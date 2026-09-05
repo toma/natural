@@ -36,6 +36,6 @@
   ],
   "dependencies": {
     "@natural-engine/core": "workspace:*",
-    "three": "^0.180.0"
+    "three": "^0.185.1"
   }
 }
