@@ -35,8 +35,8 @@
     "bun"
   ],
   "dependencies": {
-    "@dimforge/rapier2d-compat": "^0.19.0",
-    "@dimforge/rapier3d-compat": "^0.19.0",
+    "@dimforge/rapier2d-compat": "^0.20.0",
+    "@dimforge/rapier3d-compat": "^0.20.0",
     "@natural-engine/core": "workspace:*"
   }
 }
