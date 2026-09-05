@@ -1,0 +1,24 @@
+html,
+body,
+#game {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  display: block;
+  background: #07111f;
+}
+#hud {
+  position: fixed;
+  inset: 16px auto auto 16px;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  color: #dcfff2;
+  background: #06101dcc;
+  border: 1px solid #2e6658;
+  border-radius: 8px;
+  font: 13px system-ui;
+}
+#hud span {
+  color: #8eb9aa;
+}

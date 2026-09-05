@@ -1,0 +1,14 @@
+{
+  "name": "@natural-engine/example-arena-2d",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot server-dev.ts",
+    "build": "bun build src/index.html --outdir dist --target browser --production",
+    "server": "bun server.ts"
+  },
+  "dependencies": {
+    "@natural-engine/natural": "workspace:*"
+  }
+}

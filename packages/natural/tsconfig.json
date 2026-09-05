@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../assets" },
+    { "path": "../core" },
+    { "path": "../gameplay" },
+    { "path": "../netcode" },
+    { "path": "../physics" },
+    { "path": "../plugin-sdk" },
+    { "path": "../render" }
+  ]
+}

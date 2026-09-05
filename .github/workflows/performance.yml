@@ -1,0 +1,26 @@
+name: Dedicated performance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  gpu-and-network:
+    runs-on: [self-hosted, natural-gpu]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install chromium
+      - run: bun run test:network
+      - run: bun run test:e2e
+        env:
+          NATURAL_GPU_BENCH: "1"
+      - run: bun run bench
+        env:
+          NATURAL_ACTIVE_ENTITIES: "10000"
+          NATURAL_BENCH_FRAMES: "60"

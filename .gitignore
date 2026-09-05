@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.natural/
+packages/*/LICENSE
+packages/*/README.md
+target/
+**/src-tauri/gen/
+**/icons/icon.iconset/
+.DS_Store
+*.log
+*.tsbuildinfo
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example

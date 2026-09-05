@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - run: bun install --frozen-lockfile
+      - run: bun run release:verify
+      - uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: natural.spdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: natural-sbom
+          path: natural.spdx.json
+
+  npm:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: bun install --frozen-lockfile
+      - run: bun run pack:check
+      - uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: .natural/package-smoke/archives/*.tgz
+      - name: Publish packages in dependency order
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          tag="latest"
+          if [[ "$version" == *-* ]]; then tag="next"; fi
+          for package in assets core gameplay netcode physics plugin-sdk render test cli mcp natural; do
+            npm publish ".natural/package-smoke/archives/natural-engine-${package}-${version}.tgz" \
+              --access public --provenance --tag "$tag"
+          done
+
+  desktop:
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            bundles: app,dmg
+          - platform: ubuntu-24.04
+            bundles: appimage,deb
+          - platform: windows-latest
+            bundles: nsis,msi
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - name: Install Linux desktop dependencies
+        if: matrix.platform == 'ubuntu-24.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - run: bun install --frozen-lockfile
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: apps/editor-desktop
+          tagName: ${{ github.ref_name }}
+          releaseName: Natural ${{ github.ref_name }}
+          releaseDraft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          args: --bundles ${{ matrix.bundles }}
+      - name: Verify macOS bundle signature
+        if: matrix.platform == 'macos-latest'
+        run: codesign --verify --deep --strict --verbose=2 "apps/editor-desktop/src-tauri/target/release/bundle/macos/Natural Editor.app"

@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
+    "noEmit": false,
+    "outDir": ".natural/types",
+    "rootDir": "."
+  },
+  "include": [
+    "packages/assets/src/**/*.ts",
+    "packages/cli/src/**/*.ts",
+    "packages/core/src/**/*.ts",
+    "packages/gameplay/src/**/*.ts",
+    "packages/natural/src/**/*.ts",
+    "packages/netcode/src/**/*.ts",
+    "packages/physics/src/**/*.ts",
+    "packages/plugin-sdk/src/**/*.ts",
+    "packages/render/src/**/*.ts",
+    "packages/test/src/**/*.ts"
+  ]
+}

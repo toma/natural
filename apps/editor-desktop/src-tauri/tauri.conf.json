@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Natural Editor",
+  "version": "0.1.0-alpha.0",
+  "identifier": "dev.naturalengine.editor",
+  "build": {
+    "beforeDevCommand": "bun run --cwd ../../packages/editor dev",
+    "beforeBuildCommand": "bun run --cwd ../../packages/editor build",
+    "devUrl": "http://localhost:3100",
+    "frontendDist": "../../../packages/editor/dist"
+  },
+  "app": {
+    "windows": [
+      { "title": "Natural Editor", "width": 1440, "height": 900, "minWidth": 960, "minHeight": 640 }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost data: blob:; style-src 'self' 'unsafe-inline'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/icon.png", "icons/icon.icns", "icons/icon.ico"],
+    "macOS": { "signingIdentity": "-" }
+  }
+}

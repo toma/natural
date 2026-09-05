@@ -1,0 +1,47 @@
+{
+  "name": "@natural-engine/natural",
+  "version": "0.1.0-alpha.0",
+  "description": "Bun-first open-source 2D and 3D game engine with WebGPU and authoritative multiplayer",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "bun": ">=1.3.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "keywords": [
+    "game-engine",
+    "webgpu",
+    "three.js",
+    "bun",
+    "typescript"
+  ],
+  "dependencies": {
+    "@natural-engine/assets": "workspace:*",
+    "@natural-engine/core": "workspace:*",
+    "@natural-engine/gameplay": "workspace:*",
+    "@natural-engine/netcode": "workspace:*",
+    "@natural-engine/physics": "workspace:*",
+    "@natural-engine/plugin-sdk": "workspace:*",
+    "@natural-engine/render": "workspace:*"
+  }
+}

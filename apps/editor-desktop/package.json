@@ -1,0 +1,13 @@
+{
+  "name": "@natural-engine/editor-desktop",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "bun run scripts/build.ts",
+    "build:all": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.5"
+  }
+}
