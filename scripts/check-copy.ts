@@ -9,10 +9,12 @@ const binary =
   /\.(png|jpe?g|gif|ico|icns|webp|woff2?|ttf|otf|tgz|zip|pdf|lock|lockb|glb|gltf|bin|wasm|mp3|ogg|wav)$/i;
 // These two files state the word rule, so they are the only ones allowed to contain the word.
 const statesTheRule = new Set(["AGENTS.md", "scripts/check-copy.ts"]);
+// The patterns use Unicode escapes so this definition file does not itself
+// contain the characters it forbids, and needs no character-rule exemption.
 const forbiddenCharacters: Array<[RegExp, string]> = [
-  [/—/, "em dash"],
-  [/–/, "en dash"],
-  [/…/, "ellipsis character"],
+  [/\u2014/, "em dash"],
+  [/\u2013/, "en dash"],
+  [/\u2026/, "ellipsis character"],
 ];
 const forbiddenWord = /godot/i;
 
