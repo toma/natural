@@ -9,6 +9,10 @@
     "url": "git+https://github.com/toma/natural.git",
     "directory": "packages/cli"
   },
+  "homepage": "https://github.com/toma/natural/tree/main/packages/cli#readme",
+  "bugs": {
+    "url": "https://github.com/toma/natural/issues"
+  },
   "bin": {
     "natural": "./dist/main.js"
   },

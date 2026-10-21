@@ -9,6 +9,10 @@
     "url": "git+https://github.com/toma/natural.git",
     "directory": "packages/mcp"
   },
+  "homepage": "https://github.com/toma/natural/tree/main/packages/mcp#readme",
+  "bugs": {
+    "url": "https://github.com/toma/natural/issues"
+  },
   "bin": {
     "natural-mcp": "./dist/main.js"
   },
