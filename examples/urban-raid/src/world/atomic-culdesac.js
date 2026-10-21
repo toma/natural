@@ -37,11 +37,22 @@ function materials(A, rng) {
     const tint = new THREE.Color(color).getHex();
     let name, surf, opts;
     switch (kind) {
-      case "wood":
-        name = "wood";
-        surf = "wood";
-        opts = { tint, scale: 1.1, normalStrength: 1.2, weather: [0.3, 0.3, 0.5, 0.45] };
+      case "wood": {
+        // Painted clapboard reads as vivid pastel only over a light base, so
+        // the house colours tint plaster (the lap grooves are modelled
+        // geometry); bare timber keeps the wood grain. Weathering stays light.
+        const painted = ["ac-green", "ac-yellow", "ac-white", "ac-blue", "ac-cream"].includes(key);
+        if (painted) {
+          name = "plaster";
+          surf = "wood";
+          opts = { tint, scale: 1.7, normalStrength: 0.6, weather: [0.18, 0.12, 0.2, 0.35] };
+        } else {
+          name = "wood";
+          surf = "wood";
+          opts = { tint, scale: 1.1, normalStrength: 1.2, weather: [0.25, 0.25, 0.4, 0.4] };
+        }
         break;
+      }
       case "grass":
         name = "dirt";
         surf = "foliage";
