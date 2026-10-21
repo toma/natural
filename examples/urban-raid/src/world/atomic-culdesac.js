@@ -27,178 +27,77 @@ function texture(paint, size = 512) {
   return map;
 }
 
-/**
- * Tangent-space normal map derived from the albedo luminance as a height field
- * (Sobel gradient). Gives every painted plank seam, shingle row, crack, and
- * aggregate fleck real relief under the scene's shadows, GTAO, and SSR without
- * authoring a separate map. `strength` scales the slope per material kind.
- */
-function normalFromCanvas(canvas, strength) {
-  const n = canvas.width;
-  const src = canvas.getContext("2d").getImageData(0, 0, n, n).data;
-  const out = document.createElement("canvas");
-  out.width = out.height = n;
-  const ctx = out.getContext("2d");
-  const img = ctx.createImageData(n, n);
-  const lum = (x, y) => {
-    const i = (((y + n) % n) * n + ((x + n) % n)) * 4;
-    return (src[i] * 0.299 + src[i + 1] * 0.587 + src[i + 2] * 0.114) / 255;
-  };
-  for (let y = 0; y < n; y++)
-    for (let x = 0; x < n; x++) {
-      const dx =
-        lum(x + 1, y - 1) +
-        2 * lum(x + 1, y) +
-        lum(x + 1, y + 1) -
-        lum(x - 1, y - 1) -
-        2 * lum(x - 1, y) -
-        lum(x - 1, y + 1);
-      const dy =
-        lum(x - 1, y + 1) +
-        2 * lum(x, y + 1) +
-        lum(x + 1, y + 1) -
-        lum(x - 1, y - 1) -
-        2 * lum(x, y - 1) -
-        lum(x + 1, y - 1);
-      const nx = -dx * strength,
-        ny = -dy * strength,
-        nz = 1;
-      const len = Math.hypot(nx, ny, nz) || 1;
-      const o = (y * n + x) * 4;
-      img.data[o] = (nx / len) * 127.5 + 127.5;
-      img.data[o + 1] = (ny / len) * 127.5 + 127.5;
-      img.data[o + 2] = (nz / len) * 127.5 + 127.5;
-      img.data[o + 3] = 255;
-    }
-  ctx.putImageData(img, 0, 0);
-  const tex = new THREE.CanvasTexture(out);
-  tex.colorSpace = THREE.NoColorSpace;
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.anisotropy = 16;
-  return tex;
-}
-
-/** Grayscale roughness map: a base value broken up with drifting wear. */
-function roughnessTexture(rng, base, spread) {
-  return texture((g, n) => {
-    const v = Math.round(base * 255);
-    g.fillStyle = `rgb(${v},${v},${v})`;
-    g.fillRect(0, 0, n, n);
-    for (let i = 0; i < 90; i++) {
-      const x = rng.float() * n,
-        y = rng.float() * n,
-        r = rng.range(16, 110);
-      const d = Math.round(Math.max(0, Math.min(255, v + rng.signed() * spread * 255)));
-      const grad = g.createRadialGradient(x, y, 0, x, y, r);
-      grad.addColorStop(0, `rgba(${d},${d},${d},0.5)`);
-      grad.addColorStop(1, "rgba(0,0,0,0)");
-      g.fillStyle = grad;
-      g.fillRect(x - r, y - r, r * 2, r * 2);
-    }
-  });
-}
-
 function materials(A, rng) {
+  // Route the legacy (color, kind) palette onto the procedural material library
+  // (materials/ -> generator/shader/glsl) so every surface is textured at the
+  // engine's full PBR quality: baked albedo/height/ORM/normal with parallax,
+  // detail, macro variation, and weathering. The colour becomes a linear tint
+  // on the baked albedo; the kind and key pick the base surface.
   const surface = (key, color, kind, roughness = 0.8, metalness = 0) => {
-    const map = texture((g, n) => {
-      g.fillStyle = color;
-      g.fillRect(0, 0, n, n);
-      // Broad stains and fine aggregate are authored at separate scales.
-      for (let i = 0; i < 130; i++) {
-        const x = rng.float() * n,
-          y = rng.float() * n,
-          r = rng.range(8, 75);
-        const grad = g.createRadialGradient(x, y, 0, x, y, r);
-        grad.addColorStop(
-          0,
-          `rgba(${rng.float() > 0.5 ? "206,193,142" : "23,32,22"},${kind === "grass" ? 0.18 : 0.045})`,
-        );
-        grad.addColorStop(1, "rgba(0,0,0,0)");
-        g.fillStyle = grad;
-        g.fillRect(x - r, y - r, r * 2, r * 2);
-      }
-      for (let i = 0; i < 22000; i++) {
-        g.fillStyle = `rgba(${rng.float() > 0.5 ? "255,255,230" : "0,0,0"},${rng.range(0.015, kind === "grass" ? 0.28 : kind === "metal" ? 0.035 : 0.12)})`;
-        const x = rng.float() * n,
-          y = rng.float() * n;
-        if (kind === "wood") g.fillRect(x, y, rng.range(10, 130), 1);
-        else if (kind === "grass") g.fillRect(x, y, 1, rng.range(2, 10));
-        else g.fillRect(x, y, rng.range(1, 3), rng.range(1, 3));
-      }
-      if (kind === "stone") {
-        g.strokeStyle = "#494c43";
-        g.lineWidth = 8;
-        for (let y = 0; y < n; y += 48) {
-          g.beginPath();
-          g.moveTo(0, y);
-          g.lineTo(n, y);
-          g.stroke();
-          for (let x = ((y / 48) % 2) * 70; x < n; x += 140) {
-            g.beginPath();
-            g.moveTo(x, y);
-            g.lineTo(x, y + 48);
-            g.stroke();
-          }
-        }
-      }
-      if (kind === "roof") {
-        g.strokeStyle = "#272c2b";
-        g.lineWidth = 3;
-        for (let y = 0; y < n; y += 32) {
-          g.beginPath();
-          g.moveTo(0, y);
-          g.lineTo(n, y);
-          g.stroke();
-          for (let x = ((y / 32) % 2) * 25; x < n; x += 70) g.fillRect(x, y, 2, 32);
-        }
-      }
-    });
-    const scale = kind === "grass" ? 0.3 : kind === "roof" ? 0.8 : kind === "stone" ? 0.7 : 1;
-    map.repeat.setScalar(scale);
-    // Derive a tangent-space normal map and a varied roughness map so the
-    // painted detail reads as real surface relief under the HDR lighting.
-    const strength =
-      kind === "stone"
-        ? 2.6
-        : kind === "roof"
-          ? 2.2
-          : kind === "wood"
-            ? 1.5
-            : kind === "grass"
-              ? 1.1
-              : kind === "metal"
-                ? 0.5
-                : 1.5;
-    const normalMap = normalFromCanvas(map.userData.sourceCanvas, strength);
-    normalMap.repeat.setScalar(scale);
-    const normalScale =
-      kind === "stone"
-        ? 1.0
-        : kind === "roof"
-          ? 0.85
-          : kind === "wood"
-            ? 0.6
-            : kind === "grass"
-              ? 0.5
-              : kind === "metal"
-                ? 0.25
-                : 0.7;
-    const roughnessMap = roughnessTexture(rng, 0.92, kind === "metal" ? 0.22 : 0.12);
-    roughnessMap.colorSpace = THREE.NoColorSpace;
-    roughnessMap.repeat.setScalar(scale);
-    return A.registerMaterial(
-      key,
-      new THREE.MeshStandardMaterial({
-        map,
-        normalMap,
-        normalScale: new THREE.Vector2(normalScale, normalScale),
-        roughnessMap,
-        roughness,
-        metalness,
-        envMapIntensity: 1,
-      }),
-      kind === "grass" ? "foliage" : kind === "wood" ? "wood" : metalness ? "metal" : "concrete",
-    );
+    const tint = new THREE.Color(color).getHex();
+    let name, surf, opts;
+    switch (kind) {
+      case "wood":
+        name = "wood";
+        surf = "wood";
+        opts = { tint, scale: 1.1, normalStrength: 1.2, weather: [0.3, 0.3, 0.5, 0.45] };
+        break;
+      case "grass":
+        name = "dirt";
+        surf = "foliage";
+        opts = { tint, scale: 2.3, detile: 0.8, weather: [0.18, 0, 0, 0.2] };
+        break;
+      case "roof":
+        name = "asphalt";
+        surf = "concrete";
+        opts = { tint, scale: 1.0, detile: 0.5, normalStrength: 1.2 };
+        break;
+      case "stone":
+        name = "brick";
+        surf = "concrete";
+        opts = { tint, scale: 1.0 };
+        break;
+      case "road":
+        name = "asphalt";
+        surf = "concrete";
+        opts = { tint, scale: 3.0, detile: 0.8, wear: [0, 0.5, 0.45, 0] };
+        break;
+      case "sand":
+        name = "sand";
+        surf = "sand";
+        opts = { tint, scale: 2.6, detile: 0.7 };
+        break;
+      case "metal":
+        name =
+          key === "ac-chrome" || metalness >= 0.8
+            ? "metal_brushed"
+            : key === "ac-rust"
+              ? "metal_rust"
+              : "metal_painted";
+        surf = "metal";
+        opts = { tint, scale: name === "metal_brushed" ? 0.7 : name === "metal_rust" ? 1.0 : 1.3 };
+        break;
+      case "fabric":
+        name = "fabric";
+        surf = "fabric";
+        opts = { tint, scale: 0.28, three: { side: THREE.DoubleSide } };
+        break;
+      case "skin":
+        name = "plaster";
+        surf = "plaster";
+        opts = { tint, scale: 0.6, roughness: [Math.min(1, roughness), 0, 0.18] };
+        break;
+      case "plaster":
+        name = "plaster";
+        surf = "plaster";
+        opts = { tint, scale: 2.0 };
+        break;
+      default:
+        name = "concrete";
+        surf = "concrete";
+        opts = { tint, scale: 2.4 };
+    }
+    return A.registerMaterial(key, A.materials.get(name, opts), surf);
   };
   surface("ac-green", "#8fb55f", "wood");
   surface("ac-yellow", "#e8c63f", "wood");
@@ -234,12 +133,15 @@ function materials(A, rng) {
   surface("ac-enamel", "#ebe7d4", "metal", 0.28, 0.05);
   surface("ac-orange", "#b5733f", "fabric");
   surface("ac-sofa", "#809263", "fabric");
-  const glass = new THREE.MeshStandardMaterial({
-    color: 0x263538,
-    roughness: 0.09,
-    metalness: 0.8,
-  });
-  A.registerMaterial("ac-glass", glass, "glass");
+  A.registerMaterial(
+    "ac-glass",
+    A.materials.get("glass", {
+      scale: 2.0,
+      roughness: [0.28, 0.05, 0.03],
+      three: { opacity: 0.22, envMapIntensity: 1.8 },
+    }),
+    "glass",
+  );
   A.registerMaterial(
     "ac-bulb",
     new THREE.MeshStandardMaterial({
