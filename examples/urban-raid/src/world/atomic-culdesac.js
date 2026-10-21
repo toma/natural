@@ -828,6 +828,24 @@ function house(A, spec) {
     for (let i = 0; i < 14; i++)
       K.box("ac-wood", x, y + 0.86 + i * 0.14, 5.28, 0.59, 0.028, 0.035, false);
   }
+  // Sills under the two front windows, and shutters flanking the ground window.
+  K.box("ac-white", 1.6, 0.22, 5.24, 3.5, 0.08, 0.2, false);
+  K.box("ac-white", 0, y + 0.02, 5.24, 3.7, 0.08, 0.2, false);
+  for (const sx of [-0.2, 3.4]) {
+    K.box(spec.id === "green" ? "ac-blue" : "ac-orange", sx, 1.05, 5.22, 0.5, 1.6, 0.08, false);
+    for (let i = 0; i < 11; i++)
+      K.box("ac-wood", sx, 0.4 + i * 0.14, 5.28, 0.42, 0.028, 0.035, false);
+  }
+  // Front porch over the door: posts, a shed roof, fascia, and stone steps.
+  for (const px of [-3.95, -2.25]) {
+    K.round("ac-white", px, 1.35, 6.0, 0.16, 2.4, 0.16, 0.04, true);
+    K.round("ac-white", px, 2.57, 6.0, 0.22, 0.12, 0.22, 0.03, false);
+  }
+  K.box("ac-roof", -3.1, 2.74, 6.0, 2.4, 0.12, 2.0, false, 0, 0, 0.08);
+  K.box("ac-white", -3.1, 2.64, 6.98, 2.4, 0.18, 0.1, false);
+  K.box("ac-white", -3.1, 2.5, 6.0, 2.3, 0.12, 0.1, false, 0, 0, 0.08);
+  for (let i = 0; i < 3; i++)
+    K.box("ac-stone", -3.1, 0.13 - i * 0.04, 5.55 + i * 0.3, 2.4 - i * 0.2, 0.14, 0.32, true);
   // Floor leaves a real stair opening along the left wall.
   K.box("ac-wood", 1.1, y + 0.04, 0, 9.6, 0.2, 9.75, true);
   K.box("ac-wood", -4.75, y + 0.04, 3.1, 2.1, 0.2, 3.6, true);
