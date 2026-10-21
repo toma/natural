@@ -72,7 +72,7 @@ export const VEHICLES: readonly PropBox[] = [
 ];
 
 /** Utility poles, world space; footprint is the pole plus its crossarm. */
-export const POLES: readonly { x: number; z: number }[] = [
+export const POLES: ReadonlyArray<{ x: number; z: number }> = [
   { x: -21, z: -16 },
   { x: 21, z: -16 },
   { x: -21, z: 14 },
@@ -80,7 +80,7 @@ export const POLES: readonly { x: number; z: number }[] = [
 ];
 
 /** Garden fence runs in house-local space: [x0, z0, x1, z1]. */
-export const GARDEN_FENCES: readonly [number, number, number, number][] = [
+export const GARDEN_FENCES: ReadonlyArray<[number, number, number, number]> = [
   [-20, -16, 20, -16],
   [-20, -16, -20, 7],
   [20, -16, 20, 7],
@@ -89,7 +89,7 @@ export const GARDEN_FENCES: readonly [number, number, number, number][] = [
 ];
 
 /** Garden mannequin positions in house-local space. */
-export const GARDEN_MANNEQUINS: readonly { x: number; z: number; female: boolean }[] = [
+export const GARDEN_MANNEQUINS: ReadonlyArray<{ x: number; z: number; female: boolean }> = [
   { x: 3, z: -13, female: true },
   { x: -3, z: 5, female: false },
 ];

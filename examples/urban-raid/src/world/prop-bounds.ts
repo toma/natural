@@ -81,7 +81,7 @@ export function staticProps(): Obb[] {
 }
 
 /** Corners of an OBB in world space. */
-function corners(o: Obb): [number, number][] {
+function corners(o: Obb): Array<[number, number]> {
   const ax = o.cos * o.hw;
   const az = o.sin * o.hw;
   const bx = -o.sin * o.hd;
@@ -96,7 +96,7 @@ function corners(o: Obb): [number, number][] {
 
 /** Separating-axis overlap test for two oriented rectangles, with a shrink margin. */
 export function obbOverlap(a: Obb, b: Obb, margin = 0): boolean {
-  const axes = [
+  const axes: Array<[number, number]> = [
     [a.cos, a.sin],
     [-a.sin, a.cos],
     [b.cos, b.sin],
