@@ -99,10 +99,10 @@ function materials(A, rng) {
     }
     return A.registerMaterial(key, A.materials.get(name, opts), surf);
   };
-  surface("ac-green", "#8fb55f", "wood");
-  surface("ac-yellow", "#e8c63f", "wood");
-  surface("ac-white", "#ece7d6", "wood");
-  surface("ac-blue", "#2f7f90", "wood");
+  surface("ac-green", "#b6e36a", "wood");
+  surface("ac-yellow", "#ffdc45", "wood");
+  surface("ac-white", "#f4efe2", "wood");
+  surface("ac-blue", "#3a93a6", "wood");
   surface("ac-wood", "#8e6b47", "wood");
   surface("ac-fence", "#b6a17a", "wood");
   surface("ac-roof", "#606560", "roof");
@@ -114,7 +114,7 @@ function materials(A, rng) {
   surface("ac-sand", "#bfa780", "sand");
   surface("ac-cream", "#ded3b7", "wood");
   surface("ac-rust", "#914e3e", "metal", 0.53, 0.35);
-  surface("ac-bus", "#f2b60c", "metal", 0.4, 0.35);
+  surface("ac-bus", "#ffc21e", "metal", 0.4, 0.35);
   surface("ac-red", "#a73e35", "metal", 0.4, 0.35);
   surface("ac-car", "#90a64d", "metal", 0.35, 0.4);
   surface("ac-metal", "#777e79", "metal", 0.42, 0.65);
