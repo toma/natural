@@ -52,7 +52,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: bun install --frozen-lockfile
       - run: bun run pack:check
-      - uses: actions/attest-build-provenance@v3
+      - uses: actions/attest-build-provenance@v4
         with:
           subject-path: .natural/package-smoke/archives/*.tgz
       - name: Publish packages in dependency order
