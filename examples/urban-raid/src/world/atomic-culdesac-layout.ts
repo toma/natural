@@ -50,6 +50,50 @@ export const LANDMARKS = [
   { id: "welcome-sign", x: 14.5, z: -9, w: 3.4, d: 0.35 },
 ] as const;
 
+/** An oriented footprint on the ground plane, world space. */
+export interface PropBox {
+  id: string;
+  x: number;
+  z: number;
+  yaw: number;
+  w: number;
+  d: number;
+}
+
+/**
+ * Discrete movable props, world space. Geometry and the interpenetration test
+ * read the same source so placement cannot drift into an overlap unnoticed.
+ */
+export const VEHICLES: readonly PropBox[] = [
+  { id: "bus", x: -2, z: 0, yaw: 0.42, w: 11.3, d: 2.62 },
+  { id: "truck", x: 2.4, z: 5.7, yaw: 0, w: 13.5, d: 2.95 },
+  { id: "car-green", x: -15, z: -6.4, yaw: 0, w: 4.8, d: 1.85 },
+  { id: "car-yellow", x: 16.4, z: 6.4, yaw: Math.PI, w: 4.8, d: 1.85 },
+];
+
+/** Utility poles, world space; footprint is the pole plus its crossarm. */
+export const POLES: readonly { x: number; z: number }[] = [
+  { x: -21, z: -16 },
+  { x: 21, z: -16 },
+  { x: -21, z: 14 },
+  { x: 21, z: 14 },
+];
+
+/** Garden fence runs in house-local space: [x0, z0, x1, z1]. */
+export const GARDEN_FENCES: readonly [number, number, number, number][] = [
+  [-20, -16, 20, -16],
+  [-20, -16, -20, 7],
+  [20, -16, 20, 7],
+  [-18, 7, -5.2, 7],
+  [0, 7, 12, 7],
+];
+
+/** Garden mannequin positions in house-local space. */
+export const GARDEN_MANNEQUINS: readonly { x: number; z: number; female: boolean }[] = [
+  { x: 3, z: -13, female: true },
+  { x: -3, z: 5, female: false },
+];
+
 export function housePoint(house: HouseSpec, x: number, z: number) {
   const c = Math.cos(house.yaw);
   const s = Math.sin(house.yaw);

@@ -5,6 +5,10 @@ import {
   HOUSES,
   FLOOR_HEIGHT,
   MAP_BOUNDS,
+  VEHICLES,
+  POLES,
+  GARDEN_FENCES,
+  GARDEN_MANNEQUINS,
   housePoint,
   wallSpans,
 } from "./atomic-culdesac-layout.ts";
@@ -811,10 +815,10 @@ function wheels(K, xs, z, radius = 0.52) {
       K.cylinder("ac-dark", x, radius + 0.08, z + s * 1.485, radius * 0.25, 0.04, Math.PI / 2);
     }
 }
-function bus(A) {
+function bus(A, box) {
   // Parked at an angle across the middle of the street, the way the central bus
   // blocks sightlines and gives cover in the cul-de-sac.
-  const K = kit(A, -2, 0, 0.42);
+  const K = kit(A, box.x, box.z, box.yaw);
   K.box("ac-dark", 0, 0.77, 0, 11.3, 0.5, 2.5, true);
   K.box("ac-bus", 0, 1.35, 0, 11.1, 0.95, 2.62, true);
   K.box("ac-bus", 0.7, 2.86, 0, 9.7, 0.22, 2.72, true);
@@ -847,8 +851,8 @@ function bus(A) {
   wheels(K, [-3.7, 3.7], 0);
 }
 
-function truck(A) {
-  const K = kit(A, 2.2, 3.2);
+function truck(A, box) {
+  const K = kit(A, box.x, box.z, box.yaw);
   K.box("ac-dark", 0, 0.85, 0, 13.5, 0.35, 2.4, true);
   K.box("ac-red", -5.5, 1.43, 0, 2.3, 1.2, 2.55, true);
   K.box("ac-red", -5.1, 2.49, 0, 2.2, 0.95, 2.5, true);
@@ -881,8 +885,8 @@ function truck(A) {
   wheels(K, [-5.2, -2.9, 4.2, 5.6], 0, 0.58);
 }
 
-function car(A, x, z, ry = 0, color = "ac-car") {
-  const K = kit(A, x, z, ry);
+function car(A, box, color = "ac-car") {
+  const K = kit(A, box.x, box.z, box.yaw);
   K.box(color, 0, 0.74, 0, 4.8, 0.63, 1.85, true);
   K.box(color, 0, 1.34, 0, 2.5, 0.67, 1.7, true);
   K.box("ac-glass", -1.23, 1.4, 0, 0.03, 0.5, 1.54, false);
@@ -903,11 +907,21 @@ function car(A, x, z, ry = 0, color = "ac-car") {
 
 function garden(A, h, rng) {
   const K = kit(A, h.x, h.z, h.yaw);
-  fence(K, -20, -16, 20, -16, 2.05, "ac-fence", false);
-  fence(K, -20, -16, -20, 7, 1.8, "ac-fence", false);
-  fence(K, 20, -16, 20, 7, 1.8, "ac-fence", false);
-  fence(K, -18, 7, -5.2, 7);
-  fence(K, 0, 7, 12, 7);
+  // Perimeter runs (tall boarded fence) then the front picket runs, from the
+  // shared layout data the interpenetration test also reads.
+  GARDEN_FENCES.forEach((seg, i) => {
+    const perimeter = i < 3;
+    fence(
+      K,
+      seg[0],
+      seg[1],
+      seg[2],
+      seg[3],
+      perimeter ? (i === 0 ? 2.05 : 1.8) : 1.35,
+      perimeter ? "ac-fence" : "ac-white",
+      !perimeter,
+    );
+  });
   // Garden shed and lattice, separated from the circulation around the house.
   K.box("ac-wood", -13, 1.25, -14.5, 4.5, 2.3, 3.5, true);
   K.box("ac-roof", -13, 2.72, -14.5, 5, 0.15, 4, false, 0, 0, 0.13);
@@ -948,8 +962,7 @@ function garden(A, h, rng) {
       z = rng.range(6, 8);
     K.sphere(i % 3 ? "ac-hedge" : "ac-orange", x, 0.28, z, 0.1, 0.12, 0.1);
   }
-  mannequin(K, 3, -15, 0.18, 0, true);
-  mannequin(K, -3, 8, 0.18, 0);
+  for (const m of GARDEN_MANNEQUINS) mannequin(K, m.x, m.z, 0.18, 0, m.female);
   // Drainpipe, porch light and mail box.
   K.cylinder("ac-white", 5.9, 3.2, 5.25, 0.055, 6.2);
   K.box("ac-metal", 4, 0.78, 7.2, 0.06, 1.2, 0.06, true);
@@ -975,10 +988,11 @@ export function buildAtomicCuldesac(A, rng) {
   }
   const infos = HOUSES.map((h) => house(A, h));
   for (const h of HOUSES) garden(A, h, rng);
-  bus(A);
-  truck(A);
-  car(A, -11.7, -10.8, Math.PI / 2);
-  car(A, 12.4, 12.4, -Math.PI / 2, "ac-rust");
+  const vehicle = (id) => VEHICLES.find((v) => v.id === id);
+  bus(A, vehicle("bus"));
+  truck(A, vehicle("truck"));
+  car(A, vehicle("car-green"));
+  car(A, vehicle("car-yellow"), "ac-rust");
   // Welcome sign and test clock terminate the street vista.
   K.box("ac-white", 14.5, 1.7, -9, 3.65, 2.65, 0.22, true);
   K.art("ac-welcome", 14.5, 1.74, -8.85, 3.35, 2.35);
@@ -1006,24 +1020,23 @@ export function buildAtomicCuldesac(A, rng) {
       for (const side of [-1, 1])
         K.box("ac-roof", x + side * 3.2, 4.8, z, 6.7, 0.18, 10, false, 0, 0, -side * 0.26);
     }
+  for (const { x, z } of POLES) {
+    K.cylinder("ac-wood", x, 6, z, 0.14, 12);
+    K.box("ac-wood", x, 11.3, z, 3, 0.14, 0.14, false);
+    for (const dx of [-1, 0, 1]) K.cylinder("ac-white", x + dx, 11.5, z, 0.075, 0.25);
+  }
   for (const x of [-21, 21])
-    for (const z of [-18, 16]) {
-      K.cylinder("ac-wood", x, 6, z, 0.14, 12);
-      K.box("ac-wood", x, 11.3, z, 3, 0.14, 0.14, false);
-      for (const dx of [-1, 0, 1]) {
-        K.cylinder("ac-white", x + dx, 11.5, z, 0.075, 0.25);
-        for (let i = 0; i < 12; i++) {
-          const t0 = i / 12,
-            t1 = (i + 1) / 12;
-          K.line(
-            "ac-dark",
-            [x + dx, 11.6 - Math.sin(t0 * Math.PI) * 0.9, -18 + t0 * 34],
-            [x + dx, 11.6 - Math.sin(t1 * Math.PI) * 0.9, -18 + t1 * 34],
-            0.014,
-          );
-        }
+    for (const dx of [-1, 0, 1])
+      for (let i = 0; i < 12; i++) {
+        const t0 = i / 12,
+          t1 = (i + 1) / 12;
+        K.line(
+          "ac-dark",
+          [x + dx, 11.6 - Math.sin(t0 * Math.PI) * 0.9, -16 + t0 * 30],
+          [x + dx, 11.6 - Math.sin(t1 * Math.PI) * 0.9, -16 + t1 * 30],
+          0.014,
+        );
       }
-    }
   for (let i = 0; i < 24; i++) {
     const a = (i * Math.PI) / 12,
       r = 150 + rng.range(0, 80);

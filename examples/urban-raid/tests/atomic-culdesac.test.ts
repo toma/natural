@@ -8,7 +8,14 @@ import {
   insideMap,
   outdoorOpen,
 } from "../src/world/atomic-culdesac-layout.ts";
+import { findOverlaps, staticProps } from "../src/world/prop-bounds.ts";
 import { LayeredNavGrid } from "../src/ai/layered-nav.ts";
+
+test("static props do not interpenetrate on the ground plane", () => {
+  const props = staticProps();
+  expect(props.length).toBeGreaterThan(20);
+  expect(findOverlaps(props)).toEqual([]);
+});
 
 test("Atomic Cul-de-sac spawns occupy open space inside the same bounds as the world", () => {
   expect(new Set(MAP_SPAWNS.map((s) => s.id)).size).toBe(MAP_SPAWNS.length);
