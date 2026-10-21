@@ -167,7 +167,17 @@ export class WeaponSystem {
     for (const id of Object.keys(WEAPON_DEFS)) {
       const def = { ...WEAPON_DEFS[id] };
       def.cycleTime = 60 / def.rpm;
-      const model = buildClassic(id);
+      // Use the detailed per-weapon models for the carbine, SMG, and sidearm
+      // (receiver, rails, magazine, stock, sights, tuned grips); the shared
+      // classic builder covers the rest of the arsenal.
+      const model =
+        id === "rifle"
+          ? buildRifle()
+          : id === "smg"
+            ? buildSmg()
+            : id === "pistol"
+              ? buildPistol()
+              : buildClassic(id);
       const entry = this.viewmodel.addWeapon(model, def);
       tris += entry.tris;
       this.states.set(id, {
