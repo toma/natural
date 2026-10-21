@@ -7,10 +7,10 @@ import {
   housePoint,
   insideMap,
   outdoorOpen,
-} from "../src/world/nuketown-layout.ts";
+} from "../src/world/atomic-culdesac-layout.ts";
 import { LayeredNavGrid } from "../src/ai/layered-nav.ts";
 
-test("Nuketown spawns occupy open space inside the same bounds as the world", () => {
+test("Atomic Cul-de-sac spawns occupy open space inside the same bounds as the world", () => {
   expect(new Set(MAP_SPAWNS.map((s) => s.id)).size).toBe(MAP_SPAWNS.length);
   for (const p of MAP_SPAWNS) expect(outdoorOpen(p.x, p.z, 0.4)).toBe(true);
   for (const h of HOUSES) expect(outdoorOpen(h.x, h.z)).toBe(false);

@@ -26,7 +26,7 @@ export class PauseMenu {
     el("div", "nf-brand", mast, "NATURALFPS");
     el("div", "nf-session", mast, "COMBAT TRAINING / LOCAL MATCH");
     const heading = el("div", "nf-menu-heading", inner);
-    this.heading = el("h1", null, heading, "NUKETOWN");
+    this.heading = el("h1", null, heading, "ATOMIC CUL-DE-SAC");
     this.status = el("div", "nf-menu-status", heading, "NEVADA, USA / 1963");
     const body = el("div", "nf-menu-body", inner);
     const aside = el("nav", "nf-menu-nav", body);
@@ -290,7 +290,7 @@ export class PauseMenu {
     for (const [id, b] of Object.entries(this.nav)) b.classList.toggle("selected", id === page);
     setText(
       this.heading,
-      page === "options" ? "OPTIONS" : page === "loadout" ? "CHANGE LOADOUT" : "NUKETOWN",
+      page === "options" ? "OPTIONS" : page === "loadout" ? "CHANGE LOADOUT" : "ATOMIC CUL-DE-SAC",
     );
     setText(
       this.status,

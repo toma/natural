@@ -1,4 +1,4 @@
-/** Authoring dimensions are metres estimated from original map reference views. */
+/** Authoring dimensions are in metres, chosen for the Atomic Cul-de-sac layout. */
 export interface HouseSpec {
   id: "green" | "yellow";
   x: number;

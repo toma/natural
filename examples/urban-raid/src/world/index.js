@@ -1,28 +1,26 @@
 import * as THREE from "three";
 import { Assembler } from "./builder.js";
-import { buildNuketown } from "./nuketown.js";
-import { HOUSES, MAP_BOUNDS, MAP_SPAWNS, outdoorOpen } from "./nuketown-layout.ts";
+import { buildAtomicCuldesac } from "./atomic-culdesac.js";
+import { HOUSES, MAP_BOUNDS, MAP_SPAWNS, outdoorOpen } from "./atomic-culdesac-layout.ts";
 
 /**
  * WORLD - level geometry, the modular building kit, props, set dressing and
  * static collision.
  *
- * A ~120 x 120 m Middle-Eastern market street: one main street with a plaza,
- * flanking alleys, eighteen buildings (three of them enterable and furnished
- * across multiple floors), an arched gate closing the vista, and several
- * thousand props. Nothing is loaded from disk - every vertex is generated here.
+ * ATOMIC CUL-DE-SAC: a small, symmetrical 1950s desert test-site suburb. One
+ * short street with a central school bus and moving truck, two facing two-story
+ * pastel houses (both enterable and furnished across two floors, with garages
+ * and backyards), picket fences, a vintage car and truck, a welcome sign and
+ * clock tower closing the vista, surrounding model houses and a desert-mountain
+ * horizon. Nothing is loaded from disk - every vertex is generated here.
  *
  * HOW IT FITS TOGETHER
- *   layout.js     the map: footprints, facade programmes, set-piece positions
+ *   atomic-culdesac-layout.ts  the map data: house specs, spawns, landmarks,
+ *                 map bounds and the open-ground query, shared with navigation
+ *   atomic-culdesac.js         the level builder: houses, interiors, vehicles,
+ *                 fences, mannequins, gardens, signage and perimeter dressing
  *   util.js       geometry toolkit (chamfered boxes, wall panels with real
  *                 holes, cloth grids, catenary tubes, rocks) + vertex masks
- *   kit.js        the modular building kit (facades, windows, doors, balconies,
- *                 stairs, awnings, parapets, drainpipes, damage)
- *   buildings.js  assembles a building from a footprint + a facade programme
- *   interiors.js  furnishes rooms so an interior screenshot is worth taking
- *   props.js      the instanced prop library
- *   dressing.js   places the hundreds of props, cables, laundry and debris
- *   ground.js     terrain, road camber, kerbs, pavement slabs, sand drifts
  *   builder.js    the Assembler: merges statics, batches instances, authors
  *                 collision proxies, bakes the level->world transform
  *
@@ -42,8 +40,8 @@ import { HOUSES, MAP_BOUNDS, MAP_SPAWNS, outdoorOpen } from "./nuketown-layout.t
 
 /**
  * LEVEL -> WORLD. The street is authored down -Z; this yaw puts it on the axis
- * the canonical hero/sunset cameras look along, with the market in the near
- * third of the frame and the gate closing the far end.
+ * the canonical hero/sunset cameras look along, with the central vehicles in the
+ * near third of the frame and the welcome sign closing the far end.
  */
 const LEVEL_YAW = 0;
 const LEVEL_TX = 0;
@@ -86,9 +84,9 @@ export class WorldSystem {
     this.A = A;
     A.setTransform(LEVEL_YAW, LEVEL_TX, LEVEL_TZ);
 
-    this.buildings = buildNuketown(A, rng);
+    this.buildings = buildAtomicCuldesac(A, rng);
     this.mapBounds = MAP_BOUNDS;
-    this.mapName = "NUKETOWN";
+    this.mapName = "ATOMIC CUL-DE-SAC";
 
     this._addLights(A);
 
