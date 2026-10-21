@@ -9,7 +9,7 @@ export interface HouseSpec {
   floors: number;
 }
 
-export const MAP_BOUNDS = { minX: -23, maxX: 23, minZ: -39, maxZ: 39 } as const;
+export const MAP_BOUNDS = { minX: -23, maxX: 23, minZ: -33, maxZ: 33 } as const;
 export const FLOOR_HEIGHT = 3.12;
 
 /** Solid vertical spans after subtracting every opening crossing this wall column. */
@@ -29,25 +29,25 @@ export function wallSpans(
   return spans.filter(([a, b]) => b > a);
 }
 export const HOUSES: readonly HouseSpec[] = [
-  { id: "green", x: 0, z: -20, yaw: 0, w: 12, d: 10, floors: 2 },
-  { id: "yellow", x: 1.4, z: 20, yaw: Math.PI, w: 12, d: 10, floors: 2 },
+  { id: "green", x: 0, z: -15, yaw: 0, w: 12, d: 10, floors: 2 },
+  { id: "yellow", x: 1.4, z: 15, yaw: Math.PI, w: 12, d: 10, floors: 2 },
 ];
 
 export const MAP_SPAWNS = [
-  { id: "green-garden", x: 0, z: -34, yaw: Math.PI },
-  { id: "yellow-garden", x: 1, z: 34, yaw: 0 },
-  { id: "green-flank", x: 16, z: -26, yaw: Math.PI },
-  { id: "yellow-flank", x: -15, z: 26, yaw: 0 },
-  { id: "green-patio", x: -8, z: -33, yaw: Math.PI },
-  { id: "yellow-patio", x: 10, z: 33, yaw: 0 },
-  { id: "west-lane", x: -18, z: -7, yaw: -Math.PI / 2 },
-  { id: "east-lane", x: 18, z: 7, yaw: Math.PI / 2 },
+  { id: "green-garden", x: 0, z: -28, yaw: Math.PI },
+  { id: "yellow-garden", x: 1, z: 28, yaw: 0 },
+  { id: "green-flank", x: 16, z: -19, yaw: Math.PI },
+  { id: "yellow-flank", x: -15, z: 19, yaw: 0 },
+  { id: "green-patio", x: -9, z: -26, yaw: Math.PI },
+  { id: "yellow-patio", x: 11, z: 26, yaw: 0 },
+  { id: "west-lane", x: -18, z: -5, yaw: -Math.PI / 2 },
+  { id: "east-lane", x: 18, z: 5, yaw: Math.PI / 2 },
 ] as const;
 
 export const LANDMARKS = [
-  { id: "school-bus", x: -2.5, z: -3.1, w: 11.4, d: 2.65 },
+  { id: "school-bus", x: -2, z: 0, w: 13, d: 8 },
   { id: "moving-truck", x: 2.2, z: 3.2, w: 13.5, d: 2.85 },
-  { id: "welcome-sign", x: 14.5, z: -11.5, w: 3.4, d: 0.35 },
+  { id: "welcome-sign", x: 14.5, z: -9, w: 3.4, d: 0.35 },
 ] as const;
 
 export function housePoint(house: HouseSpec, x: number, z: number) {

@@ -812,7 +812,9 @@ function wheels(K, xs, z, radius = 0.52) {
     }
 }
 function bus(A) {
-  const K = kit(A, -2.5, -3.1);
+  // Parked at an angle across the middle of the street, the way the central bus
+  // blocks sightlines and gives cover in the cul-de-sac.
+  const K = kit(A, -2, 0, 0.42);
   K.box("ac-dark", 0, 0.77, 0, 11.3, 0.5, 2.5, true);
   K.box("ac-bus", 0, 1.35, 0, 11.1, 0.95, 2.62, true);
   K.box("ac-bus", 0.7, 2.86, 0, 9.7, 0.22, 2.72, true);
@@ -901,11 +903,11 @@ function car(A, x, z, ry = 0, color = "ac-car") {
 
 function garden(A, h, rng) {
   const K = kit(A, h.x, h.z, h.yaw);
-  fence(K, -20, -18, 20, -18, 2.05, "ac-fence", false);
-  fence(K, -20, -18, -20, 10, 1.8, "ac-fence", false);
-  fence(K, 20, -18, 20, 10, 1.8, "ac-fence", false);
-  fence(K, -18, 9, -5.2, 9);
-  fence(K, 0, 9, 12, 9);
+  fence(K, -20, -16, 20, -16, 2.05, "ac-fence", false);
+  fence(K, -20, -16, -20, 7, 1.8, "ac-fence", false);
+  fence(K, 20, -16, 20, 7, 1.8, "ac-fence", false);
+  fence(K, -18, 7, -5.2, 7);
+  fence(K, 0, 7, 12, 7);
   // Garden shed and lattice, separated from the circulation around the house.
   K.box("ac-wood", -13, 1.25, -14.5, 4.5, 2.3, 3.5, true);
   K.box("ac-roof", -13, 2.72, -14.5, 5, 0.15, 4, false, 0, 0, 0.13);
@@ -950,8 +952,8 @@ function garden(A, h, rng) {
   mannequin(K, -3, 8, 0.18, 0);
   // Drainpipe, porch light and mail box.
   K.cylinder("ac-white", 5.9, 3.2, 5.25, 0.055, 6.2);
-  K.box("ac-metal", 4, 0.78, 10.2, 0.06, 1.2, 0.06, true);
-  K.box("ac-metal", 4, 1.42, 10.2, 0.38, 0.34, 0.62, false);
+  K.box("ac-metal", 4, 0.78, 7.2, 0.06, 1.2, 0.06, true);
+  K.box("ac-metal", 4, 1.42, 7.2, 0.38, 0.34, 0.62, false);
   K.sphere("ac-bulb", -2.03, 2.2, 5.22, 0.09, 0.16, 0.1);
 }
 
@@ -960,9 +962,9 @@ export function buildAtomicCuldesac(A, rng) {
   const K = kit(A);
   // Sand extends to the atmospheric horizon; only the fenced map is playable.
   K.box("ac-sand", 0, -0.3, 0, 1800, 0.4, 1800, false);
-  K.box("ac-grass", 0, 0.045, 0, 46, 0.15, 78, true);
-  K.box("ac-road", 0, 0.05, 0, 46, 0.17, 17, true);
-  for (const z of [-9.1, 9.1]) {
+  K.box("ac-grass", 0, 0.045, 0, 46, 0.15, 66, true);
+  K.box("ac-road", 0, 0.05, 0, 46, 0.17, 15, true);
+  for (const z of [-7.6, 7.6]) {
     K.box("ac-concrete", 0, 0.17, z, 46, 0.24, 1.25, true);
     for (let x = -23; x < 23; x += 1.5) K.box("ac-dark", x, 0.298, z, 0.014, 0.004, 1.2, false);
   }
@@ -978,11 +980,11 @@ export function buildAtomicCuldesac(A, rng) {
   car(A, -11.7, -10.8, Math.PI / 2);
   car(A, 12.4, 12.4, -Math.PI / 2, "ac-rust");
   // Welcome sign and test clock terminate the street vista.
-  K.box("ac-white", 14.5, 1.7, -11.5, 3.65, 2.65, 0.22, true);
-  K.art("ac-welcome", 14.5, 1.74, -11.35, 3.35, 2.35);
+  K.box("ac-white", 14.5, 1.7, -9, 3.65, 2.65, 0.22, true);
+  K.art("ac-welcome", 14.5, 1.74, -8.85, 3.35, 2.35);
   for (const x of [12.53, 16.47]) {
-    K.box("ac-white", x, 1.4, -11.5, 0.28, 2.85, 0.32, true);
-    K.sphere("ac-white", x, 3, -11.5, 0.23, 0.23, 0.23);
+    K.box("ac-white", x, 1.4, -9, 0.28, 2.85, 0.32, true);
+    K.sphere("ac-white", x, 3, -9, 0.23, 0.23, 0.23);
   }
   for (const x of [-20, 20]) {
     K.box("ac-metal", x, 0.55, 0, 0.25, 1.1, 16, true);
@@ -1037,7 +1039,7 @@ export function buildAtomicCuldesac(A, rng) {
     );
   }
   // Boundary collision is independent of dressing, including fence tops.
-  for (const x of [MAP_BOUNDS.minX, MAP_BOUNDS.maxX]) A.box("concrete", x, 6, 0, 0.5, 12, 78);
+  for (const x of [MAP_BOUNDS.minX, MAP_BOUNDS.maxX]) A.box("concrete", x, 6, 0, 0.5, 12, 66);
   for (const z of [MAP_BOUNDS.minZ, MAP_BOUNDS.maxZ]) A.box("concrete", 0, 6, z, 46, 12, 0.5);
   return infos;
 }

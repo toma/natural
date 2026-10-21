@@ -22,8 +22,8 @@ test("Atomic Cul-de-sac spawns occupy open space inside the same bounds as the w
 test("opposing house transforms preserve front and backyard route placement", () => {
   const green = HOUSES[0]!,
     yellow = HOUSES[1]!;
-  expect(housePoint(green, 0, 5).z).toBe(-15);
-  expect(housePoint(yellow, 0, 5).z).toBe(15);
+  expect(housePoint(green, 0, 5).z).toBe(-10);
+  expect(housePoint(yellow, 0, 5).z).toBe(10);
   expect(housePoint(yellow, 3, -10).x).toBeCloseTo(-1.6);
 });
 
