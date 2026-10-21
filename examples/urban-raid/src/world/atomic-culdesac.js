@@ -1181,18 +1181,34 @@ export function buildAtomicCuldesac(A, rng) {
           0.014,
         );
       }
-  for (let i = 0; i < 24; i++) {
-    const a = (i * Math.PI) / 12,
-      r = 150 + rng.range(0, 80);
+  // Layered desert mountains: a taller far range and a nearer ridge for depth,
+  // read against the sky's atmospheric haze.
+  for (let i = 0; i < 30; i++) {
+    const a = (i * Math.PI) / 15,
+      r = 170 + rng.range(0, 90);
     K.geo(
       "ac-sand",
       rockGeometry(rng, 1, 3, 0.5),
       Math.sin(a) * r,
       -3,
       Math.cos(a) * r,
-      rng.range(30, 65),
-      rng.range(15, 34),
-      rng.range(24, 50),
+      rng.range(40, 85),
+      rng.range(34, 72),
+      rng.range(34, 66),
+    );
+  }
+  for (let i = 0; i < 26; i++) {
+    const a = (i * Math.PI) / 13 + 0.12,
+      r = 95 + rng.range(0, 45);
+    K.geo(
+      "ac-sand",
+      rockGeometry(rng, 1, 3, 0.5),
+      Math.sin(a) * r,
+      -2,
+      Math.cos(a) * r,
+      rng.range(26, 50),
+      rng.range(14, 30),
+      rng.range(22, 40),
     );
   }
   // Boundary collision is independent of dressing, including fence tops.
