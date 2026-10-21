@@ -9,7 +9,10 @@ export class WeaponPreview {
     this.current = null;
     this.scene = new THREE.Scene();
     this.scene.add(new THREE.HemisphereLight(0xd7e4ed, 0x252326, 2.1));
-    for (const [color, intensity, x, y, z] of [[0xffedcb, 3.5, 2, 4, 3], [0xb9d8f5, 3, -2, 1, -4]]) {
+    for (const [color, intensity, x, y, z] of [
+      [0xffedcb, 3.5, 2, 4, 3],
+      [0xb9d8f5, 3, -2, 1, -4],
+    ]) {
       const lamp = new THREE.DirectionalLight(color, intensity);
       lamp.position.set(x, y, z);
       this.scene.add(lamp);
@@ -20,7 +23,9 @@ export class WeaponPreview {
     this.image = null;
   }
 
-  select(id) { if (id !== this.current) this.pending = id; }
+  select(id) {
+    if (id !== this.current) this.pending = id;
+  }
 
   update() {
     if (!this.pending) return;
@@ -28,9 +33,13 @@ export class WeaponPreview {
     const renderer = this.ctx.peek("render")?.renderer;
     if (!entry || !renderer) return;
     const id = this.pending;
-    const width = 1400, height = 600;
+    const width = 1400,
+      height = 600;
     if (!this.target) {
-      this.target = new THREE.WebGLRenderTarget(width, height, { samples: 4, type: THREE.UnsignedByteType });
+      this.target = new THREE.WebGLRenderTarget(width, height, {
+        samples: 4,
+        type: THREE.UnsignedByteType,
+      });
       this.target.texture.colorSpace = THREE.SRGBColorSpace;
       this.pixels = new Uint8Array(width * height * 4);
       this.image = new ImageData(width, height);
@@ -44,10 +53,20 @@ export class WeaponPreview {
     model.scale.setScalar(1);
     model.traverse((node) => {
       node.matrixAutoUpdate = true;
-      if (node.isMesh) { node.castShadow = false; node.receiveShadow = false; }
+      if (node.isMesh) {
+        node.castShadow = false;
+        node.receiveShadow = false;
+      }
     });
     const nodes = entry.model.nodes;
-    for (const [part, key] of [["magazine", "magSeat"], ["charging", "chargeRest"], ["bolt", "boltRest"], ["slide", "slideRest"], ["trigger", "triggerPivot"], ["selector", "selectorPivot"]]) {
+    for (const [part, key] of [
+      ["magazine", "magSeat"],
+      ["charging", "chargeRest"],
+      ["bolt", "boltRest"],
+      ["slide", "slideRest"],
+      ["trigger", "triggerPivot"],
+      ["selector", "selectorPivot"],
+    ]) {
       const obj = model.getObjectByName(`${id}-${part}`);
       const node = nodes[key];
       if (obj && node) {
@@ -67,16 +86,25 @@ export class WeaponPreview {
     const size = box.getSize(new THREE.Vector3());
     model.position.sub(centre);
     const aspect = width / height;
-    const fit = Math.max(size.y, size.x / aspect) * 0.64 / Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
+    const fit =
+      (Math.max(size.y, size.x / aspect) * 0.64) /
+      Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
     this.camera.aspect = aspect;
     this.camera.position.set(0, 0.025, fit + size.z * 0.6);
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
     const prev = {
-      target: renderer.getRenderTarget(), face: renderer.getActiveCubeFace(), level: renderer.getActiveMipmapLevel(),
-      viewport: renderer.getViewport(new THREE.Vector4()), scissor: renderer.getScissor(new THREE.Vector4()),
-      scissorTest: renderer.getScissorTest(), color: renderer.getClearColor(new THREE.Color()), alpha: renderer.getClearAlpha(),
-      auto: renderer.autoClear, tone: renderer.toneMapping, exposure: renderer.toneMappingExposure,
+      target: renderer.getRenderTarget(),
+      face: renderer.getActiveCubeFace(),
+      level: renderer.getActiveMipmapLevel(),
+      viewport: renderer.getViewport(new THREE.Vector4()),
+      scissor: renderer.getScissor(new THREE.Vector4()),
+      scissorTest: renderer.getScissorTest(),
+      color: renderer.getClearColor(new THREE.Color()),
+      alpha: renderer.getClearAlpha(),
+      auto: renderer.autoClear,
+      tone: renderer.toneMapping,
+      exposure: renderer.toneMappingExposure,
       shadow: renderer.shadowMap.autoUpdate,
     };
     try {

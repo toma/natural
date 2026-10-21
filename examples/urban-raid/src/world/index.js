@@ -59,7 +59,7 @@ const LEVEL_TZ = 0;
 const LIGHT_SLOTS = 20;
 
 /** Spawn points in LEVEL space: [x, z, yaw, tag]. */
-const SPAWNS = MAP_SPAWNS.map(p => [p.x, p.z, p.yaw, p.id]);
+const SPAWNS = MAP_SPAWNS.map((p) => [p.x, p.z, p.yaw, p.id]);
 
 export class WorldSystem {
   static id = "world";

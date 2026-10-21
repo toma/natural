@@ -16,13 +16,13 @@ export const FLOOR_HEIGHT = 3.12;
 export function wallSpans(bottom: number, top: number, holes: readonly { y: number; h: number }[]) {
   const spans: [number, number][] = [];
   let cursor = bottom;
-  for (const hole of [...holes].sort((a,b)=>a.y-b.y)) {
+  for (const hole of [...holes].sort((a, b) => a.y - b.y)) {
     if (hole.y > cursor) spans.push([cursor, Math.min(hole.y, top)]);
     cursor = Math.max(cursor, hole.y + hole.h);
     if (cursor >= top) break;
   }
-  if (cursor < top) spans.push([cursor,top]);
-  return spans.filter(([a,b])=>b>a);
+  if (cursor < top) spans.push([cursor, top]);
+  return spans.filter(([a, b]) => b > a);
 }
 export const HOUSES: readonly HouseSpec[] = [
   { id: "green", x: 0, z: -20, yaw: 0, w: 12, d: 10, floors: 2 },
@@ -53,18 +53,25 @@ export function housePoint(house: HouseSpec, x: number, z: number) {
 }
 
 export function insideMap(x: number, z: number, margin = 0) {
-  return x > MAP_BOUNDS.minX + margin && x < MAP_BOUNDS.maxX - margin &&
-    z > MAP_BOUNDS.minZ + margin && z < MAP_BOUNDS.maxZ - margin;
+  return (
+    x > MAP_BOUNDS.minX + margin &&
+    x < MAP_BOUNDS.maxX - margin &&
+    z > MAP_BOUNDS.minZ + margin &&
+    z < MAP_BOUNDS.maxZ - margin
+  );
 }
 
 export function outdoorOpen(x: number, z: number, margin = 0.4) {
   if (!insideMap(x, z, margin)) return false;
   for (const h of HOUSES) {
-    const c = Math.cos(h.yaw), s = Math.sin(h.yaw);
+    const c = Math.cos(h.yaw),
+      s = Math.sin(h.yaw);
     const lx = c * (x - h.x) - s * (z - h.z);
     const lz = s * (x - h.x) + c * (z - h.z);
     if (Math.abs(lx) < h.w / 2 + margin && Math.abs(lz) < h.d / 2 + margin) return false;
     if (Math.abs(lx + 9) < 3 + margin && Math.abs(lz - 1) < 4 + margin) return false;
   }
-  return !LANDMARKS.slice(0, 2).some(p => Math.abs(x - p.x) < p.w / 2 + margin && Math.abs(z - p.z) < p.d / 2 + margin);
+  return !LANDMARKS.slice(0, 2).some(
+    (p) => Math.abs(x - p.x) < p.w / 2 + margin && Math.abs(z - p.z) < p.d / 2 + margin,
+  );
 }

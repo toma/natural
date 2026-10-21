@@ -319,9 +319,15 @@ export class WeaponSystem {
     this.viewmodel.stopClip();
     this.setWeaponImmediate(id);
     this.debugMode = null;
-    this._nextShell = false; this._fireTimer = 0; this._burstLeft = 0; this._shotIndex = 0; this._spread = 0;
+    this._nextShell = false;
+    this._fireTimer = 0;
+    this._burstLeft = 0;
+    this._shotIndex = 0;
+    this._spread = 0;
     for (const state of this.states.values()) {
-      state.mag = state.def.magSize - 1; state.chambered = true; state.reserve = state.def.reserve;
+      state.mag = state.def.magSize - 1;
+      state.chambered = true;
+      state.reserve = state.def.reserve;
     }
     this.viewmodel.play("draw");
     return id;
@@ -400,7 +406,14 @@ export class WeaponSystem {
   canFire() {
     const s = this.state;
     if (!s) return false;
-    if (this.reloading || this.switching || this._equipmentLock > 0 || this.player?.health?.dead || this.player?.movement?.diving) return false;
+    if (
+      this.reloading ||
+      this.switching ||
+      this._equipmentLock > 0 ||
+      this.player?.health?.dead ||
+      this.player?.movement?.diving
+    )
+      return false;
     if (this._fireTimer > 0) return false;
     return s.chambered;
   }
@@ -409,7 +422,15 @@ export class WeaponSystem {
   tryFire() {
     const s = this.state;
     if (!s) return false;
-    if (this.reloading || this.switching || this._fireTimer > 0 || this.player?.movement?.diving || this.player?.health?.dead || this._equipmentLock > 0) return false;
+    if (
+      this.reloading ||
+      this.switching ||
+      this._fireTimer > 0 ||
+      this.player?.movement?.diving ||
+      this.player?.health?.dead ||
+      this._equipmentLock > 0
+    )
+      return false;
     if (!s.chambered) {
       // Dry: lock the bolt back and let the player know by feel.
       this.viewmodel.boltHold = 1;
@@ -457,22 +478,24 @@ export class WeaponSystem {
     for (let pellet = 0; pellet < (def.pellets ?? 1); pellet++) {
       const direction = this._dir.clone();
       if (def.pellets > 1) {
-        const disc = this.rng.disc({x:0,y:0});
-        direction.addScaledVector(this._right, Math.tan(spreadRad)*disc.x).addScaledVector(this._up, Math.tan(spreadRad)*disc.y).normalize();
+        const disc = this.rng.disc({ x: 0, y: 0 });
+        direction
+          .addScaledVector(this._right, Math.tan(spreadRad) * disc.x)
+          .addScaledVector(this._up, Math.tan(spreadRad) * disc.y)
+          .normalize();
       }
-    this.sim.spawn({
-      origin: this._muzzle,
-      dir: direction,
-      speed: def.muzzleVelocity,
-      damage: def.damage,
-      penetration: def.penetration,
-      dragK: def.dragK,
-      dropoff: def.dropoff,
-      maxRange: def.maxRange,
-      weapon: def,
-      tracer: this.stats.fired % def.tracerEvery === 0,
-    });
-
+      this.sim.spawn({
+        origin: this._muzzle,
+        dir: direction,
+        speed: def.muzzleVelocity,
+        damage: def.damage,
+        penetration: def.penetration,
+        dragK: def.dragK,
+        dropoff: def.dropoff,
+        maxRange: def.maxRange,
+        weapon: def,
+        tracer: this.stats.fired % def.tracerEvery === 0,
+      });
     }
 
     // ---- feedback ----
@@ -516,7 +539,9 @@ export class WeaponSystem {
     switch (name) {
       case "shell":
         if (s.def.shellReload && s.reserve > 0 && s.mag + Number(s.chambered) < s.def.magSize) {
-          s.reserve--; if (!s.chambered) s.chambered = true; else s.mag++;
+          s.reserve--;
+          if (!s.chambered) s.chambered = true;
+          else s.mag++;
           this._emitReload("magin");
         }
         break;
@@ -542,7 +567,8 @@ export class WeaponSystem {
         if (isReload) {
           this._emitReload("end");
           this.viewmodel.boltHold = 0;
-          this._nextShell = s.def.shellReload && s.reserve > 0 && s.mag + Number(s.chambered) < s.def.magSize;
+          this._nextShell =
+            s.def.shellReload && s.reserve > 0 && s.mag + Number(s.chambered) < s.def.magSize;
         }
         if (clipName === "holster" && this._switchTo) {
           this.activeId = this._switchTo;
@@ -682,21 +708,33 @@ export class WeaponSystem {
     if (this._sinceShot > 0.6) this._shotIndex = 0;
 
     // ---- gather state ----------------------------------------------------
-    const live = !input.frozen && !input.menuActive && input.enabled !== false && this.debugMode === null && !player?.health?.dead;
+    const live =
+      !input.frozen &&
+      !input.menuActive &&
+      input.enabled !== false &&
+      this.debugMode === null &&
+      !player?.health?.dead;
     st.ads = live ? input.ads || player?.adsRequested === true : this.debugMode === "ads";
     st.sprint = live ? player?.sprinting === true && this._sinceShot > 0.3 : false;
     st.speed = player?.horizontalSpeed ?? player?.speed ?? 0;
     st.crouch = player?.stance === "crouch";
     st.airborne = player?.airborne === true;
-    st.lowReady = player?.state === "mantle" || player?.mantling === true || player?.movement?.diving;
+    st.lowReady =
+      player?.state === "mantle" || player?.mantling === true || player?.movement?.diving;
     st.empty = s.mag === 0 && !s.chambered;
 
     if (this._nextShell && !this.reloading && !this.switching) {
       this._nextShell = false;
       if (!input.fire) this.reload();
     }
-    if (this.state?.def.shellReload && input.firePressed && this.reloading && this.state.chambered) {
-      this.viewmodel.stopClip(); this._nextShell = false;
+    if (
+      this.state?.def.shellReload &&
+      input.firePressed &&
+      this.reloading &&
+      this.state.chambered
+    ) {
+      this.viewmodel.stopClip();
+      this._nextShell = false;
     }
     // ---- input -----------------------------------------------------------
     if (live) {
@@ -847,7 +885,7 @@ export class WeaponSystem {
 
     const s = this.state;
     if (s) {
-      s.mag = kind === "fire" ? Math.min(22,s.def.magSize-1) : s.def.magSize-1;
+      s.mag = kind === "fire" ? Math.min(22, s.def.magSize - 1) : s.def.magSize - 1;
       s.chambered = true;
       s.reserve = s.def.reserve;
     }

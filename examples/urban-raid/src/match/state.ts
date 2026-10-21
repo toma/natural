@@ -30,12 +30,19 @@ export class MatchState {
     this.rows = [
       { id: "player", name: "You", score: 0, kills: 0, deaths: 0, local: true },
       ...BOT_NAMES.map((name, i) => ({
-        id: `bot-${i}`, name, score: 0, kills: 0, deaths: 0, local: false,
+        id: `bot-${i}`,
+        name,
+        score: 0,
+        kills: 0,
+        deaths: 0,
+        local: false,
       })),
     ];
   }
 
-  get local() { return this.rows[0]!; }
+  get local() {
+    return this.rows[0]!;
+  }
 
   start() {
     this.started = true;
@@ -51,7 +58,7 @@ export class MatchState {
 
   death(victimId: string, killerId: string | null) {
     if (!this.started || this.finished || this.respawns.has(victimId)) return false;
-    const victim = this.rows.find(row => row.id === victimId);
+    const victim = this.rows.find((row) => row.id === victimId);
     if (!victim) return false;
     victim.deaths++;
     this.respawns.set(victimId, victim.local ? 3 : 4);
@@ -60,7 +67,7 @@ export class MatchState {
       this.respawnRemaining = 3;
       this.enemyScore += 100;
     }
-    const killer = this.rows.find(row => row.id === killerId);
+    const killer = this.rows.find((row) => row.id === killerId);
     if (killer && killer !== victim) {
       killer.kills++;
       killer.score += 100;
@@ -93,23 +100,43 @@ export class MatchState {
   }
 
   private checkEnd() {
-    if (this.remaining > 0 && this.local.score < this.scoreLimit && this.enemyScore < this.scoreLimit) return;
+    if (
+      this.remaining > 0 &&
+      this.local.score < this.scoreLimit &&
+      this.enemyScore < this.scoreLimit
+    )
+      return;
     this.finished = true;
-    this.outcome = this.local.score === this.enemyScore ? "DRAW" : this.local.score > this.enemyScore ? "VICTORY" : "DEFEAT";
+    this.outcome =
+      this.local.score === this.enemyScore
+        ? "DRAW"
+        : this.local.score > this.enemyScore
+          ? "VICTORY"
+          : "DEFEAT";
     this.respawnRemaining = 0;
     this.respawns.clear();
   }
 }
 
-export interface SpawnCandidate { index: number; clearance: boolean; distance: number; visible: boolean; crowding: number }
+export interface SpawnCandidate {
+  index: number;
+  clearance: boolean;
+  distance: number;
+  visible: boolean;
+  crowding: number;
+}
 
 /** Reject obstructed spawns, then prefer cover and space from opponents. */
 export function chooseSpawn(candidates: readonly SpawnCandidate[]) {
-  let best = -1, score = -Infinity;
+  let best = -1,
+    score = -Infinity;
   for (const c of candidates) {
     if (!c.clearance) continue;
     const value = Math.min(c.distance, 50) - (c.visible ? 35 : 0) - c.crowding * 18;
-    if (value > score) { score = value; best = c.index; }
+    if (value > score) {
+      score = value;
+      best = c.index;
+    }
   }
   return best;
 }

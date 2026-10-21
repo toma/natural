@@ -64,9 +64,9 @@ export const ENV_OCCLUSION = 0.24;
  * Ordered roughly from receiver outward so the log reads like a parts list.
  */
 export const WEAPON_MATERIALS = {
-  walnut: ["wood", {...BASE, scale:0.2, tint:0x916947}],
-  olive: ["rubber", {...BASE, scale:0.13, tint:0x82906c}],
-  shell_red: ["rubber", {...BASE, scale:0.07, tint:0xc44535}],
+  walnut: ["wood", { ...BASE, scale: 0.2, tint: 0x916947 }],
+  olive: ["rubber", { ...BASE, scale: 0.13, tint: 0x82906c }],
+  shell_red: ["rubber", { ...BASE, scale: 0.07, tint: 0xc44535 }],
   /**
    * Hard-anodised aluminium - upper/lower receiver, rails, handguard.
    *

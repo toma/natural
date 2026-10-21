@@ -898,7 +898,8 @@ export class Viewmodel {
     if (p.magazine) {
       const inHand = res.active ? res.parts.mag : 0;
       this.magVisible = res.active ? res.parts.magVisible : true;
-      p.magazine.visible = this.magVisible && (!w.def.shellReload || this.clip?.name?.startsWith("reload"));
+      p.magazine.visible =
+        this.magVisible && (!w.def.shellReload || this.clip?.name?.startsWith("reload"));
       if (inHand > 1e-4) {
         // Follow the support hand: the magazine is gripped by its spine.
         this._magFromHand(w, p.magazine, inHand);

@@ -260,7 +260,6 @@ export class Movement {
     prev.sprint = sprint;
 
     if (cmd.jump) this._jumpBuffer = MOVE.jumpBuffer;
-
   }
 
   /* ==================================================================== */
@@ -325,8 +324,10 @@ export class Movement {
 
     // ---- discrete decisions, in priority order --------------------------
     if (cmd.pronePressed && this.sprinting && c.grounded && this.horizontalSpeed > 4.5) {
-      this.diving = true; this._diveTime = 0;
-      this.stanceWant = "prone"; this.sprinting = false;
+      this.diving = true;
+      this._diveTime = 0;
+      this.stanceWant = "prone";
+      this.sprinting = false;
       this.velocity.set(this._fwd.x * 7.2, 3.1, this._fwd.z * 7.2);
       c.grounded = false;
     }
@@ -341,7 +342,8 @@ export class Movement {
     // ---- integrate velocity ---------------------------------------------
     const v = this.velocity;
     if (this.diving) {
-      v.x *= Math.exp(-h * 0.6); v.z *= Math.exp(-h * 0.6);
+      v.x *= Math.exp(-h * 0.6);
+      v.z *= Math.exp(-h * 0.6);
     } else if (this.sliding) {
       this._accelerateSlide(h, wish, wishLen);
     } else if (c.grounded && !jumped) {
@@ -422,7 +424,14 @@ export class Movement {
         this.stanceWant = this.stanceWant === "prone" ? "stand" : "prone";
       }
       // Sprinting always stands you up - CoD does not let you sprint crouched.
-      if (cmd.sprintPressed && !cmd.pronePressed && !cmd.crouchPressed && rawInput > 0.5 && this.stanceWant !== "stand" && cmd.moveY > 0.5) {
+      if (
+        cmd.sprintPressed &&
+        !cmd.pronePressed &&
+        !cmd.crouchPressed &&
+        rawInput > 0.5 &&
+        this.stanceWant !== "stand" &&
+        cmd.moveY > 0.5
+      ) {
         this.stanceWant = "stand";
       }
       if (cmd.jump && this.stanceWant !== "stand") this.stanceWant = "stand";
@@ -450,13 +459,22 @@ export class Movement {
   _updateSprint(cmd, rawInput, forwardIntent) {
     const dt = this.ctx.time.fixed;
     if (!cmd.sprintHeld && this.sprintFuel > 0.75) this._sprintExhausted = false;
-    const want = cmd.sprintHeld && rawInput > 0.45 && forwardIntent > 0.55 &&
-      this.stance === "stand" && !this.diving && this.adsAmount < 0.3 &&
-      !this._sprintExhausted && (this.character.grounded || this.sprinting);
+    const want =
+      cmd.sprintHeld &&
+      rawInput > 0.45 &&
+      forwardIntent > 0.55 &&
+      this.stance === "stand" &&
+      !this.diving &&
+      this.adsAmount < 0.3 &&
+      !this._sprintExhausted &&
+      (this.character.grounded || this.sprinting);
     this.sprinting = want;
     this.tacticalSprint = false;
     this.sprintFuel = Math.max(0, Math.min(4, this.sprintFuel + (want ? -dt : dt * 0.8)));
-    if (this.sprintFuel <= 0) { this.sprinting = false; this._sprintExhausted = true; }
+    if (this.sprintFuel <= 0) {
+      this.sprinting = false;
+      this._sprintExhausted = true;
+    }
   }
 
   /* ==================================================================== */
@@ -1000,7 +1018,10 @@ export class Movement {
   teleport(x, y, z) {
     if (!this.character) return;
     this.mantleMotion.end();
-    this.diving = false; this._diveTime = 0; this.sprintFuel = 4; this._sprintExhausted = false;
+    this.diving = false;
+    this._diveTime = 0;
+    this.sprintFuel = 4;
+    this._sprintExhausted = false;
     this.sliding = false;
     this.sprinting = false;
     this.tacticalSprint = false;

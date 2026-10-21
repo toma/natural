@@ -6,7 +6,12 @@ export interface MenuSettings {
   fov: number;
   invertY: boolean;
 }
-export const MENU_DEFAULTS: MenuSettings = { quality: "ultra", sensitivity: 0.0022, fov: 80, invertY: false };
+export const MENU_DEFAULTS: MenuSettings = {
+  quality: "ultra",
+  sensitivity: 0.0022,
+  fov: 80,
+  invertY: false,
+};
 
 /** Stored preferences are untrusted input, including data written by older builds. */
 export function readSettings(raw: string | null): MenuSettings | null {
@@ -17,7 +22,9 @@ export function readSettings(raw: string | null): MenuSettings | null {
     const obj = value as Record<string, unknown>;
     const numeric = (key: string, min: number, max: number, fallback: number) => {
       const n = obj[key];
-      return typeof n === "number" && Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+      return typeof n === "number" && Number.isFinite(n)
+        ? Math.max(min, Math.min(max, n))
+        : fallback;
     };
     return {
       quality: QUALITY_NAMES.find((name) => name === obj["quality"]) ?? MENU_DEFAULTS.quality,

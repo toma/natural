@@ -414,40 +414,98 @@ export function buildClips(nodes, def) {
 
   const clips = { reloadTac, reloadEmpty, inspect, draw, holster };
   if (def.shellReload) {
-    for (const [name,duration] of [["reloadTac",def.reloadTac],["reloadEmpty",def.reloadEmpty]]) {
-      clips[name] = new Clip(name,duration,{
-        weapon:[{t:0,p:[0,0,0],r:[0,0,0]},{t:duration*0.3,p:[0.03,-0.035,0.03],r:[-0.2,0.2,0.6]},{t:duration,p:[0,0,0],r:[0,0,0]}],
-        lhand:[{t:0,p:hgP,finger:wrapFinger,back:wrapBack},{t:duration*0.23,p:[-0.04,-0.22,0.02],finger:magFinger,back:magBack,pose:"pinch"},{t:duration*0.6,p:[0.01,-0.025,-0.058],finger:magFinger,back:magBack,pose:"pinch"},{t:duration,p:hgP,finger:wrapFinger,back:wrapBack}],
-        parts:[{t:0,magVisible:0},{t:duration*0.2,magVisible:1,mag:1},{t:duration*0.63,magVisible:0,mag:0}],
-        events:[{t:0.001,name:"start"},{t:duration*0.64,name:"shell"},{t:duration*0.995,name:"end"}],
+    for (const [name, duration] of [
+      ["reloadTac", def.reloadTac],
+      ["reloadEmpty", def.reloadEmpty],
+    ]) {
+      clips[name] = new Clip(name, duration, {
+        weapon: [
+          { t: 0, p: [0, 0, 0], r: [0, 0, 0] },
+          { t: duration * 0.3, p: [0.03, -0.035, 0.03], r: [-0.2, 0.2, 0.6] },
+          { t: duration, p: [0, 0, 0], r: [0, 0, 0] },
+        ],
+        lhand: [
+          { t: 0, p: hgP, finger: wrapFinger, back: wrapBack },
+          {
+            t: duration * 0.23,
+            p: [-0.04, -0.22, 0.02],
+            finger: magFinger,
+            back: magBack,
+            pose: "pinch",
+          },
+          {
+            t: duration * 0.6,
+            p: [0.01, -0.025, -0.058],
+            finger: magFinger,
+            back: magBack,
+            pose: "pinch",
+          },
+          { t: duration, p: hgP, finger: wrapFinger, back: wrapBack },
+        ],
+        parts: [
+          { t: 0, magVisible: 0 },
+          { t: duration * 0.2, magVisible: 1, mag: 1 },
+          { t: duration * 0.63, magVisible: 0, mag: 0 },
+        ],
+        events: [
+          { t: 0.001, name: "start" },
+          { t: duration * 0.64, name: "shell" },
+          { t: duration * 0.995, name: "end" },
+        ],
       });
     }
   }
-  clips.cycle = new Clip("cycle",0.95,{
-    weapon:[{t:0,p:[0,0,0],r:[0,0,0]},{t:0.22,p:[0.025,-0.035,0.045],r:[0.1,-0.12,-0.18]},{t:0.7,p:[0.015,-0.015,0.02],r:[0.02,0,-0.1]},{t:0.95,p:[0,0,0],r:[0,0,0]}],
-    rhand:[{t:0,p:[0,0,0]},{t:0.2,p:[0.035,0.02,-0.02]},{t:0.4,p:[0.035,0.02,0.07]},{t:0.7,p:[0.03,0.02,-0.015]},{t:0.95,p:[0,0,0]}],
-    parts:[{t:0,charge:0},{t:0.4,charge:1},{t:0.7,charge:0}],
+  clips.cycle = new Clip("cycle", 0.95, {
+    weapon: [
+      { t: 0, p: [0, 0, 0], r: [0, 0, 0] },
+      { t: 0.22, p: [0.025, -0.035, 0.045], r: [0.1, -0.12, -0.18] },
+      { t: 0.7, p: [0.015, -0.015, 0.02], r: [0.02, 0, -0.1] },
+      { t: 0.95, p: [0, 0, 0], r: [0, 0, 0] },
+    ],
+    rhand: [
+      { t: 0, p: [0, 0, 0] },
+      { t: 0.2, p: [0.035, 0.02, -0.02] },
+      { t: 0.4, p: [0.035, 0.02, 0.07] },
+      { t: 0.7, p: [0.03, 0.02, -0.015] },
+      { t: 0.95, p: [0, 0, 0] },
+    ],
+    parts: [
+      { t: 0, charge: 0 },
+      { t: 0.4, charge: 1 },
+      { t: 0.7, charge: 0 },
+    ],
   });
   for (const kind of ["frag", "flash"]) {
     clips[kind] = new Clip(kind, 0.85, {
       weapon: [
-        { t: 0, p: [0,0,0], r: [0,0,0] },
-        { t: 0.16, p: [0.12,-0.32,0.14], r: [-0.5,0.3,0.45] },
-        { t: 0.55, p: [0.12,-0.32,0.14], r: [-0.5,0.3,0.45] },
-        { t: 0.85, p: [0,0,0], r: [0,0,0] },
+        { t: 0, p: [0, 0, 0], r: [0, 0, 0] },
+        { t: 0.16, p: [0.12, -0.32, 0.14], r: [-0.5, 0.3, 0.45] },
+        { t: 0.55, p: [0.12, -0.32, 0.14], r: [-0.5, 0.3, 0.45] },
+        { t: 0.85, p: [0, 0, 0], r: [0, 0, 0] },
       ],
       lhand: [
-        {t:0,p:hgP,finger:wrapFinger,back:wrapBack},
-        {t:0.18,p:[-0.17,0.28,0.04],finger:[0,0,-1],back:[-1,0,0],pose:"grip"},
-        {t:0.36,p:[-0.12,0.45,-0.35],finger:[0,0,-1],back:[-1,0,0],pose:"open"},
-        {t:0.6,p:[-0.12,0.05,-0.28],finger:wrapFinger,back:wrapBack,pose:"open"},
-        {t:0.85,p:hgP,finger:wrapFinger,back:wrapBack},
+        { t: 0, p: hgP, finger: wrapFinger, back: wrapBack },
+        { t: 0.18, p: [-0.17, 0.28, 0.04], finger: [0, 0, -1], back: [-1, 0, 0], pose: "grip" },
+        { t: 0.36, p: [-0.12, 0.45, -0.35], finger: [0, 0, -1], back: [-1, 0, 0], pose: "open" },
+        { t: 0.6, p: [-0.12, 0.05, -0.28], finger: wrapFinger, back: wrapBack, pose: "open" },
+        { t: 0.85, p: hgP, finger: wrapFinger, back: wrapBack },
       ],
     });
   }
   clips.melee = new Clip("melee", 0.65, {
-    weapon: [{t:0,p:[0,0,0],r:[0,0,0]},{t:0.12,p:[0.08,-0.15,0.03],r:[0,0.5,0.5]},{t:0.35,p:[0.08,-0.15,0.03],r:[0,0.5,0.5]},{t:0.65,p:[0,0,0],r:[0,0,0]}],
-    lhand: [{t:0,p:hgP,finger:wrapFinger,back:wrapBack},{t:0.12,p:[-0.19,0.14,0.05],finger:[0.7,0,-0.7],back:[0,-1,0],pose:"grip"},{t:0.24,p:[0.05,0.18,-0.5],finger:[0.7,0,-0.7],back:[0,-1,0],pose:"grip"},{t:0.42,p:[0.04,0.1,-0.3],finger:[0.7,0,-0.7],back:[0,-1,0],pose:"grip"},{t:0.65,p:hgP,finger:wrapFinger,back:wrapBack}],
+    weapon: [
+      { t: 0, p: [0, 0, 0], r: [0, 0, 0] },
+      { t: 0.12, p: [0.08, -0.15, 0.03], r: [0, 0.5, 0.5] },
+      { t: 0.35, p: [0.08, -0.15, 0.03], r: [0, 0.5, 0.5] },
+      { t: 0.65, p: [0, 0, 0], r: [0, 0, 0] },
+    ],
+    lhand: [
+      { t: 0, p: hgP, finger: wrapFinger, back: wrapBack },
+      { t: 0.12, p: [-0.19, 0.14, 0.05], finger: [0.7, 0, -0.7], back: [0, -1, 0], pose: "grip" },
+      { t: 0.24, p: [0.05, 0.18, -0.5], finger: [0.7, 0, -0.7], back: [0, -1, 0], pose: "grip" },
+      { t: 0.42, p: [0.04, 0.1, -0.3], finger: [0.7, 0, -0.7], back: [0, -1, 0], pose: "grip" },
+      { t: 0.65, p: hgP, finger: wrapFinger, back: wrapBack },
+    ],
   });
   return clips;
 }
