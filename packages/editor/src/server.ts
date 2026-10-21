@@ -1,7 +1,7 @@
 import editor from "./index.html";
 import { mkdir, readdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
 import { basename, extname, resolve, sep } from "node:path";
-import { canonicalJson, validateScene } from "@natural-engine/core";
+import { canonicalJson, validateScene } from "@toma.com/core";
 import { parse, printParseErrorCode, type ParseError } from "jsonc-parser";
 
 const projectRoot = await realpath(resolve(process.env.NATURAL_PROJECT ?? process.cwd()));

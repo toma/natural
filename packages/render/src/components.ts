@@ -1,4 +1,4 @@
-import { defineComponent, type Vec2, type Vec3 } from "@natural-engine/core";
+import { defineComponent, type Vec2, type Vec3 } from "@toma.com/core";
 
 export type Primitive3D = "box" | "sphere" | "plane";
 
@@ -8,6 +8,12 @@ export interface MeshRendererData {
   emissive: string;
   metalness: number;
   roughness: number;
+  baseColorMap: string | null;
+  normalMap: string | null;
+  roughnessMap: string | null;
+  metalnessMap: string | null;
+  aoMap: string | null;
+  textureRepeat: Vec2;
   wireframe: boolean;
   castShadow: boolean;
   receiveShadow: boolean;
@@ -91,6 +97,12 @@ export const MeshRenderer = defineComponent<MeshRendererData>({
     emissive: "#000000",
     metalness: 0,
     roughness: 1,
+    baseColorMap: null,
+    normalMap: null,
+    roughnessMap: null,
+    metalnessMap: null,
+    aoMap: null,
+    textureRepeat: { x: 1, y: 1 },
     wireframe: false,
     castShadow: true,
     receiveShadow: true,
@@ -110,6 +122,13 @@ export const MeshRenderer = defineComponent<MeshRendererData>({
       finite(data.roughness) &&
       data.roughness >= 0 &&
       data.roughness <= 1 &&
+      (data.baseColorMap === null || typeof data.baseColorMap === "string") &&
+      (data.normalMap === null || typeof data.normalMap === "string") &&
+      (data.roughnessMap === null || typeof data.roughnessMap === "string") &&
+      (data.metalnessMap === null || typeof data.metalnessMap === "string") &&
+      (data.aoMap === null || typeof data.aoMap === "string") &&
+      positive(data.textureRepeat?.x) &&
+      positive(data.textureRepeat?.y) &&
       typeof data.wireframe === "boolean" &&
       typeof data.castShadow === "boolean" &&
       typeof data.receiveShadow === "boolean" &&

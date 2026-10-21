@@ -26,5 +26,15 @@ export default defineConfig({
       env: { PORT: "43300" },
       reuseExistingServer: !process.env.CI,
     },
+    ...(process.env.NATURAL_FPS_TEST_URL
+      ? []
+      : [
+          {
+            command: "bun run examples/urban-raid/server-dev.ts",
+            url: "http://127.0.0.1:43400",
+            env: { PORT: "43400" },
+            reuseExistingServer: !process.env.CI,
+          },
+        ]),
   ],
 });

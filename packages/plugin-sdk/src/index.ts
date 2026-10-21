@@ -1,4 +1,4 @@
-export { definePlugin, type EnginePlugin } from "@natural-engine/core";
+export { definePlugin, type EnginePlugin } from "@toma.com/core";
 
 export type PluginPermission =
   "filesystem:read" | "filesystem:write" | "network" | "process" | "editor" | "runtime";

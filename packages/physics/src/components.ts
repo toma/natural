@@ -1,4 +1,4 @@
-import { defineComponent, type Vec3 } from "@natural-engine/core";
+import { defineComponent, type Vec3 } from "@toma.com/core";
 
 export interface RigidBodyData {
   type: "dynamic" | "fixed" | "kinematic";

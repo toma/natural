@@ -1,9 +1,4 @@
-import {
-  canonicalJson,
-  validateScene,
-  type SceneData,
-  type SceneNodeData,
-} from "@natural-engine/core";
+import { canonicalJson, validateScene, type SceneData, type SceneNodeData } from "@toma.com/core";
 import { parse } from "jsonc-parser";
 
 export interface ProjectSummary {

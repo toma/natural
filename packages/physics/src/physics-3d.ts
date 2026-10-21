@@ -8,7 +8,7 @@ import {
   type Entity,
   type Game,
   type Vec3,
-} from "@natural-engine/core";
+} from "@toma.com/core";
 import RAPIER from "@dimforge/rapier3d-compat";
 import {
   Collider,
@@ -20,7 +20,46 @@ import {
 
 export interface Physics3DOptions {
   gravity?: Vec3;
+  characterController?: Partial<CharacterControllerOptions>;
 }
+
+export interface CharacterControllerOptions {
+  offset: number;
+  maxStepHeight: number;
+  minStepWidth: number;
+  maxSlopeClimbAngle: number;
+  minSlopeSlideAngle: number;
+  snapToGroundDistance: number;
+}
+
+export interface CharacterCollision3D {
+  entity?: Entity;
+  point: Vec3;
+  normal: Vec3;
+}
+
+export interface CharacterMove3DResult {
+  movement: Vec3;
+  grounded: boolean;
+  collisions: readonly CharacterCollision3D[];
+}
+
+export interface EntityRayHit3D {
+  entity: Entity;
+  colliderHandle: number;
+  distance: number;
+  point: Vec3;
+  normal: Vec3;
+}
+
+const defaultCharacterController: CharacterControllerOptions = {
+  offset: 0.02,
+  maxStepHeight: 0.4,
+  minStepWidth: 0.25,
+  maxSlopeClimbAngle: Math.PI / 4,
+  minSlopeSlideAngle: Math.PI / 3,
+  snapToGroundDistance: 0.25,
+};
 
 export interface Collision3DEvent {
   first: Entity;
@@ -68,13 +107,32 @@ export class Physics3DWorld {
   readonly #signatures = new Map<string, string>();
   #world: RAPIER.World | null = null;
   #events: RAPIER.EventQueue | null = null;
+  #characterController: RAPIER.KinematicCharacterController | null = null;
+  readonly #characterOptions: CharacterControllerOptions;
 
-  constructor(readonly options: Physics3DOptions = {}) {}
+  constructor(readonly options: Physics3DOptions = {}) {
+    const characterOptions = { ...defaultCharacterController, ...options.characterController };
+    for (const [name, value] of Object.entries(characterOptions)) {
+      if (!Number.isFinite(value) || value <= 0)
+        throw new Error(`Character controller ${name} must be finite and positive`);
+    }
+    this.#characterOptions = characterOptions;
+  }
 
   async initialize(): Promise<void> {
     await RAPIER.init();
     this.#world = new RAPIER.World(this.options.gravity ?? { x: 0, y: -9.81, z: 0 });
     this.#events = new RAPIER.EventQueue(true);
+    const controller = this.#world.createCharacterController(this.#characterOptions.offset);
+    controller.enableAutostep(
+      this.#characterOptions.maxStepHeight,
+      this.#characterOptions.minStepWidth,
+      false,
+    );
+    controller.setMaxSlopeClimbAngle(this.#characterOptions.maxSlopeClimbAngle);
+    controller.setMinSlopeSlideAngle(this.#characterOptions.minSlopeSlideAngle);
+    controller.enableSnapToGround(this.#characterOptions.snapToGroundDistance);
+    this.#characterController = controller;
   }
 
   syncAndStep(game: Game, delta: number): void {
@@ -160,6 +218,100 @@ export class Physics3DWorld {
     return this.#world.castRay(new RAPIER.Ray(origin, direction), maxDistance, solid);
   }
 
+  castRayEntity(
+    origin: Vec3,
+    direction: Vec3,
+    maxDistance: number,
+    solid = true,
+    excludeEntities: readonly Entity[] = [],
+  ): EntityRayHit3D | null {
+    if (this.#world === null) throw new Error("Physics 3D world is not initialized");
+    if (
+      ![origin.x, origin.y, origin.z, direction.x, direction.y, direction.z].every(Number.isFinite)
+    )
+      throw new Error("Ray origin and direction must be finite");
+    if (!Number.isFinite(maxDistance) || maxDistance <= 0)
+      throw new Error("Ray maximum distance must be finite and positive");
+    const length = Math.hypot(direction.x, direction.y, direction.z);
+    if (length === 0) throw new Error("Ray direction must not be zero");
+    const normalized = {
+      x: direction.x / length,
+      y: direction.y / length,
+      z: direction.z / length,
+    };
+    const ray = new RAPIER.Ray(origin, normalized);
+    const excluded = new Set(excludeEntities.map(key));
+    const hit = this.#world.castRayAndGetNormal(
+      ray,
+      maxDistance,
+      solid,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      (collider) => {
+        const entity = this.#colliders.get(collider.handle);
+        return entity === undefined || !excluded.has(key(entity));
+      },
+    );
+    if (hit === null) return null;
+    const entity = this.#colliders.get(hit.collider.handle);
+    if (entity === undefined) return null;
+    return {
+      entity,
+      colliderHandle: hit.collider.handle,
+      distance: hit.timeOfImpact,
+      point: ray.pointAt(hit.timeOfImpact),
+      normal: { x: hit.normal.x, y: hit.normal.y, z: hit.normal.z },
+    };
+  }
+
+  moveCharacter(game: Game, entity: Entity, desiredMovement: Vec3): CharacterMove3DResult {
+    const world = this.#world;
+    const controller = this.#characterController;
+    if (world === null || controller === null)
+      throw new Error("Physics 3D world is not initialized");
+    if (![desiredMovement.x, desiredMovement.y, desiredMovement.z].every(Number.isFinite))
+      throw new Error("Character movement must be finite");
+    const body = this.bodies.get(key(entity));
+    const colliderHandle = this.#colliderHandles.get(key(entity));
+    if (body === undefined || colliderHandle === undefined)
+      throw new Error("Entity has no 3D physics body");
+    if (!body.isKinematic()) throw new Error("Character body must be kinematic");
+    const collider = world.getCollider(colliderHandle);
+    controller.computeColliderMovement(collider, desiredMovement);
+    const movement = controller.computedMovement();
+    const current = body.translation();
+    const position = {
+      x: current.x + movement.x,
+      y: current.y + movement.y,
+      z: current.z + movement.z,
+    };
+    body.setNextKinematicTranslation(position);
+    game.world.require(entity, LocalTransform).position = position;
+    const collisions: CharacterCollision3D[] = [];
+    for (let index = 0; index < controller.numComputedCollisions(); index += 1) {
+      const collision = controller.computedCollision(index);
+      if (collision === null) continue;
+      const collisionEntity =
+        collision.collider === null ? undefined : this.#colliders.get(collision.collider.handle);
+      collisions.push({
+        ...(collisionEntity === undefined ? {} : { entity: collisionEntity }),
+        point: {
+          x: collision.witness1.x,
+          y: collision.witness1.y,
+          z: collision.witness1.z,
+        },
+        normal: { x: collision.normal1.x, y: collision.normal1.y, z: collision.normal1.z },
+      });
+    }
+    return {
+      movement: { x: movement.x, y: movement.y, z: movement.z },
+      grounded: controller.computedGrounded(),
+      collisions,
+    };
+  }
+
   dispose(): void {
     this.bodies.clear();
     this.#colliders.clear();
@@ -168,6 +320,9 @@ export class Physics3DWorld {
     this.onCollision.clear();
     this.#events?.free();
     this.#events = null;
+    if (this.#world !== null && this.#characterController !== null)
+      this.#world.removeCharacterController(this.#characterController);
+    this.#characterController = null;
     this.#world?.free();
     this.#world = null;
   }

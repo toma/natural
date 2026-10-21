@@ -71,4 +71,4 @@ jobs:
       - name: Check Rust formatting and lints
         working-directory: apps/editor-desktop/src-tauri
         run: cargo fmt --check && cargo clippy --all-targets --all-features -- -D warnings
-      - run: bun run --filter @natural-engine/editor-desktop build
+      - run: bun run --filter @toma.com/editor-desktop build

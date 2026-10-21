@@ -8,7 +8,7 @@ import {
   type Entity,
   type Game,
   type Vec2,
-} from "@natural-engine/core";
+} from "@toma.com/core";
 import RAPIER from "@dimforge/rapier2d-compat";
 import {
   Collider,

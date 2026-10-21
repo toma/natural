@@ -1,0 +1,82 @@
+# Turns a version bump on main into a tag and a release run.
+#
+# The root package.json version is ground truth (see AGENTS.md, "When to bump
+# the version"). The bump lands in the change that earned it; this job only
+# publishes what main already decided. It never writes to main.
+#
+# It pushes the tag and then dispatches release.yml by hand. A tag pushed with
+# GITHUB_TOKEN does not fire release.yml's `push: tags` trigger: GitHub only
+# lets GITHUB_TOKEN start runs through workflow_dispatch and repository_dispatch.
+# An existing tag is left alone and is not dispatched again. A transient failed
+# release can be rerun on that tag. A code fix gets a new version and tag.
+name: tag
+
+on:
+  push:
+    branches: [main]
+
+# never abort a half-published release
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  tag:
+    name: tag and dispatch release
+    runs-on: ubuntu-latest
+    steps:
+      # tags and full history, so the tag check is honest
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+
+      # the script has no dependencies, so no install is needed here
+      - name: Every version site agrees
+        run: bun run verify:versions
+
+      - name: Read the version
+        id: v
+        run: |
+          version=$(jq -r '.version // empty' package.json)
+          case "$version" in
+            "") echo "::error::package.json has no version field"; exit 1 ;;
+          esac
+          if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::version '$version' is not semver"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Already tagged?
+        id: check
+        run: |
+          if git rev-parse -q --verify "refs/tags/${{ steps.v.outputs.tag }}" >/dev/null; then
+            echo "::notice::${{ steps.v.outputs.tag }} exists already, nothing to release"
+            echo "fresh=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "fresh=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tag it
+        if: steps.check.outputs.fresh == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.v.outputs.tag }}" -m "Natural ${{ steps.v.outputs.tag }}"
+          git push origin "refs/tags/${{ steps.v.outputs.tag }}"
+
+      # release.yml derives everything from the ref name, so dispatch it on the tag
+      - name: Dispatch the release
+        if: steps.check.outputs.fresh == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run release.yml --ref "${{ steps.v.outputs.tag }}"

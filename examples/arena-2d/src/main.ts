@@ -9,7 +9,7 @@ import {
   createRendererPlugin,
   defineProject,
   defineSystem,
-} from "@natural-engine/natural";
+} from "@toma.com/natural";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
 if (canvas === null) throw new Error("Game canvas not found");

@@ -276,6 +276,13 @@ describe("game lifecycle", () => {
     });
     await game.start();
     expect(callback).toBeDefined();
+    game.stop();
+    expect(cancelled).toBe(7);
+    expect(game.running).toBe(false);
+    expect(game.initialized).toBe(true);
+    expect(game.disposed).toBe(false);
+    await game.start();
+    expect(game.running).toBe(true);
     callback?.(116.67);
     await Bun.sleep(0);
     await game.dispose();

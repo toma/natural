@@ -1,4 +1,4 @@
-import type { Vec2 } from "@natural-engine/core";
+import type { Vec2 } from "@toma.com/core";
 
 export interface NavigationGridOptions {
   width: number;

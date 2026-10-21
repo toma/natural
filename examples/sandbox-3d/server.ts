@@ -1,4 +1,4 @@
-import { createServer, defineBinarySchema, InterestGrid } from "@natural-engine/natural";
+import { createServer, defineBinarySchema, InterestGrid } from "@toma.com/natural";
 
 interface Player {
   x: number;

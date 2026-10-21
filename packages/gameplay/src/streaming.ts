@@ -1,4 +1,4 @@
-import type { Vec3 } from "@natural-engine/core";
+import type { Vec3 } from "@toma.com/core";
 
 export interface WorldCell {
   key: string;

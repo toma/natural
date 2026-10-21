@@ -15,9 +15,9 @@ export const projectPackage = (name: string): string =>
         typecheck: "tsc --noEmit",
         check: "bun run typecheck && bun test",
       },
-      dependencies: { "@natural-engine/natural": "^0.1.0-alpha.0" },
+      dependencies: { "@toma.com/natural": "^0.1.0-alpha.3" },
       devDependencies: {
-        "@natural-engine/cli": "^0.1.0-alpha.0",
+        "@toma.com/cli": "^0.1.0-alpha.3",
         "@tauri-apps/cli": "^2.8.5",
         "@types/bun": "^1.3.0",
         typescript: "^5.9.2",
@@ -29,7 +29,7 @@ export const projectPackage = (name: string): string =>
 
 export const projectConfig = (
   name: string,
-): string => `import { defineProject } from "@natural-engine/natural";
+): string => `import { defineProject } from "@toma.com/natural";
 
 export default defineProject({
   id: "${name}",
@@ -52,7 +52,7 @@ export const gameEntry = `import {
   createRendererPlugin,
   defineProject,
   defineSystem,
-} from "@natural-engine/natural";
+} from "@toma.com/natural";
 import project from "../natural.config.ts";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
@@ -113,7 +113,7 @@ export const gameHtml = `<!doctype html>
 </html>
 `;
 
-export const serverEntry = `import { createServer, defineBinarySchema } from "@natural-engine/natural";
+export const serverEntry = `import { createServer, defineBinarySchema } from "@toma.com/natural";
 
 const state = defineBinarySchema<{ x: number; y: number }>([
   { name: "x", type: "f32" },
@@ -135,7 +135,7 @@ console.info(\`Natural authoritative server listening on :\${server.port}\`);
 `;
 
 export const projectTest = `import { expect, test } from "bun:test";
-import { LocalTransform, World } from "@natural-engine/natural";
+import { LocalTransform, World } from "@toma.com/natural";
 
 test("game world boots", () => {
   const world = new World();

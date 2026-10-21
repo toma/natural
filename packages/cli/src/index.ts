@@ -1,6 +1,6 @@
 import { copyFile, mkdir, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { resolve, sep } from "node:path";
-import { validateScene } from "@natural-engine/core";
+import { validateScene } from "@toma.com/core";
 import { parse, printParseErrorCode, type ParseError } from "jsonc-parser";
 import {
   desktopBuild,

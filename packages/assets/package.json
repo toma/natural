@@ -1,9 +1,14 @@
 {
-  "name": "@natural-engine/assets",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/assets",
+  "version": "0.1.0-alpha.3",
   "description": "Content-addressed asset import pipeline for the Natural game engine",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toma/natural.git",
+    "directory": "packages/assets"
+  },
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

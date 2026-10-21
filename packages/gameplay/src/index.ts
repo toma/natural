@@ -1,6 +1,7 @@
 export * from "./animation.ts";
 export * from "./audio.ts";
 export * from "./browser-input.ts";
+export * from "./fps.ts";
 export * from "./localization.ts";
 export * from "./navigation.ts";
 export * from "./streaming.ts";

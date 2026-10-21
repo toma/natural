@@ -1,9 +1,14 @@
 {
-  "name": "@natural-engine/render",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/render",
+  "version": "0.1.0-alpha.3",
   "description": "WebGPU-first 2D and 3D rendering for Natural, powered by Three.js",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toma/natural.git",
+    "directory": "packages/render"
+  },
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,7 +40,7 @@
     "bun"
   ],
   "dependencies": {
-    "@natural-engine/core": "workspace:*",
+    "@toma.com/core": "workspace:*",
     "three": "^0.180.0"
   }
 }

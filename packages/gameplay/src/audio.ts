@@ -5,7 +5,7 @@ import {
   defineSystem,
   type EnginePlugin,
   type Entity,
-} from "@natural-engine/core";
+} from "@toma.com/core";
 
 export interface AudioSourceData {
   source: string;

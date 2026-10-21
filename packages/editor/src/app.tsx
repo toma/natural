@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { SceneData, SceneNodeData } from "@natural-engine/core";
+import type { SceneData, SceneNodeData } from "@toma.com/core";
 import {
   chooseProject,
   flattenNodes,

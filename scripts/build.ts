@@ -68,6 +68,11 @@ for (const target of [
     entrypoint: "examples/sandbox-3d/src/index.html",
     outdir: "examples/sandbox-3d/dist",
   },
+  {
+    name: "urban-raid",
+    entrypoint: "examples/urban-raid/src/index.html",
+    outdir: "examples/urban-raid/dist",
+  },
 ]) {
   await rm(resolve(root, target.outdir), { recursive: true, force: true });
   const result = await Bun.build({
@@ -78,6 +83,12 @@ for (const target of [
     sourcemap: "external",
   });
   if (!result.success) throw new AggregateError(result.logs, `Failed to build ${target.name}`);
+  if (target.name === "urban-raid") {
+    await copyFile(
+      resolve(root, "examples/urban-raid/LICENSE.upstream"),
+      resolve(root, target.outdir, "LICENSE.upstream"),
+    );
+  }
   console.info(`built ${target.name}`);
 }
 

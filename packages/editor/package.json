@@ -1,6 +1,6 @@
 {
-  "name": "@natural-engine/editor",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/editor",
+  "version": "0.1.0-alpha.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "bun build src/index.html --outdir dist --target browser --production"
   },
   "dependencies": {
-    "@natural-engine/core": "workspace:*",
+    "@toma.com/core": "workspace:*",
     "@tauri-apps/api": "^2.8.0",
     "@tauri-apps/plugin-dialog": "^2.4.0",
     "jsonc-parser": "^3.3.1",

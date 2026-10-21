@@ -1,9 +1,14 @@
 {
-  "name": "@natural-engine/gameplay",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/gameplay",
+  "version": "0.1.0-alpha.3",
   "description": "Animation, input, audio, UI, localization, navigation, and streaming for Natural",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toma/natural.git",
+    "directory": "packages/gameplay"
+  },
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,6 +40,6 @@
     "typescript"
   ],
   "dependencies": {
-    "@natural-engine/core": "workspace:*"
+    "@toma.com/core": "workspace:*"
   }
 }

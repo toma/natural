@@ -1,9 +1,14 @@
 {
-  "name": "@natural-engine/cli",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/cli",
+  "version": "0.1.0-alpha.3",
   "description": "Project creation, development, inspection, testing, and export CLI for Natural",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toma/natural.git",
+    "directory": "packages/cli"
+  },
   "bin": {
     "natural": "./dist/main.js"
   },
@@ -38,7 +43,7 @@
     "typescript"
   ],
   "dependencies": {
-    "@natural-engine/core": "workspace:*",
+    "@toma.com/core": "workspace:*",
     "jsonc-parser": "^3.3.1"
   }
 }

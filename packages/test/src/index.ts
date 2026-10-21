@@ -1,4 +1,4 @@
-import { createGame, defineProject, type Game, type ProjectDefinition } from "@natural-engine/core";
+import { createGame, defineProject, type Game, type ProjectDefinition } from "@toma.com/core";
 
 export interface HeadlessGame {
   game: Game;

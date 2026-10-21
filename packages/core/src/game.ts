@@ -38,6 +38,7 @@ export class Game {
   #elapsed = 0;
   #tick = 0;
   #timeScale = 1;
+  #unscaledDelta = 0;
 
   constructor(options: GameOptions) {
     this.project = options.project;
@@ -73,20 +74,25 @@ export class Game {
     if (this.#disposed) throw new Error("Game is disposed");
     if (!this.#initialized) await this.initialize();
     const maxFrameDelta = this.project.maxFrameDelta ?? 0.25;
-    const frameDelta = Math.min(Math.max(deltaSeconds, 0), maxFrameDelta) * this.#timeScale;
+    this.#unscaledDelta = Math.min(Math.max(deltaSeconds, 0), maxFrameDelta);
+    const frameDelta = this.#unscaledDelta * this.#timeScale;
     const fixedDelta = 1 / (this.project.fixedTickRate ?? 60);
     this.input.beginFrame();
     await this.#run("input", frameDelta, 0);
     if (!this.#paused) {
       this.#accumulator += frameDelta;
-      while (this.#accumulator >= fixedDelta) {
+      let steps = 0;
+      const maxSteps = this.project.maxFixedSteps ?? Infinity;
+      while (this.#accumulator >= fixedDelta && steps < maxSteps) {
         for (const stage of ["fixedUpdate", "physics", "network"] as const) {
           await this.#run(stage, fixedDelta, 0);
         }
         this.#accumulator -= fixedDelta;
         this.#elapsed += fixedDelta;
         this.#tick += 1;
+        steps += 1;
       }
+      if (steps === maxSteps) this.#accumulator = 0;
       const alpha = this.#accumulator / fixedDelta;
       for (const stage of ["update", "animation", "render"] as const) {
         await this.#run(stage, frameDelta, alpha);
@@ -119,6 +125,12 @@ export class Game {
     this.#paused = value;
   }
 
+  stop(): void {
+    this.#running = false;
+    if (this.#frameHandle !== undefined) this.#cancelFrame?.(this.#frameHandle);
+    this.#frameHandle = undefined;
+  }
+
   setTimeScale(value: number): void {
     if (!Number.isFinite(value) || value < 0)
       throw new Error("Time scale must be finite and non-negative");
@@ -135,8 +147,7 @@ export class Game {
       }
     }
     this.#disposed = true;
-    this.#running = false;
-    if (this.#frameHandle !== undefined) this.#cancelFrame?.(this.#frameHandle);
+    this.stop();
     const errors: unknown[] = [];
     for (const plugin of [...this.#initializedPlugins].reverse()) {
       try {
@@ -205,6 +216,7 @@ export class Game {
     const context: SystemContext = {
       world: this.world,
       delta,
+      unscaledDelta: this.#unscaledDelta,
       elapsed: this.#elapsed,
       tick: this.#tick,
       alpha,

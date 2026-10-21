@@ -1,9 +1,14 @@
 {
-  "name": "@natural-engine/core",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/core",
+  "version": "0.1.0-alpha.3",
   "description": "Deterministic ECS, scenes, resources, and runtime lifecycle for Natural",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toma/natural.git",
+    "directory": "packages/core"
+  },
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -21,50 +21,61 @@
       },
     },
     "apps/editor-desktop": {
-      "name": "@natural-engine/editor-desktop",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/editor-desktop",
+      "version": "0.1.0-alpha.3",
       "devDependencies": {
         "@tauri-apps/cli": "^2.8.5",
       },
     },
     "examples/arena-2d": {
-      "name": "@natural-engine/example-arena-2d",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/example-arena-2d",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/natural": "workspace:*",
+        "@toma.com/natural": "workspace:*",
       },
     },
     "examples/sandbox-3d": {
-      "name": "@natural-engine/example-sandbox-3d",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/example-sandbox-3d",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/natural": "workspace:*",
+        "@toma.com/natural": "workspace:*",
+      },
+    },
+    "examples/urban-raid": {
+      "name": "@toma.com/example-urban-raid",
+      "version": "0.1.0-alpha.3",
+      "dependencies": {
+        "@toma.com/natural": "workspace:*",
+        "three": "^0.180.0",
+      },
+      "devDependencies": {
+        "pngjs": "7.0.0",
       },
     },
     "packages/assets": {
-      "name": "@natural-engine/assets",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/assets",
+      "version": "0.1.0-alpha.3",
     },
     "packages/cli": {
-      "name": "@natural-engine/cli",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/cli",
+      "version": "0.1.0-alpha.3",
       "bin": {
         "natural": "./src/main.ts",
       },
       "dependencies": {
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
         "jsonc-parser": "^3.3.1",
       },
     },
     "packages/core": {
-      "name": "@natural-engine/core",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/core",
+      "version": "0.1.0-alpha.3",
     },
     "packages/editor": {
-      "name": "@natural-engine/editor",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/editor",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
         "@tauri-apps/api": "^2.8.0",
         "@tauri-apps/plugin-dialog": "^2.4.0",
         "jsonc-parser": "^3.3.1",
@@ -73,72 +84,72 @@
       },
     },
     "packages/gameplay": {
-      "name": "@natural-engine/gameplay",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/gameplay",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
       },
     },
     "packages/mcp": {
-      "name": "@natural-engine/mcp",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/mcp",
+      "version": "0.1.0-alpha.3",
       "bin": {
         "natural-mcp": "./src/main.ts",
       },
       "dependencies": {
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
         "jsonc-parser": "^3.3.1",
       },
     },
     "packages/natural": {
-      "name": "@natural-engine/natural",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/natural",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/assets": "workspace:*",
-        "@natural-engine/core": "workspace:*",
-        "@natural-engine/gameplay": "workspace:*",
-        "@natural-engine/netcode": "workspace:*",
-        "@natural-engine/physics": "workspace:*",
-        "@natural-engine/plugin-sdk": "workspace:*",
-        "@natural-engine/render": "workspace:*",
+        "@toma.com/assets": "workspace:*",
+        "@toma.com/core": "workspace:*",
+        "@toma.com/gameplay": "workspace:*",
+        "@toma.com/netcode": "workspace:*",
+        "@toma.com/physics": "workspace:*",
+        "@toma.com/plugin-sdk": "workspace:*",
+        "@toma.com/render": "workspace:*",
       },
     },
     "packages/netcode": {
-      "name": "@natural-engine/netcode",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/netcode",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
       },
     },
     "packages/physics": {
-      "name": "@natural-engine/physics",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/physics",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
         "@dimforge/rapier2d-compat": "^0.19.0",
         "@dimforge/rapier3d-compat": "^0.19.0",
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
       },
     },
     "packages/plugin-sdk": {
-      "name": "@natural-engine/plugin-sdk",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/plugin-sdk",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
       },
     },
     "packages/render": {
-      "name": "@natural-engine/render",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/render",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
         "three": "^0.180.0",
       },
     },
     "packages/test": {
-      "name": "@natural-engine/test",
-      "version": "0.1.0-alpha.0",
+      "name": "@toma.com/test",
+      "version": "0.1.0-alpha.3",
       "dependencies": {
-        "@natural-engine/core": "workspace:*",
+        "@toma.com/core": "workspace:*",
       },
     },
   },
@@ -183,35 +194,37 @@
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.2.3", "", { "dependencies": { "@tybys/wasm-util": "^0.10.3" }, "peerDependencies": { "@emnapi/core": "^1.7.1 || ^2.0.0-alpha.4", "@emnapi/runtime": "^1.7.1 || ^2.0.0-alpha.4" } }, "sha512-UMduMbqO5s5zF2NkNacMT/yK5Y5QiKvWr2+50bzIIxFDwVJ2h49b+oyjaCGPhJxd2/gC2x39EHv/gHVuu36x2Q=="],
 
-    "@natural-engine/assets": ["@natural-engine/assets@workspace:packages/assets"],
+    "@toma.com/assets": ["@toma.com/assets@workspace:packages/assets"],
 
-    "@natural-engine/cli": ["@natural-engine/cli@workspace:packages/cli"],
+    "@toma.com/cli": ["@toma.com/cli@workspace:packages/cli"],
 
-    "@natural-engine/core": ["@natural-engine/core@workspace:packages/core"],
+    "@toma.com/core": ["@toma.com/core@workspace:packages/core"],
 
-    "@natural-engine/editor": ["@natural-engine/editor@workspace:packages/editor"],
+    "@toma.com/editor": ["@toma.com/editor@workspace:packages/editor"],
 
-    "@natural-engine/editor-desktop": ["@natural-engine/editor-desktop@workspace:apps/editor-desktop"],
+    "@toma.com/editor-desktop": ["@toma.com/editor-desktop@workspace:apps/editor-desktop"],
 
-    "@natural-engine/example-arena-2d": ["@natural-engine/example-arena-2d@workspace:examples/arena-2d"],
+    "@toma.com/example-arena-2d": ["@toma.com/example-arena-2d@workspace:examples/arena-2d"],
 
-    "@natural-engine/example-sandbox-3d": ["@natural-engine/example-sandbox-3d@workspace:examples/sandbox-3d"],
+    "@toma.com/example-sandbox-3d": ["@toma.com/example-sandbox-3d@workspace:examples/sandbox-3d"],
 
-    "@natural-engine/gameplay": ["@natural-engine/gameplay@workspace:packages/gameplay"],
+    "@toma.com/example-urban-raid": ["@toma.com/example-urban-raid@workspace:examples/urban-raid"],
 
-    "@natural-engine/mcp": ["@natural-engine/mcp@workspace:packages/mcp"],
+    "@toma.com/gameplay": ["@toma.com/gameplay@workspace:packages/gameplay"],
 
-    "@natural-engine/natural": ["@natural-engine/natural@workspace:packages/natural"],
+    "@toma.com/mcp": ["@toma.com/mcp@workspace:packages/mcp"],
 
-    "@natural-engine/netcode": ["@natural-engine/netcode@workspace:packages/netcode"],
+    "@toma.com/natural": ["@toma.com/natural@workspace:packages/natural"],
 
-    "@natural-engine/physics": ["@natural-engine/physics@workspace:packages/physics"],
+    "@toma.com/netcode": ["@toma.com/netcode@workspace:packages/netcode"],
 
-    "@natural-engine/plugin-sdk": ["@natural-engine/plugin-sdk@workspace:packages/plugin-sdk"],
+    "@toma.com/physics": ["@toma.com/physics@workspace:packages/physics"],
 
-    "@natural-engine/render": ["@natural-engine/render@workspace:packages/render"],
+    "@toma.com/plugin-sdk": ["@toma.com/plugin-sdk@workspace:packages/plugin-sdk"],
 
-    "@natural-engine/test": ["@natural-engine/test@workspace:packages/test"],
+    "@toma.com/render": ["@toma.com/render@workspace:packages/render"],
+
+    "@toma.com/test": ["@toma.com/test@workspace:packages/test"],
 
     "@playwright/test": ["@playwright/test@1.62.1", "", { "dependencies": { "playwright": "1.62.1" }, "bin": { "playwright": "cli.js" } }, "sha512-DTcUc8qii+cpHvtOwggMtBRMjKZHXYWdw8syRYu2vtzuq4Wxphqq4NfCs5Zt44L6mA8rfDfj+PHnxFc/FeK6mQ=="],
 
@@ -478,6 +491,8 @@
     "playwright": ["playwright@1.62.1", "", { "dependencies": { "playwright-core": "1.62.1" }, "optionalDependencies": { "fsevents": "2.3.2" }, "bin": { "playwright": "cli.js" } }, "sha512-0M+L3LAD8/nm554LOla9Ayx0j0tmFZ0FBcoQ7F1VuVHpM/XpiC8RcDzBQB8W5+hA8L22THxELzeF+2WcUzvcLg=="],
 
     "playwright-core": ["playwright-core@1.62.1", "", { "bin": { "playwright-core": "cli.js" } }, "sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw=="],
+
+    "pngjs": ["pngjs@7.0.0", "", {}, "sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow=="],
 
     "prelude-ls": ["prelude-ls@1.2.1", "", {}, "sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g=="],
 

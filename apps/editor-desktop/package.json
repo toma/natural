@@ -1,6 +1,6 @@
 {
-  "name": "@natural-engine/editor-desktop",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/editor-desktop",
+  "version": "0.1.0-alpha.3",
   "private": true,
   "scripts": {
     "dev": "tauri dev",

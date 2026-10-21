@@ -1,63 +1,58 @@
-import { mkdir, readFile, rm } from "node:fs/promises";
+import { access, mkdir, rm } from "node:fs/promises";
 import { resolve } from "node:path";
+
+import { publishablePackages } from "./package-metadata.ts";
 
 const root = resolve(import.meta.dir, "..");
 const outputRoot = resolve(root, ".natural/package-smoke");
 const archiveRoot = resolve(outputRoot, "archives");
 const installRoot = resolve(outputRoot, "consumer");
-const packages = [
-  "assets",
-  "core",
-  "gameplay",
-  "netcode",
-  "physics",
-  "plugin-sdk",
-  "render",
-  "natural",
-  "test",
-  "cli",
-  "mcp",
-] as const;
+const packages = await publishablePackages();
 
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(archiveRoot, { recursive: true });
 
 const archives = new Map<string, string>();
-for (const name of packages) {
-  const packageRoot = resolve(root, "packages", name);
+for (const item of packages) {
+  const packageRoot = resolve(root, item.directory);
   const pack = Bun.spawn(["bun", "pm", "pack", "--destination", archiveRoot, "--quiet"], {
     cwd: packageRoot,
-    stdout: "pipe",
+    stdout: "ignore",
     stderr: "inherit",
   });
-  const output = (await new Response(pack.stdout).text()).trim();
-  if ((await pack.exited) !== 0) throw new Error(`Failed to pack ${name}`);
-  const archive = output.split("\n").at(-1);
-  if (archive === undefined || archive === "")
-    throw new Error(`Pack did not report ${name} archive`);
-  archives.set(name, archive);
+  if ((await pack.exited) !== 0) throw new Error(`Failed to pack ${item.name}`);
+  const archive = resolve(archiveRoot, item.archive);
+  await access(archive);
+  archives.set(item.name, archive);
 
   const manifestProcess = Bun.spawn(["tar", "-xOf", archive, "package/package.json"], {
     stdout: "pipe",
     stderr: "inherit",
   });
   const manifestText = await new Response(manifestProcess.stdout).text();
-  if ((await manifestProcess.exited) !== 0) throw new Error(`Cannot inspect ${name} archive`);
+  if ((await manifestProcess.exited) !== 0) throw new Error(`Cannot inspect ${item.name} archive`);
   if (manifestText.includes("workspace:"))
-    throw new Error(`${name} package contains unresolved workspace dependencies`);
-  const manifest = JSON.parse(manifestText) as { name?: string; version?: string };
+    throw new Error(`${item.name} package contains unresolved workspace dependencies`);
+  const manifest = JSON.parse(manifestText) as {
+    name?: string;
+    version?: string;
+    repository?: { type?: string; url?: string; directory?: string };
+  };
   if (manifest.name === undefined || manifest.version === undefined)
-    throw new Error(`${name} package metadata is incomplete`);
+    throw new Error(`${item.name} package metadata is incomplete`);
+  if (manifest.name !== item.name || manifest.version !== item.version)
+    throw new Error(`${item.archive} metadata does not match ${item.name}@${item.version}`);
+  if (
+    manifest.repository?.type !== item.repository.type ||
+    manifest.repository.url !== item.repository.url ||
+    manifest.repository.directory !== item.repository.directory
+  )
+    throw new Error(`${item.archive} does not contain its provenance repository metadata`);
 }
 
 await mkdir(installRoot, { recursive: true });
-const dependencyEntries = await Promise.all(
-  packages.map(async (name) => {
-    const manifest = JSON.parse(
-      await readFile(resolve(root, "packages", name, "package.json"), "utf8"),
-    ) as { name: string };
-    return [manifest.name, `file:${archives.get(name)!}`] as const;
-  }),
+const dependencyEntries = packages.map(
+  (item) => [item.name, `file:${archives.get(item.name)!}`] as const,
 );
 await Bun.write(
   resolve(installRoot, "package.json"),
@@ -75,7 +70,7 @@ await Bun.write(
 );
 await Bun.write(
   resolve(installRoot, "smoke.mjs"),
-  `import { LocalTransform, World } from "@natural-engine/natural";
+  `import { LocalTransform, World } from "@toma.com/natural";
 const world = new World();
 world.register(LocalTransform);
 const entity = world.createEntity();

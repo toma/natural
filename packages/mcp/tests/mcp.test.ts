@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 test("MCP initializes, lists tools, and inspects a validated scene", async () => {
@@ -33,9 +34,12 @@ test("MCP initializes, lists tools, and inspects a validated scene", async () =>
     .split("\n")
     .map((line) => JSON.parse(line) as { id: number; result: Record<string, unknown> });
   expect(responses).toHaveLength(3);
+  const manifest = JSON.parse(
+    await readFile(resolve(import.meta.dir, "../package.json"), "utf8"),
+  ) as { version: string };
   expect(responses[0]?.result.serverInfo).toEqual({
     name: "natural-engine",
-    version: "0.1.0-alpha.0",
+    version: manifest.version,
   });
   expect((responses[1]?.result.tools as unknown[]).length).toBe(3);
   expect(JSON.stringify(responses[2]?.result)).toContain("Arena 2D");

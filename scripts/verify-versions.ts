@@ -1,43 +1,15 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mismatches, rootVersion, semver } from "./versions.ts";
 
-const root = resolve(import.meta.dir, "..");
-const packageNames = [
-  "assets",
-  "cli",
-  "core",
-  "gameplay",
-  "mcp",
-  "natural",
-  "netcode",
-  "physics",
-  "plugin-sdk",
-  "render",
-  "test",
-] as const;
+const expected = await rootVersion();
+if (!semver.test(expected)) throw new Error(`Root version ${expected} is not semver`);
 
-async function json(path: string): Promise<{ version?: string }> {
-  return JSON.parse(await readFile(resolve(root, path), "utf8")) as { version?: string };
-}
+const problems = await mismatches(expected);
+if (problems.length > 0) throw new Error(`Version sites disagree:\n${problems.join("\n")}`);
 
-const expected = (await json("package.json")).version;
-if (expected === undefined) throw new Error("Root package version is missing");
-const versions = new Map<string, string | undefined>();
-for (const name of packageNames)
-  versions.set(`packages/${name}`, (await json(`packages/${name}/package.json`)).version);
-versions.set(
-  "desktop config",
-  (await json("apps/editor-desktop/src-tauri/tauri.conf.json")).version,
-);
-
-const cargo = await readFile(resolve(root, "apps/editor-desktop/src-tauri/Cargo.toml"), "utf8");
-versions.set("desktop crate", /^version = "([^"]+)"/m.exec(cargo)?.[1]);
-for (const [name, version] of versions) {
-  if (version !== expected) throw new Error(`${name} version ${String(version)} != ${expected}`);
-}
-
+// GitHub sets GITHUB_REF_TYPE to "tag" only for tag refs. On a push to main it is "branch", and the
+// ref name is "main", so the tag check must not run there.
 const tag = process.env.GITHUB_REF_NAME;
-if (tag !== undefined && tag !== `v${expected}`)
-  throw new Error(`Release tag ${tag} does not match v${expected}`);
+if (process.env.GITHUB_REF_TYPE === "tag" && tag !== `v${expected}`)
+  throw new Error(`Release tag ${String(tag)} does not match v${expected}`);
 
 console.info(`all release versions match ${expected}`);

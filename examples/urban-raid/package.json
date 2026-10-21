@@ -1,0 +1,24 @@
+{
+  "name": "@toma.com/example-urban-raid",
+  "version": "0.1.0-alpha.3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot server-dev.ts",
+    "build": "bun build.ts",
+    "server": "bun server.ts",
+    "test": "bun test tests",
+    "test:physics": "bun src/physics/selftest.js",
+    "test:parity": "bun tools/parity.mjs",
+    "test:render": "bun tools/render-parity.mjs",
+    "test:transitions": "bun tools/verify-transitions.mjs",
+    "bench": "bun tools/bench.mjs"
+  },
+  "dependencies": {
+    "@toma.com/natural": "workspace:*",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "pngjs": "7.0.0"
+  }
+}

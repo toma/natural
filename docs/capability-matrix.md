@@ -1,11 +1,12 @@
-# Godot 4.7.2 capability matrix
+# Capability matrix
 
-This matrix is a scope ledger, not a marketing equivalence claim. `complete` means the listed
-Natural 0.1 release contract has public documentation and an automated acceptance test. `partial`
-means useful production code exists but the broader Godot-class subsystem is not yet equivalent.
-`planned` means no supported public implementation exists.
+This matrix is a scope ledger. It tracks Natural against the subsystems a desktop engine such as
+Unity or Unreal Engine ships, and it records what is shipped, what is partial, and what is planned.
+`complete` means the listed Natural 0.1 release contract has public documentation and an automated
+acceptance test. `partial` means useful production code exists and the broader subsystem is still
+short of what a desktop engine ships. `planned` means no supported public implementation exists.
 
-| Area                     | 0.1 status | Shipped contract                                                                                                                   | Remaining parity work                                                                       |
+| Area                     | 0.1 status | Shipped contract                                                                                                                   | Remaining work                                                                              |
 | ------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | Runtime and ECS          | complete   | Generation-safe entities, hierarchy, transforms, deterministic stages, lifecycle, resources, signals, profiler                     | Job system, worker simulation, C#/native scripting                                          |
 | Scenes and serialization | complete   | Stable UUID JSONC trees, ECS instantiation, canonical JSON, version migrations, validation limits                                  | Packed-scene inheritance UI, binary resources, live scene diffing                           |

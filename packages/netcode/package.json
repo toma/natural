@@ -1,9 +1,14 @@
 {
-  "name": "@natural-engine/netcode",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/netcode",
+  "version": "0.1.0-alpha.3",
   "description": "Authoritative multiplayer, prediction, replication, and replays for Natural",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toma/natural.git",
+    "directory": "packages/netcode"
+  },
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,6 +40,6 @@
     "bun"
   ],
   "dependencies": {
-    "@natural-engine/core": "workspace:*"
+    "@toma.com/core": "workspace:*"
   }
 }

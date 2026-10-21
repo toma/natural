@@ -1,0 +1,3851 @@
+{
+  "scope": "NaturalFPS pipeline optimization, compared with the current support-arm port before optimization",
+  "retainedChanges": [
+    "NaturalFPS naming throughout the game and verification tooling",
+    "combined depth groups",
+    "per-pass static instance culling",
+    "one transform and palette preparation per frame",
+    "depth coverage shader taps",
+    "unused viewmodel depth resolve disabled",
+    "dedicated camera instance vertex bindings",
+    "cached and revalidated prop child slots",
+    "combined opaque prop buckets without distance LOD and with matching instance colors",
+    "world shader warmup at the settled light count before presenting the first frame",
+    "complete deferred program reflection before first presentation",
+    "skip direct-light work for exactly zero-radiance light slots"
+  ],
+  "rejectedExperiments": [
+    "shared prepass depth and linear-depth rejection produced visible holes",
+    "48 metre building partitions added about 500 draws for a small triangle reduction",
+    "additional prop box tests removed less than 0.4 percent of triangles",
+    "precomputed shadow disks did not improve median frame pacing",
+    "an additional point-light branch after attenuation did not improve night or interior pacing in three valid paired Retina trials"
+  ],
+  "normalTimingCaveat": "The original paired trials below precede the later startup and lighting changes. continuedVerification records the first startup fix; lightingAndReadinessVerification records the lighting benchmarks and the later shared-tree validation separately. All measurements use M4 Pro with other host applications uncontrolled, and do not establish M4 Max performance.",
+  "date": "2026-09-06T13:46:31.099Z",
+  "cpu": "Apple M4 Pro",
+  "platform": "darwin 25.6.0",
+  "browser": "152.0.7977.83",
+  "fingerprints": {
+    "optimized": {
+      "sha256": "9511fd4e45ca75a7d1de646f066a98b60fd31078d33ac65331a821a2e45f057c",
+      "files": ["chunk-r81jmx35.js", "index.html"]
+    },
+    "baseline": {
+      "sha256": "deab3428c600cd7bf8de83ce4ef794fb56073b44c6db1dcf4330464515d6946a",
+      "files": [
+        "chunk-2kdtq31k.js",
+        "chunk-4rqrd5rg.js",
+        "chunk-awd1dh4e.js",
+        "chunk-bsbggh37.js",
+        "chunk-cx9qx4fw.js",
+        "chunk-dwd42tks.js",
+        "chunk-p39ek6tn.js",
+        "chunk-tzy00x37.js",
+        "index.html"
+      ]
+    }
+  },
+  "target": {
+    "hardware": "Apple M4 Max",
+    "p95FrameMs": 16.7,
+    "verified": false,
+    "reason": "The available machine is an M4 Pro. A normal M4 Max browser window remains unmeasured."
+  },
+  "measurement": {
+    "headed": false,
+    "quality": "ultra",
+    "seed": "0x5eed1234",
+    "warmupFrames": 60,
+    "measuredFramesPerRun": 120,
+    "runsPerVariant": 3,
+    "pairedRuns": 36,
+    "routeVersion": 1,
+    "isolation": "Sequential browser runs; other host applications are not controlled by this harness.",
+    "timerQueriesUsedForPacing": false,
+    "pixelRatioCap": 1.5,
+    "shadowMapCap": 2048,
+    "fixedHz": 120,
+    "maxFixedSteps": 8,
+    "browserErrors": 0,
+    "measuredShaderCompileCalls": 0
+  },
+  "normalFramePacing": [
+    {
+      "viewport": [1280, 720],
+      "deviceScaleFactor": 1,
+      "route": "outdoor",
+      "baseline": {
+        "medianP95FrameMs": 33.4,
+        "medianP50FrameMs": 16.7,
+        "medianP50CpuSubmissionMs": 18.2,
+        "medianDrawCalls": 1409,
+        "medianTriangles": 10466499,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [33.3, 33.4, 33.4]
+      },
+      "optimized": {
+        "medianP95FrameMs": 16.8,
+        "medianP50FrameMs": 16.7,
+        "medianP50CpuSubmissionMs": 4.5,
+        "medianDrawCalls": 887,
+        "medianTriangles": 8858469,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [16.8, 16.8, 16.8]
+      }
+    },
+    {
+      "viewport": [1280, 720],
+      "deviceScaleFactor": 1,
+      "route": "interior",
+      "baseline": {
+        "medianP95FrameMs": 33.4,
+        "medianP50FrameMs": 16.7,
+        "medianP50CpuSubmissionMs": 19,
+        "medianDrawCalls": 1413,
+        "medianTriangles": 10540359,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [33.3, 33.4, 33.4]
+      },
+      "optimized": {
+        "medianP95FrameMs": 16.8,
+        "medianP50FrameMs": 16.7,
+        "medianP50CpuSubmissionMs": 4.6,
+        "medianDrawCalls": 888,
+        "medianTriangles": 7876973,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [33.3, 16.8, 16.8]
+      }
+    },
+    {
+      "viewport": [1280, 720],
+      "deviceScaleFactor": 1,
+      "route": "combat",
+      "baseline": {
+        "medianP95FrameMs": 33.4,
+        "medianP50FrameMs": 16.7,
+        "medianP50CpuSubmissionMs": 19.6,
+        "medianDrawCalls": 1741,
+        "medianTriangles": 11421863,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [33.4, 33.4, 33.4]
+      },
+      "optimized": {
+        "medianP95FrameMs": 33.4,
+        "medianP50FrameMs": 16.7,
+        "medianP50CpuSubmissionMs": 5.3,
+        "medianDrawCalls": 985,
+        "medianTriangles": 9693135,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [33.4, 33.4, 33.3]
+      }
+    },
+    {
+      "viewport": [1280, 720],
+      "deviceScaleFactor": 1,
+      "route": "aiming",
+      "baseline": {
+        "medianP95FrameMs": 33.4,
+        "medianP50FrameMs": 16.7,
+        "medianP50CpuSubmissionMs": 19.9,
+        "medianDrawCalls": 1423,
+        "medianTriangles": 10533934,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [33.4, 33.4, 33.4]
+      },
+      "optimized": {
+        "medianP95FrameMs": 33.3,
+        "medianP50FrameMs": 16.7,
+        "medianP50CpuSubmissionMs": 4.8,
+        "medianDrawCalls": 892,
+        "medianTriangles": 7996168,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [33.3, 33.4, 33.3]
+      }
+    },
+    {
+      "viewport": [1512, 982],
+      "deviceScaleFactor": 2,
+      "route": "outdoor",
+      "baseline": {
+        "medianP95FrameMs": 50.1,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 46.9,
+        "medianDrawCalls": 1398,
+        "medianTriangles": 10389855,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50.1, 50.1, 50.1]
+      },
+      "optimized": {
+        "medianP95FrameMs": 50.1,
+        "medianP50FrameMs": 49.9,
+        "medianP50CpuSubmissionMs": 4.5,
+        "medianDrawCalls": 882,
+        "medianTriangles": 8710227,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50.1, 50.1, 50]
+      }
+    },
+    {
+      "viewport": [1512, 982],
+      "deviceScaleFactor": 2,
+      "route": "interior",
+      "baseline": {
+        "medianP95FrameMs": 50.1,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 43.6,
+        "medianDrawCalls": 1412,
+        "medianTriangles": 10539079,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50.1, 50.1, 50.1]
+      },
+      "optimized": {
+        "medianP95FrameMs": 50,
+        "medianP50FrameMs": 33.3,
+        "medianP50CpuSubmissionMs": 4.4,
+        "medianDrawCalls": 885,
+        "medianTriangles": 7662497,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50, 50, 50.1]
+      }
+    },
+    {
+      "viewport": [1512, 982],
+      "deviceScaleFactor": 2,
+      "route": "combat",
+      "baseline": {
+        "medianP95FrameMs": 66.7,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 48.6,
+        "medianDrawCalls": 1741,
+        "medianTriangles": 11421659,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [66.7, 83.3, 66.7]
+      },
+      "optimized": {
+        "medianP95FrameMs": 50.1,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 6.7,
+        "medianDrawCalls": 983,
+        "medianTriangles": 9533895,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50.1, 50.1, 50]
+      }
+    },
+    {
+      "viewport": [1512, 982],
+      "deviceScaleFactor": 2,
+      "route": "aiming",
+      "baseline": {
+        "medianP95FrameMs": 50.1,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 44.5,
+        "medianDrawCalls": 1423,
+        "medianTriangles": 10533938,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50.1, 50.1, 50.1]
+      },
+      "optimized": {
+        "medianP95FrameMs": 50,
+        "medianP50FrameMs": 33.4,
+        "medianP50CpuSubmissionMs": 5.8,
+        "medianDrawCalls": 890,
+        "medianTriangles": 7753632,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50.1, 50, 50]
+      }
+    },
+    {
+      "viewport": [1728, 1117],
+      "deviceScaleFactor": 2,
+      "route": "outdoor",
+      "baseline": {
+        "medianP95FrameMs": 66.7,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 51.1,
+        "medianDrawCalls": 1399,
+        "medianTriangles": 10432695,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [66.7, 66.7, 66.7]
+      },
+      "optimized": {
+        "medianP95FrameMs": 50.1,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 5.9,
+        "medianDrawCalls": 883,
+        "medianTriangles": 8715767,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50.1, 50.1, 50.1]
+      }
+    },
+    {
+      "viewport": [1728, 1117],
+      "deviceScaleFactor": 2,
+      "route": "interior",
+      "baseline": {
+        "medianP95FrameMs": 66.7,
+        "medianP50FrameMs": 66.6,
+        "medianP50CpuSubmissionMs": 59,
+        "medianDrawCalls": 1412,
+        "medianTriangles": 10539079,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [66.7, 66.8, 66.7]
+      },
+      "optimized": {
+        "medianP95FrameMs": 66.6,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 5.5,
+        "medianDrawCalls": 885,
+        "medianTriangles": 7668905,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [66.6, 66.7, 50.1]
+      }
+    },
+    {
+      "viewport": [1728, 1117],
+      "deviceScaleFactor": 2,
+      "route": "combat",
+      "baseline": {
+        "medianP95FrameMs": 66.7,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 53,
+        "medianDrawCalls": 1741,
+        "medianTriangles": 11421659,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [66.7, 66.7, 66.7]
+      },
+      "optimized": {
+        "medianP95FrameMs": 50.1,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 5.9,
+        "medianDrawCalls": 983,
+        "medianTriangles": 9535583,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [50.1, 50.1, 50.1]
+      }
+    },
+    {
+      "viewport": [1728, 1117],
+      "deviceScaleFactor": 2,
+      "route": "aiming",
+      "baseline": {
+        "medianP95FrameMs": 66.8,
+        "medianP50FrameMs": 66.7,
+        "medianP50CpuSubmissionMs": 62.6,
+        "medianDrawCalls": 1423,
+        "medianTriangles": 10533938,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [66.8, 83.3, 66.8]
+      },
+      "optimized": {
+        "medianP95FrameMs": 66.7,
+        "medianP50FrameMs": 50,
+        "medianP50CpuSubmissionMs": 4.8,
+        "medianDrawCalls": 890,
+        "medianTriangles": 7766328,
+        "measuredShaderCompileCalls": [0, 0, 0],
+        "p95FrameMsByRun": [66.7, 66.7, 66.7]
+      }
+    }
+  ],
+  "gpuTiming": {
+    "measurement": "gpu queries, frame pacing excluded",
+    "caveat": "Metal timer queries flush command buffers. These instrumented measurements are excluded from normal frame pacing and from the 60 FPS assessment.",
+    "results": [
+      {
+        "variant": "baseline",
+        "route": "outdoor",
+        "status": "valid",
+        "gpuMs": {
+          "count": 60,
+          "p50": 158.006791,
+          "p95": 182.065291,
+          "p99": 189.824916,
+          "max": 189.824916
+        }
+      },
+      {
+        "variant": "optimized",
+        "route": "outdoor",
+        "status": "valid",
+        "gpuMs": {
+          "count": 60,
+          "p50": 136.016375,
+          "p95": 165.439708,
+          "p99": 167.195499,
+          "max": 167.195499
+        }
+      },
+      {
+        "variant": "baseline",
+        "route": "interior",
+        "status": "valid",
+        "gpuMs": {
+          "count": 60,
+          "p50": 156.576916,
+          "p95": 185.496875,
+          "p99": 188.413541,
+          "max": 188.413541
+        }
+      },
+      {
+        "variant": "optimized",
+        "route": "interior",
+        "status": "valid",
+        "gpuMs": {
+          "count": 60,
+          "p50": 133.186875,
+          "p95": 159.092791,
+          "p99": 165.315666,
+          "max": 165.315666
+        }
+      },
+      {
+        "variant": "baseline",
+        "route": "combat",
+        "status": "valid",
+        "gpuMs": {
+          "count": 60,
+          "p50": 176.813125,
+          "p95": 194.948291,
+          "p99": 199.033666,
+          "max": 199.033666
+        }
+      },
+      {
+        "variant": "optimized",
+        "route": "combat",
+        "status": "valid",
+        "gpuMs": {
+          "count": 60,
+          "p50": 176.368583,
+          "p95": 193.514624,
+          "p99": 197.815333,
+          "max": 197.815333
+        }
+      },
+      {
+        "variant": "baseline",
+        "route": "aiming",
+        "status": "valid",
+        "gpuMs": {
+          "count": 60,
+          "p50": 189.086208,
+          "p95": 221.870666,
+          "p99": 234.636874,
+          "max": 234.636874
+        }
+      },
+      {
+        "variant": "optimized",
+        "route": "aiming",
+        "status": "valid",
+        "gpuMs": {
+          "count": 60,
+          "p50": 169.342833,
+          "p95": 210.473666,
+          "p99": 224.545333,
+          "max": 224.545333
+        }
+      }
+    ]
+  },
+  "visualParity": {
+    "browser": "151.0.7922.34",
+    "viewport": [1280, 720],
+    "deviceScaleFactor": 1,
+    "freshPagePerCapture": true,
+    "allPassed": true,
+    "maxChangedPixelPercent": 0.038628,
+    "maxChannelDelta": 3,
+    "shots": [
+      {
+        "name": "hero",
+        "changedPixels": 279,
+        "maxChannelDelta": 3,
+        "changedRatio": 0.000302734375,
+        "investigate": true,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1397,
+            "tris": 10343599,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 226,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 882,
+            "tris": 8830019,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 314,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "interior",
+        "changedPixels": 0,
+        "maxChannelDelta": 0,
+        "changedRatio": 0,
+        "investigate": false,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1415,
+            "tris": 10542121,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 226,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 888,
+            "tris": 7907269,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 310,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "detail",
+        "changedPixels": 7,
+        "maxChannelDelta": 1,
+        "changedRatio": 7.595486111111111e-6,
+        "investigate": false,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1338,
+            "tris": 10125905,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 226,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 829,
+            "tris": 6363779,
+            "programs": 210,
+            "textures": 137,
+            "geometries": 305,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "sunset",
+        "changedPixels": 0,
+        "maxChannelDelta": 0,
+        "changedRatio": 0,
+        "investigate": false,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1411,
+            "tris": 10514033,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 226,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 889,
+            "tris": 9078941,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 314,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "night",
+        "changedPixels": 13,
+        "maxChannelDelta": 3,
+        "changedRatio": 1.4105902777777777e-5,
+        "investigate": true,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1414,
+            "tris": 10533299,
+            "programs": 211,
+            "textures": 136,
+            "geometries": 224,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 891,
+            "tris": 9016983,
+            "programs": 211,
+            "textures": 136,
+            "geometries": 312,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "weapon",
+        "changedPixels": 356,
+        "maxChannelDelta": 1,
+        "changedRatio": 0.0003862847222222222,
+        "investigate": true,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1417,
+            "tris": 10539809,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 226,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 889,
+            "tris": 8722627,
+            "programs": 210,
+            "textures": 137,
+            "geometries": 313,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "ads",
+        "changedPixels": 0,
+        "maxChannelDelta": 0,
+        "changedRatio": 0,
+        "investigate": false,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1424,
+            "tris": 10536866,
+            "programs": 211,
+            "textures": 139,
+            "geometries": 230,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 893,
+            "tris": 8024332,
+            "programs": 210,
+            "textures": 139,
+            "geometries": 315,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "muzzle",
+        "changedPixels": 141,
+        "maxChannelDelta": 1,
+        "changedRatio": 0.00015299479166666668,
+        "investigate": true,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1424,
+            "tris": 10545227,
+            "programs": 212,
+            "textures": 142,
+            "geometries": 232,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 896,
+            "tris": 8728045,
+            "programs": 211,
+            "textures": 142,
+            "geometries": 319,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "combat",
+        "changedPixels": 4,
+        "maxChannelDelta": 1,
+        "changedRatio": 4.340277777777778e-6,
+        "investigate": false,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1740,
+            "tris": 11414363,
+            "programs": 221,
+            "textures": 179,
+            "geometries": 234,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 986,
+            "tris": 9704339,
+            "programs": 221,
+            "textures": 179,
+            "geometries": 322,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "impacts",
+        "changedPixels": 7,
+        "maxChannelDelta": 2,
+        "changedRatio": 7.595486111111111e-6,
+        "investigate": true,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1293,
+            "tris": 9985229,
+            "programs": 212,
+            "textures": 142,
+            "geometries": 230,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 804,
+            "tris": 6646169,
+            "programs": 212,
+            "textures": 142,
+            "geometries": 292,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "hud",
+        "changedPixels": 0,
+        "maxChannelDelta": 0,
+        "changedRatio": 0,
+        "investigate": false,
+        "states": [
+          {
+            "frame": 93,
+            "calls": 1404,
+            "tris": 10447615,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 226,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 93,
+            "calls": 886,
+            "tris": 8974349,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 314,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "wrist-idle",
+        "changedPixels": 19,
+        "maxChannelDelta": 2,
+        "changedRatio": 2.0616319444444445e-5,
+        "investigate": true,
+        "states": [
+          {
+            "frame": 123,
+            "calls": 1397,
+            "tris": 10343603,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 226,
+            "ms": 16.666666666666742
+          },
+          {
+            "frame": 123,
+            "calls": 882,
+            "tris": 8830023,
+            "programs": 211,
+            "textures": 137,
+            "geometries": 314,
+            "ms": 16.666666666666742
+          }
+        ]
+      },
+      {
+        "name": "wrist-ads",
+        "changedPixels": 108,
+        "maxChannelDelta": 1,
+        "changedRatio": 0.0001171875,
+        "investigate": true,
+        "states": [
+          {
+            "frame": 153,
+            "calls": 1408,
+            "tris": 10344058,
+            "programs": 211,
+            "textures": 139,
+            "geometries": 230,
+            "ms": 16.666666666666515
+          },
+          {
+            "frame": 153,
+            "calls": 893,
+            "tris": 8830558,
+            "programs": 211,
+            "textures": 139,
+            "geometries": 318,
+            "ms": 16.666666666666515
+          }
+        ]
+      },
+      {
+        "name": "wrist-reload",
+        "changedPixels": 177,
+        "maxChannelDelta": 2,
+        "changedRatio": 0.00019205729166666666,
+        "investigate": true,
+        "states": [
+          {
+            "frame": 159,
+            "calls": 1397,
+            "tris": 10343609,
+            "programs": 211,
+            "textures": 139,
+            "geometries": 230,
+            "ms": 16.666666666666515
+          },
+          {
+            "frame": 159,
+            "calls": 882,
+            "tris": 8830029,
+            "programs": 211,
+            "textures": 139,
+            "geometries": 318,
+            "ms": 16.666666666666515
+          }
+        ]
+      }
+    ],
+    "acceptedLimits": {
+      "maxChannelDelta": 3,
+      "maxChangedRatio": 0.0005
+    },
+    "investigationLimits": {
+      "maxChannelDelta": 1,
+      "maxChangedRatio": 0.0001
+    },
+    "review": "Combining opaque prop buckets changes their depth-sorting centers. Full-size captures and amplified differences were reviewed. The observed color shifts are not perceptible at normal viewing size; resolution, effects, and geometry are preserved."
+  },
+  "validation": {
+    "check": "passed",
+    "unitAssertions": 2971,
+    "unitTests": 87,
+    "browserTestsPassed": 18,
+    "browserTestsSkipped": 1,
+    "skippedReason": "The separate million-instance WebGPU timing test requires the dedicated Natural GPU runner."
+  },
+  "artifacts": "test-results/fps-optimization contains complete benchmark metrics, resource counts, shader data, parity results, and validation logs.",
+  "commands": {
+    "normal": "bun run bench --baseline=<saved-production-dist> --frames=120 --warmup=60",
+    "gpu": "bun run bench --baseline=<saved-production-dist> --gpu --runs=1 --frames=60 --sizes=1512x982x2",
+    "visual": "bun run test:render --baseline=<saved-production-dist> --max-channel-delta=3 --max-changed-ratio=0.0005",
+    "latestNormal": "bun run bench --baseline=<previous-saved-production-dist> --runs=3 --frames=120 --warmup=60",
+    "latestVisualReview": "bun run test:render --baseline=<previous-saved-production-dist> --max-channel-delta=15 --max-changed-ratio=0.003"
+  },
+  "continuedVerification": {
+    "date": "2026-09-06T14:37:23.860Z",
+    "productionSha256": "4e8453fac4160887c72efd52dd8cbe4453cc9d241ac0b9ac2711a2cda103befd",
+    "renderingCodeChanged": true,
+    "transitions": {
+      "command": "bun run test:transitions",
+      "productionSha256": "4e8453fac4160887c72efd52dd8cbe4453cc9d241ac0b9ac2711a2cda103befd",
+      "browser": "151.0.7922.34",
+      "reference": "Same production build with instance substitution, depth collapse and transform reuse bypassed after boot. Prop batching and shader optimizations remain enabled in both variants.",
+      "sizes": [
+        {
+          "width": 1280,
+          "height": 720,
+          "dpr": 1
+        },
+        {
+          "width": 1512,
+          "height": 982,
+          "dpr": 2
+        }
+      ],
+      "scenes": ["hero", "interior", "sunset", "combat"],
+      "cutsPerSceneAndSize": 8,
+      "capturesPerVariant": 64,
+      "passed": 64,
+      "pixelIdentical": 49,
+      "maxChannelDelta": 1,
+      "maxChangedPixelPercent": 0.00410834168471643,
+      "canonicalInstancesPreserved": true,
+      "automaticUpdatesRestored": true,
+      "referenceAndOptimizedTicksMatch": true,
+      "fixedTickRemainderLimit": 1
+    },
+    "lifecycle": {
+      "cycles": 4,
+      "sceneAndViewportChanges": 24,
+      "stableLiveResourceCounts": true,
+      "liveResourceCounts": {
+        "Buffer": 2347,
+        "Texture": 141,
+        "Framebuffer": 133,
+        "Renderbuffer": 6,
+        "Program": 214,
+        "Shader": 242,
+        "VertexArray": 533
+      },
+      "lastCycleShaderCompileCalls": 0,
+      "passMeshes": 450,
+      "passMeshesDisposed": 450,
+      "registeredInstanceEntriesAfterDisposal": 0,
+      "resourceCaveat": "Counts track explicit WebGL create/delete calls, not GPU bytes or resources released implicitly when a program or context is destroyed.",
+      "browserErrors": []
+    },
+    "sustainedCombat": {
+      "command": "bun run bench --runs=1 --frames=1200 --warmup=240 --sizes=1512x982x2 --routes=combat",
+      "cpu": "Apple M4 Pro",
+      "browser": "152.0.7977.83",
+      "warmupFrames": 240,
+      "measuredFrames": 1200,
+      "simulationSeconds": 24.0,
+      "viewport": [1512, 982],
+      "dpr": 2,
+      "renderPixelRatio": 1.5,
+      "shadowMapSize": 2048,
+      "metrics": {
+        "frameMs": {
+          "count": 1200,
+          "p50": 33.399999999999636,
+          "p95": 50,
+          "p99": 50.10000000000218,
+          "max": 116.60000000000218
+        },
+        "cpuSubmissionMs": {
+          "count": 1200,
+          "p50": 6.300000000745058,
+          "p95": 6.800000000745058,
+          "p99": 6.900000002235174,
+          "max": 114.80000000074506
+        },
+        "stepMs": {
+          "count": 1200,
+          "p50": 8.600000001490116,
+          "p95": 9.399999998509884,
+          "p99": 9.600000001490116,
+          "max": 116.69999999925494
+        },
+        "calls": {
+          "count": 1200,
+          "p50": 982,
+          "p95": 984,
+          "p99": 984,
+          "max": 984
+        },
+        "triangles": {
+          "count": 1200,
+          "p50": 9482951,
+          "p95": 9705377,
+          "p99": 9718357,
+          "max": 9720579
+        },
+        "gpuMs": null
+      },
+      "measuredShaderCompileCalls": 0,
+      "resources": {
+        "before": {
+          "Buffer": {
+            "created": 2387,
+            "deleted": 30,
+            "live": 2357
+          },
+          "Texture": {
+            "created": 187,
+            "deleted": 4,
+            "live": 183
+          },
+          "Framebuffer": {
+            "created": 137,
+            "deleted": 4,
+            "live": 133
+          },
+          "Renderbuffer": {
+            "created": 6,
+            "deleted": 0,
+            "live": 6
+          },
+          "Program": {
+            "created": 225,
+            "deleted": 3,
+            "live": 222
+          },
+          "Shader": {
+            "created": 450,
+            "deleted": 214,
+            "live": 236
+          },
+          "VertexArray": {
+            "created": 561,
+            "deleted": 10,
+            "live": 551
+          }
+        },
+        "after": {
+          "Buffer": {
+            "created": 2397,
+            "deleted": 30,
+            "live": 2367
+          },
+          "Texture": {
+            "created": 187,
+            "deleted": 6,
+            "live": 181
+          },
+          "Framebuffer": {
+            "created": 137,
+            "deleted": 6,
+            "live": 131
+          },
+          "Renderbuffer": {
+            "created": 6,
+            "deleted": 0,
+            "live": 6
+          },
+          "Program": {
+            "created": 225,
+            "deleted": 3,
+            "live": 222
+          },
+          "Shader": {
+            "created": 450,
+            "deleted": 216,
+            "live": 234
+          },
+          "VertexArray": {
+            "created": 563,
+            "deleted": 10,
+            "live": 553
+          }
+        },
+        "three": {
+          "geometries": 322,
+          "textures": 177
+        }
+      },
+      "errors": [],
+      "caveat": "One warmed diagnostic run on M4 Pro with other host applications uncontrolled, without GPU queries. This is not an isolated measurement or M4 Max target verification."
+    },
+    "check": {
+      "passed": true,
+      "unitTests": 86,
+      "unitAssertions": 2965,
+      "browserTestsPassed": 18,
+      "browserTestsSkipped": 1,
+      "regressionBeforeFix": {
+        "expectedCompileCalls": 0,
+        "actualCompileCalls": 2,
+        "testFailedAsExpected": true
+      }
+    },
+    "artifacts": "test-results/fps-optimization/continued-verification contains all transition PNGs, detailed JSON, combat metrics, and the check log.",
+    "warmupFix": {
+      "cause": "The instanced mattress shader was warmed with 3 directional and 21 point lights, but its later draw used 2 and 20. Compile all world layouts once against the HDR target after light visibility settles, before the first frame is presented.",
+      "firstObservedFrame": 622,
+      "beforeShaderCompileCalls": 2,
+      "afterShaderCompileCalls": 0,
+      "beforeMetrics": {
+        "frameMs": {
+          "count": 1200,
+          "p50": 33.399999999999636,
+          "p95": 50,
+          "p99": 50.100000000000364,
+          "max": 133.29999999999927
+        },
+        "cpuSubmissionMs": {
+          "count": 1200,
+          "p50": 6.399999998509884,
+          "p95": 6.899999998509884,
+          "p99": 7.199999999254942,
+          "max": 140.60000000149012
+        },
+        "stepMs": {
+          "count": 1200,
+          "p50": 8.799999997019768,
+          "p95": 9.5,
+          "p99": 9.900000002235174,
+          "max": 143.19999999925494
+        },
+        "calls": {
+          "count": 1200,
+          "p50": 982,
+          "p95": 984,
+          "p99": 984,
+          "max": 984
+        },
+        "triangles": {
+          "count": 1200,
+          "p50": 9482951,
+          "p95": 9705377,
+          "p99": 9718357,
+          "max": 9720579
+        },
+        "gpuMs": null
+      },
+      "comparisonCaveat": "The before and after sustained runs are individual diagnostics on an uncontrolled M4 Pro host, not three paired timing trials.",
+      "exactVisualComparisons": 14,
+      "maxChannelDelta": 0,
+      "baselineSha256": "9511fd4e45ca75a7d1de646f066a98b60fd31078d33ac65331a821a2e45f057c",
+      "optimizedSha256": "4e8453fac4160887c72efd52dd8cbe4453cc9d241ac0b9ac2711a2cda103befd"
+    }
+  },
+  "currentProductionFingerprint": {
+    "sha256": "384fd5bf05c46eb892b19ef400a5e74b25318eec28232429d32d529cfa850597",
+    "files": ["chunk-dn7yrjsf.js", "index.html"]
+  },
+  "lightingAndReadinessVerification": {
+    "date": "2026-09-06T15:17:53.811Z",
+    "fingerprints": {
+      "optimized": {
+        "sha256": "bec11e3e8f9c636af4d46565c76e63c9d4a0da0776f49fae53bc5002e5e5b35b",
+        "files": ["chunk-90j3erj8.js", "index.html"]
+      },
+      "baseline": {
+        "sha256": "4e8453fac4160887c72efd52dd8cbe4453cc9d241ac0b9ac2711a2cda103befd",
+        "files": ["chunk-y4813059.js", "index.html"]
+      }
+    },
+    "isolatedValidationFingerprint": {
+      "sha256": "5160ca4547cf67e25b9fbce20874f803befee1b8007d87a821362d20fc20e552",
+      "files": ["chunk-bxj35pr3.js", "index.html"]
+    },
+    "currentSharedTreeVerification": {
+      "fingerprint": {
+        "sha256": "384fd5bf05c46eb892b19ef400a5e74b25318eec28232429d32d529cfa850597",
+        "files": ["chunk-dn7yrjsf.js", "index.html"]
+      },
+      "exitCode": 0,
+      "caveat": "Includes the concurrent rifle-grip correction and its current snapshots. Copied tests and snapshots plus a private build prevent later shared edits from changing this run."
+    },
+    "provenance": "The completed 72-trial matrix and 720p comparisons precede a concurrent rifle-grip edit. Isolated validation reconstructs that prior rifle source from its saved source map without reverting the shared edit. Its bundle fingerprint differs, so timing and validation fingerprints are recorded separately. A separate frozen copy of the current shared tree validates the updated arm fixtures.",
+    "discardedMixedRuns": [
+      "The first GPU batch rebuilt shared dist after the rifle changed and is excluded from optimization comparisons.",
+      "The first shared-tree E2E attempt saw changing arm code and fixtures. Its failures are superseded by isolated and current-tree runs."
+    ],
+    "changes": [
+      "Finish deferred link diagnostics and uniform/attribute reflection for newly warmed world programs before first presentation.",
+      "Skip the complete point, spot, and directional direct-light bodies when the uniform radiance is exactly zero. Every nonzero light remains active.",
+      "Record existing program-info-log calls separately from shader compile submissions in the benchmark."
+    ],
+    "measurement": {
+      "cpu": "Apple M4 Pro",
+      "platform": "darwin 25.6.0",
+      "browser": "152.0.7977.83",
+      "channel": "chrome",
+      "headed": false,
+      "measurement": "normal frame pacing, no GPU queries",
+      "seed": "0x5eed1234",
+      "fixedHz": 120,
+      "maxFixedSteps": 8,
+      "warmup": 60,
+      "frames": 120,
+      "runs": 3,
+      "routeVersion": 1,
+      "isolation": "Sequential browser runs; other host applications are not controlled by this harness."
+    },
+    "hostObservation": {
+      "date": "2026-09-06T15:28:42.273761+00:00",
+      "stage": "1728x1117 paired trials",
+      "observation": "Another browser renderer and GPU process were active alongside a separate test process. Their activity was not controlled by this harness. Process CPU activity does not measure GPU utilization.",
+      "interpretation": "Absolute frame times cannot establish isolated hardware performance or attribute the larger-window slowdown solely to this game."
+    },
+    "normalFramePacing": [
+      {
+        "viewport": [1280, 720],
+        "dpr": 1,
+        "route": "outdoor",
+        "baseline": {
+          "medianP50FrameMs": 16.699999999999818,
+          "medianP95FrameMs": 16.799999999999272,
+          "p95FrameMsByRun": [16.700000000000728, 33.30000000000018, 16.799999999999272],
+          "medianP50CpuSubmissionMs": 4.700000002980232,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 16.699999999999818,
+          "medianP95FrameMs": 16.700000000000728,
+          "p95FrameMsByRun": [16.800000000000182, 16.700000000000728, 16.700000000000728],
+          "medianP50CpuSubmissionMs": 4.699999999254942,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1280, 720],
+        "dpr": 1,
+        "route": "interior",
+        "baseline": {
+          "medianP50FrameMs": 16.699999999999818,
+          "medianP95FrameMs": 16.700000000000728,
+          "p95FrameMsByRun": [16.700000000000273, 16.700000000000728, 16.700000000000728],
+          "medianP50CpuSubmissionMs": 4.799999997019768,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 16.699999999999818,
+          "medianP95FrameMs": 16.700000000000728,
+          "p95FrameMsByRun": [16.700000000000728, 16.700000000000728, 16.700000000000728],
+          "medianP50CpuSubmissionMs": 4.600000001490116,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1280, 720],
+        "dpr": 1,
+        "route": "combat",
+        "baseline": {
+          "medianP50FrameMs": 16.699999999999818,
+          "medianP95FrameMs": 33.30000000000018,
+          "p95FrameMsByRun": [33.30000000000018, 33.29999999999927, 33.30000000000018],
+          "medianP50CpuSubmissionMs": 5.199999999254942,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 16.699999999999818,
+          "medianP95FrameMs": 16.700000000000728,
+          "p95FrameMsByRun": [16.700000000000728, 16.800000000000182, 16.700000000000728],
+          "medianP50CpuSubmissionMs": 4.800000000745058,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1280, 720],
+        "dpr": 1,
+        "route": "aiming",
+        "baseline": {
+          "medianP50FrameMs": 16.699999999999818,
+          "medianP95FrameMs": 16.800000000000182,
+          "p95FrameMsByRun": [33.30000000000018, 16.800000000000182, 16.800000000000182],
+          "medianP50CpuSubmissionMs": 4.800000000745058,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 16.699999999999818,
+          "medianP95FrameMs": 16.800000000000182,
+          "p95FrameMsByRun": [16.700000000000728, 16.800000000000182, 16.800000000000182],
+          "medianP50CpuSubmissionMs": 4.699999999254942,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1512, 982],
+        "dpr": 2,
+        "route": "outdoor",
+        "baseline": {
+          "medianP50FrameMs": 33.399999999999636,
+          "medianP95FrameMs": 50.100000000000364,
+          "p95FrameMsByRun": [50.100000000000364, 50, 50.100000000000364],
+          "medianP50CpuSubmissionMs": 6.300000000745058,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 33.30000000000018,
+          "medianP95FrameMs": 33.400000000000546,
+          "p95FrameMsByRun": [33.400000000000546, 33.400000000000546, 33.400000000000546],
+          "medianP50CpuSubmissionMs": 5.799999997019768,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1512, 982],
+        "dpr": 2,
+        "route": "interior",
+        "baseline": {
+          "medianP50FrameMs": 33.399999999999636,
+          "medianP95FrameMs": 50,
+          "p95FrameMsByRun": [50, 50.099999999999454, 50],
+          "medianP50CpuSubmissionMs": 6.300000000745058,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 33.30000000000018,
+          "medianP95FrameMs": 33.400000000000546,
+          "p95FrameMsByRun": [33.400000000000546, 33.400000000000546, 49.900000000000546],
+          "medianP50CpuSubmissionMs": 5,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1512, 982],
+        "dpr": 2,
+        "route": "combat",
+        "baseline": {
+          "medianP50FrameMs": 33.400000000000546,
+          "medianP95FrameMs": 50.099999999999454,
+          "p95FrameMsByRun": [50.100000000000364, 50.099999999999454, 50],
+          "medianP50CpuSubmissionMs": 6.099999997764826,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 33.30000000000018,
+          "medianP95FrameMs": 33.400000000000546,
+          "p95FrameMsByRun": [33.400000000000546, 33.400000000000546, 33.400000000000546],
+          "medianP50CpuSubmissionMs": 5.800000000745058,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1512, 982],
+        "dpr": 2,
+        "route": "aiming",
+        "baseline": {
+          "medianP50FrameMs": 33.399999999999636,
+          "medianP95FrameMs": 50.099999999999454,
+          "p95FrameMsByRun": [50.100000000000364, 50, 50.099999999999454],
+          "medianP50CpuSubmissionMs": 6,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 33.30000000000018,
+          "medianP95FrameMs": 33.400000000000546,
+          "p95FrameMsByRun": [33.400000000000546, 33.400000000000546, 33.400000000000546],
+          "medianP50CpuSubmissionMs": 5.299999997019768,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1728, 1117],
+        "dpr": 2,
+        "route": "outdoor",
+        "baseline": {
+          "medianP50FrameMs": 50,
+          "medianP95FrameMs": 66.69999999999891,
+          "p95FrameMsByRun": [50.099999999999454, 66.69999999999982, 66.69999999999891],
+          "medianP50CpuSubmissionMs": 5.800000000745058,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 33.399999999999636,
+          "medianP95FrameMs": 50.099999999998545,
+          "p95FrameMsByRun": [50, 50.099999999998545, 66.70000000000073],
+          "medianP50CpuSubmissionMs": 5.099999997764826,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1728, 1117],
+        "dpr": 2,
+        "route": "interior",
+        "baseline": {
+          "medianP50FrameMs": 66.70000000000073,
+          "medianP95FrameMs": 83.39999999999964,
+          "p95FrameMsByRun": [83.39999999999964, 83.40000000000146, 83.39999999999964],
+          "medianP50CpuSubmissionMs": 5.5,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 66.60000000000036,
+          "medianP95FrameMs": 83.29999999999927,
+          "p95FrameMsByRun": [83.29999999999927, 66.79999999999927, 83.29999999999927],
+          "medianP50CpuSubmissionMs": 5.100000001490116,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1728, 1117],
+        "dpr": 2,
+        "route": "combat",
+        "baseline": {
+          "medianP50FrameMs": 83.29999999999927,
+          "medianP95FrameMs": 83.40000000000146,
+          "p95FrameMsByRun": [83.40000000000146, 116.70000000000073, 83.39999999999964],
+          "medianP50CpuSubmissionMs": 5.400000002235174,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 66.60000000000036,
+          "medianP95FrameMs": 66.79999999999927,
+          "p95FrameMsByRun": [66.79999999999927, 66.79999999999927, 50.100000000000364],
+          "medianP50CpuSubmissionMs": 6.400000002235174,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      },
+      {
+        "viewport": [1728, 1117],
+        "dpr": 2,
+        "route": "aiming",
+        "baseline": {
+          "medianP50FrameMs": 50.100000000000364,
+          "medianP95FrameMs": 66.70000000000073,
+          "p95FrameMsByRun": [66.70000000000073, 66.70000000000073, 66.70000000000073],
+          "medianP50CpuSubmissionMs": 4.699999999254942,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        },
+        "optimized": {
+          "medianP50FrameMs": 50,
+          "medianP95FrameMs": 50.100000000000364,
+          "p95FrameMsByRun": [50.100000000000364, 50.100000000000364, 66.70000000000073],
+          "medianP50CpuSubmissionMs": 4.699999999254942,
+          "measuredShaderCompileCalls": [0, 0, 0],
+          "measuredProgramInfoLogCalls": [0, 0, 0]
+        }
+      }
+    ],
+    "rejectedPointRangeExperiment": {
+      "retained": false,
+      "validPairedTrials": 6,
+      "sceneByRoute": {
+        "outdoor": "night",
+        "interior": "interior"
+      },
+      "p50FrameMsBothVariants": 33.3,
+      "p95FrameMsBothVariants": 33.4,
+      "invalidInitialTrialDiscarded": true,
+      "reason": "No frame-pacing improvement over the retained uniform zero-radiance guard."
+    },
+    "sustainedCombat": {
+      "warmupFrames": 240,
+      "measuredFrames": 1200,
+      "cpu": "Apple M4 Pro",
+      "browser": "152.0.7977.83",
+      "result": {
+        "variant": "optimized",
+        "route": "combat",
+        "run": 1,
+        "width": 1512,
+        "height": 982,
+        "dpr": 2,
+        "device": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+        "pixelRatio": 1.5,
+        "screenSize": {
+          "width": 2268,
+          "height": 1473
+        },
+        "quality": "ultra",
+        "shadowMapSize": 2048,
+        "tick": 2886,
+        "frame": 1443,
+        "gpuStatus": "not requested",
+        "shaderCompilation": {
+          "boot": {
+            "ok": true,
+            "hooks": {
+              "render": {
+                "ok": true,
+                "ms": 153,
+                "programsBefore": 78,
+                "programsAfter": 142,
+                "compiled": 64,
+                "parallel": true
+              },
+              "world": {
+                "ok": true,
+                "ms": 89,
+                "compiled": 30,
+                "lightTarget": 20
+              },
+              "ai": {
+                "ok": true,
+                "materials": 26,
+                "programs": 7,
+                "ms": 53
+              }
+            },
+            "ms": 390,
+            "programsBefore": 34,
+            "programsAfter": 172,
+            "compiled": 138,
+            "parallel": true
+          },
+          "measuredCalls": 0,
+          "measuredSubmissionMs": 0,
+          "programsBefore": 222,
+          "programsAfter": 222
+        },
+        "programDiagnostics": {
+          "measuredInfoLogCalls": 0,
+          "measuredInfoLogMs": 0
+        },
+        "resources": {
+          "before": {
+            "Buffer": {
+              "created": 2387,
+              "deleted": 30,
+              "live": 2357
+            },
+            "Texture": {
+              "created": 187,
+              "deleted": 4,
+              "live": 183
+            },
+            "Framebuffer": {
+              "created": 137,
+              "deleted": 4,
+              "live": 133
+            },
+            "Renderbuffer": {
+              "created": 6,
+              "deleted": 0,
+              "live": 6
+            },
+            "Program": {
+              "created": 225,
+              "deleted": 3,
+              "live": 222
+            },
+            "Shader": {
+              "created": 450,
+              "deleted": 220,
+              "live": 230
+            },
+            "VertexArray": {
+              "created": 561,
+              "deleted": 10,
+              "live": 551
+            }
+          },
+          "after": {
+            "Buffer": {
+              "created": 2397,
+              "deleted": 30,
+              "live": 2367
+            },
+            "Texture": {
+              "created": 187,
+              "deleted": 6,
+              "live": 181
+            },
+            "Framebuffer": {
+              "created": 137,
+              "deleted": 6,
+              "live": 131
+            },
+            "Renderbuffer": {
+              "created": 6,
+              "deleted": 0,
+              "live": 6
+            },
+            "Program": {
+              "created": 225,
+              "deleted": 3,
+              "live": 222
+            },
+            "Shader": {
+              "created": 450,
+              "deleted": 220,
+              "live": 230
+            },
+            "VertexArray": {
+              "created": 563,
+              "deleted": 10,
+              "live": 553
+            }
+          },
+          "three": {
+            "geometries": 322,
+            "textures": 177
+          }
+        },
+        "instanceVisibility": {
+          "shadow0": {
+            "total": 7927,
+            "visible": 1950
+          },
+          "shadow1": {
+            "total": 7927,
+            "visible": 5416
+          },
+          "shadow2": {
+            "total": 7927,
+            "visible": 7833
+          },
+          "shadow3": {
+            "total": 7927,
+            "visible": 7927
+          },
+          "camera": {
+            "total": 7927,
+            "visible": 4895
+          }
+        },
+        "metrics": {
+          "frameMs": {
+            "count": 1200,
+            "p50": 33.30000000000109,
+            "p95": 33.400000000001455,
+            "p99": 33.400000000001455,
+            "max": 33.5
+          },
+          "cpuSubmissionMs": {
+            "count": 1200,
+            "p50": 6.100000001490116,
+            "p95": 6.400000002235174,
+            "p99": 6.699999999254942,
+            "max": 7.300000000745058
+          },
+          "stepMs": {
+            "count": 1200,
+            "p50": 8.199999999254942,
+            "p95": 8.800000000745058,
+            "p99": 9.199999999254942,
+            "max": 10.100000001490116
+          },
+          "calls": {
+            "count": 1200,
+            "p50": 982,
+            "p95": 984,
+            "p99": 984,
+            "max": 984
+          },
+          "triangles": {
+            "count": 1200,
+            "p50": 9482951,
+            "p95": 9705377,
+            "p99": 9718357,
+            "max": 9720579
+          },
+          "gpuMs": null
+        },
+        "errors": []
+      },
+      "comparisonCaveat": "Individual sustained diagnostics on an uncontrolled host; do not treat their worst-frame difference as three paired timing trials.",
+      "previousBuildMetrics": {
+        "frameMs": {
+          "count": 1200,
+          "p50": 33.399999999999636,
+          "p95": 50,
+          "p99": 50.10000000000218,
+          "max": 116.60000000000218
+        },
+        "cpuSubmissionMs": {
+          "count": 1200,
+          "p50": 6.300000000745058,
+          "p95": 6.800000000745058,
+          "p99": 6.900000002235174,
+          "max": 114.80000000074506
+        },
+        "stepMs": {
+          "count": 1200,
+          "p50": 8.600000001490116,
+          "p95": 9.399999998509884,
+          "p99": 9.600000001490116,
+          "max": 116.69999999925494
+        },
+        "calls": {
+          "count": 1200,
+          "p50": 982,
+          "p95": 984,
+          "p99": 984,
+          "max": 984
+        },
+        "triangles": {
+          "count": 1200,
+          "p50": 9482951,
+          "p95": 9705377,
+          "p99": 9718357,
+          "max": 9720579
+        },
+        "gpuMs": null
+      }
+    },
+    "gpuTiming": {
+      "fingerprints": {
+        "optimized": {
+          "sha256": "5160ca4547cf67e25b9fbce20874f803befee1b8007d87a821362d20fc20e552",
+          "files": ["chunk-bxj35pr3.js", "index.html"]
+        },
+        "baseline": {
+          "sha256": "4e8453fac4160887c72efd52dd8cbe4453cc9d241ac0b9ac2711a2cda103befd",
+          "files": ["chunk-y4813059.js", "index.html"]
+        }
+      },
+      "measurement": "gpu queries, frame pacing excluded",
+      "caveat": "Metal timer queries flush command buffers. Query-instrumented timing is excluded from normal frame pacing and the 60 FPS assessment.",
+      "results": [
+        {
+          "variant": "baseline",
+          "route": "outdoor",
+          "run": 1,
+          "width": 1512,
+          "height": 982,
+          "dpr": 2,
+          "device": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+          "pixelRatio": 1.5,
+          "screenSize": {
+            "width": 2268,
+            "height": 1473
+          },
+          "quality": "ultra",
+          "shadowMapSize": 2048,
+          "tick": 365,
+          "frame": 183,
+          "gpuStatus": "valid",
+          "shaderCompilation": {
+            "boot": {
+              "ok": true,
+              "hooks": {
+                "render": {
+                  "ok": true,
+                  "ms": 150,
+                  "programsBefore": 78,
+                  "programsAfter": 142,
+                  "compiled": 64,
+                  "parallel": true
+                },
+                "world": {
+                  "ok": true,
+                  "ms": 101,
+                  "compiled": 30,
+                  "lightTarget": 20
+                },
+                "ai": {
+                  "ok": true,
+                  "materials": 26,
+                  "programs": 7,
+                  "ms": 53
+                }
+              },
+              "ms": 398,
+              "programsBefore": 34,
+              "programsAfter": 172,
+              "compiled": 138,
+              "parallel": true
+            },
+            "measuredCalls": 0,
+            "measuredSubmissionMs": 0,
+            "programsBefore": 214,
+            "programsAfter": 214
+          },
+          "programDiagnostics": {
+            "measuredInfoLogCalls": 0,
+            "measuredInfoLogMs": 0
+          },
+          "resources": {
+            "before": {
+              "Buffer": {
+                "created": 2328,
+                "deleted": 30,
+                "live": 2298
+              },
+              "Texture": {
+                "created": 145,
+                "deleted": 4,
+                "live": 141
+              },
+              "Framebuffer": {
+                "created": 137,
+                "deleted": 4,
+                "live": 133
+              },
+              "Renderbuffer": {
+                "created": 6,
+                "deleted": 0,
+                "live": 6
+              },
+              "Program": {
+                "created": 217,
+                "deleted": 3,
+                "live": 214
+              },
+              "Shader": {
+                "created": 434,
+                "deleted": 192,
+                "live": 242
+              },
+              "VertexArray": {
+                "created": 535,
+                "deleted": 10,
+                "live": 525
+              }
+            },
+            "after": {
+              "Buffer": {
+                "created": 2332,
+                "deleted": 30,
+                "live": 2302
+              },
+              "Texture": {
+                "created": 145,
+                "deleted": 4,
+                "live": 141
+              },
+              "Framebuffer": {
+                "created": 137,
+                "deleted": 4,
+                "live": 133
+              },
+              "Renderbuffer": {
+                "created": 6,
+                "deleted": 0,
+                "live": 6
+              },
+              "Program": {
+                "created": 217,
+                "deleted": 3,
+                "live": 214
+              },
+              "Shader": {
+                "created": 434,
+                "deleted": 192,
+                "live": 242
+              },
+              "VertexArray": {
+                "created": 535,
+                "deleted": 10,
+                "live": 525
+              }
+            },
+            "three": {
+              "geometries": 314,
+              "textures": 137
+            }
+          },
+          "instanceVisibility": {
+            "shadow0": {
+              "total": 7927,
+              "visible": 1615
+            },
+            "shadow1": {
+              "total": 7927,
+              "visible": 4477
+            },
+            "shadow2": {
+              "total": 7927,
+              "visible": 7815
+            },
+            "shadow3": {
+              "total": 7927,
+              "visible": 7927
+            },
+            "camera": {
+              "total": 7927,
+              "visible": 5721
+            }
+          },
+          "metrics": {
+            "frameMs": null,
+            "cpuSubmissionMs": {
+              "count": 60,
+              "p50": 7.400000002235174,
+              "p95": 8,
+              "p99": 8.300000000745058,
+              "max": 8.300000000745058
+            },
+            "stepMs": {
+              "count": 60,
+              "p50": 7.900000002235174,
+              "p95": 8.399999998509884,
+              "p99": 8.700000002980232,
+              "max": 8.700000002980232
+            },
+            "calls": {
+              "count": 60,
+              "p50": 884,
+              "p95": 885,
+              "p99": 885,
+              "max": 885
+            },
+            "triangles": {
+              "count": 60,
+              "p50": 8705057,
+              "p95": 8711209,
+              "p99": 8711349,
+              "max": 8711349
+            },
+            "gpuMs": {
+              "count": 60,
+              "p50": 129.429208,
+              "p95": 155.278124,
+              "p99": 160.457583,
+              "max": 160.457583
+            }
+          },
+          "errors": []
+        },
+        {
+          "variant": "optimized",
+          "route": "outdoor",
+          "run": 1,
+          "width": 1512,
+          "height": 982,
+          "dpr": 2,
+          "device": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+          "pixelRatio": 1.5,
+          "screenSize": {
+            "width": 2268,
+            "height": 1473
+          },
+          "quality": "ultra",
+          "shadowMapSize": 2048,
+          "tick": 365,
+          "frame": 183,
+          "gpuStatus": "valid",
+          "shaderCompilation": {
+            "boot": {
+              "ok": true,
+              "hooks": {
+                "render": {
+                  "ok": true,
+                  "ms": 147,
+                  "programsBefore": 78,
+                  "programsAfter": 142,
+                  "compiled": 64,
+                  "parallel": true
+                },
+                "world": {
+                  "ok": true,
+                  "ms": 91,
+                  "compiled": 30,
+                  "lightTarget": 20
+                },
+                "ai": {
+                  "ok": true,
+                  "materials": 26,
+                  "programs": 7,
+                  "ms": 52
+                }
+              },
+              "ms": 373,
+              "programsBefore": 34,
+              "programsAfter": 172,
+              "compiled": 138,
+              "parallel": true
+            },
+            "measuredCalls": 0,
+            "measuredSubmissionMs": 0,
+            "programsBefore": 214,
+            "programsAfter": 214
+          },
+          "programDiagnostics": {
+            "measuredInfoLogCalls": 0,
+            "measuredInfoLogMs": 0
+          },
+          "resources": {
+            "before": {
+              "Buffer": {
+                "created": 2328,
+                "deleted": 30,
+                "live": 2298
+              },
+              "Texture": {
+                "created": 145,
+                "deleted": 4,
+                "live": 141
+              },
+              "Framebuffer": {
+                "created": 137,
+                "deleted": 4,
+                "live": 133
+              },
+              "Renderbuffer": {
+                "created": 6,
+                "deleted": 0,
+                "live": 6
+              },
+              "Program": {
+                "created": 217,
+                "deleted": 3,
+                "live": 214
+              },
+              "Shader": {
+                "created": 434,
+                "deleted": 204,
+                "live": 230
+              },
+              "VertexArray": {
+                "created": 535,
+                "deleted": 10,
+                "live": 525
+              }
+            },
+            "after": {
+              "Buffer": {
+                "created": 2332,
+                "deleted": 30,
+                "live": 2302
+              },
+              "Texture": {
+                "created": 145,
+                "deleted": 4,
+                "live": 141
+              },
+              "Framebuffer": {
+                "created": 137,
+                "deleted": 4,
+                "live": 133
+              },
+              "Renderbuffer": {
+                "created": 6,
+                "deleted": 0,
+                "live": 6
+              },
+              "Program": {
+                "created": 217,
+                "deleted": 3,
+                "live": 214
+              },
+              "Shader": {
+                "created": 434,
+                "deleted": 204,
+                "live": 230
+              },
+              "VertexArray": {
+                "created": 535,
+                "deleted": 10,
+                "live": 525
+              }
+            },
+            "three": {
+              "geometries": 314,
+              "textures": 137
+            }
+          },
+          "instanceVisibility": {
+            "shadow0": {
+              "total": 7927,
+              "visible": 1615
+            },
+            "shadow1": {
+              "total": 7927,
+              "visible": 4477
+            },
+            "shadow2": {
+              "total": 7927,
+              "visible": 7815
+            },
+            "shadow3": {
+              "total": 7927,
+              "visible": 7927
+            },
+            "camera": {
+              "total": 7927,
+              "visible": 5721
+            }
+          },
+          "metrics": {
+            "frameMs": null,
+            "cpuSubmissionMs": {
+              "count": 60,
+              "p50": 6.399999998509884,
+              "p95": 6.800000000745058,
+              "p99": 7,
+              "max": 7
+            },
+            "stepMs": {
+              "count": 60,
+              "p50": 6.800000000745058,
+              "p95": 7.300000000745058,
+              "p99": 7.400000002235174,
+              "max": 7.400000002235174
+            },
+            "calls": {
+              "count": 60,
+              "p50": 884,
+              "p95": 885,
+              "p99": 885,
+              "max": 885
+            },
+            "triangles": {
+              "count": 60,
+              "p50": 8705057,
+              "p95": 8711209,
+              "p99": 8711349,
+              "max": 8711349
+            },
+            "gpuMs": {
+              "count": 60,
+              "p50": 106.920083,
+              "p95": 120.995083,
+              "p99": 123.616374,
+              "max": 123.616374
+            }
+          },
+          "errors": []
+        },
+        {
+          "variant": "baseline",
+          "route": "combat",
+          "run": 1,
+          "width": 1512,
+          "height": 982,
+          "dpr": 2,
+          "device": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+          "pixelRatio": 1.5,
+          "screenSize": {
+            "width": 2268,
+            "height": 1473
+          },
+          "quality": "ultra",
+          "shadowMapSize": 2048,
+          "tick": 365,
+          "frame": 183,
+          "gpuStatus": "valid",
+          "shaderCompilation": {
+            "boot": {
+              "ok": true,
+              "hooks": {
+                "render": {
+                  "ok": true,
+                  "ms": 179,
+                  "programsBefore": 78,
+                  "programsAfter": 142,
+                  "compiled": 64,
+                  "parallel": true
+                },
+                "world": {
+                  "ok": true,
+                  "ms": 122,
+                  "compiled": 30,
+                  "lightTarget": 20
+                },
+                "ai": {
+                  "ok": true,
+                  "materials": 26,
+                  "programs": 7,
+                  "ms": 52
+                }
+              },
+              "ms": 481,
+              "programsBefore": 34,
+              "programsAfter": 172,
+              "compiled": 138,
+              "parallel": true
+            },
+            "measuredCalls": 0,
+            "measuredSubmissionMs": 0,
+            "programsBefore": 222,
+            "programsAfter": 222
+          },
+          "programDiagnostics": {
+            "measuredInfoLogCalls": 0,
+            "measuredInfoLogMs": 0
+          },
+          "resources": {
+            "before": {
+              "Buffer": {
+                "created": 2387,
+                "deleted": 30,
+                "live": 2357
+              },
+              "Texture": {
+                "created": 187,
+                "deleted": 4,
+                "live": 183
+              },
+              "Framebuffer": {
+                "created": 137,
+                "deleted": 4,
+                "live": 133
+              },
+              "Renderbuffer": {
+                "created": 6,
+                "deleted": 0,
+                "live": 6
+              },
+              "Program": {
+                "created": 225,
+                "deleted": 3,
+                "live": 222
+              },
+              "Shader": {
+                "created": 450,
+                "deleted": 214,
+                "live": 236
+              },
+              "VertexArray": {
+                "created": 561,
+                "deleted": 10,
+                "live": 551
+              }
+            },
+            "after": {
+              "Buffer": {
+                "created": 2387,
+                "deleted": 30,
+                "live": 2357
+              },
+              "Texture": {
+                "created": 187,
+                "deleted": 4,
+                "live": 183
+              },
+              "Framebuffer": {
+                "created": 137,
+                "deleted": 4,
+                "live": 133
+              },
+              "Renderbuffer": {
+                "created": 6,
+                "deleted": 0,
+                "live": 6
+              },
+              "Program": {
+                "created": 225,
+                "deleted": 3,
+                "live": 222
+              },
+              "Shader": {
+                "created": 450,
+                "deleted": 214,
+                "live": 236
+              },
+              "VertexArray": {
+                "created": 561,
+                "deleted": 10,
+                "live": 551
+              }
+            },
+            "three": {
+              "geometries": 321,
+              "textures": 179
+            }
+          },
+          "instanceVisibility": {
+            "shadow0": {
+              "total": 7927,
+              "visible": 2073
+            },
+            "shadow1": {
+              "total": 7927,
+              "visible": 5563
+            },
+            "shadow2": {
+              "total": 7927,
+              "visible": 7821
+            },
+            "shadow3": {
+              "total": 7927,
+              "visible": 7927
+            },
+            "camera": {
+              "total": 7927,
+              "visible": 4800
+            }
+          },
+          "metrics": {
+            "frameMs": null,
+            "cpuSubmissionMs": {
+              "count": 60,
+              "p50": 6.699999999254942,
+              "p95": 7.099999997764826,
+              "p99": 7.399999998509884,
+              "max": 7.399999998509884
+            },
+            "stepMs": {
+              "count": 60,
+              "p50": 9.200000002980232,
+              "p95": 10.199999999254942,
+              "p99": 10.400000002235174,
+              "max": 10.400000002235174
+            },
+            "calls": {
+              "count": 60,
+              "p50": 983,
+              "p95": 983,
+              "p99": 983,
+              "max": 983
+            },
+            "triangles": {
+              "count": 60,
+              "p50": 9529553,
+              "p95": 9536635,
+              "p99": 9538027,
+              "max": 9538027
+            },
+            "gpuMs": {
+              "count": 60,
+              "p50": 160.215166,
+              "p95": 166.719166,
+              "p99": 168.479166,
+              "max": 168.479166
+            }
+          },
+          "errors": []
+        },
+        {
+          "variant": "optimized",
+          "route": "combat",
+          "run": 1,
+          "width": 1512,
+          "height": 982,
+          "dpr": 2,
+          "device": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+          "pixelRatio": 1.5,
+          "screenSize": {
+            "width": 2268,
+            "height": 1473
+          },
+          "quality": "ultra",
+          "shadowMapSize": 2048,
+          "tick": 365,
+          "frame": 183,
+          "gpuStatus": "valid",
+          "shaderCompilation": {
+            "boot": {
+              "ok": true,
+              "hooks": {
+                "render": {
+                  "ok": true,
+                  "ms": 144,
+                  "programsBefore": 78,
+                  "programsAfter": 142,
+                  "compiled": 64,
+                  "parallel": true
+                },
+                "world": {
+                  "ok": true,
+                  "ms": 82,
+                  "compiled": 30,
+                  "lightTarget": 20
+                },
+                "ai": {
+                  "ok": true,
+                  "materials": 26,
+                  "programs": 7,
+                  "ms": 63
+                }
+              },
+              "ms": 374,
+              "programsBefore": 34,
+              "programsAfter": 172,
+              "compiled": 138,
+              "parallel": true
+            },
+            "measuredCalls": 0,
+            "measuredSubmissionMs": 0,
+            "programsBefore": 222,
+            "programsAfter": 222
+          },
+          "programDiagnostics": {
+            "measuredInfoLogCalls": 0,
+            "measuredInfoLogMs": 0
+          },
+          "resources": {
+            "before": {
+              "Buffer": {
+                "created": 2387,
+                "deleted": 30,
+                "live": 2357
+              },
+              "Texture": {
+                "created": 187,
+                "deleted": 4,
+                "live": 183
+              },
+              "Framebuffer": {
+                "created": 137,
+                "deleted": 4,
+                "live": 133
+              },
+              "Renderbuffer": {
+                "created": 6,
+                "deleted": 0,
+                "live": 6
+              },
+              "Program": {
+                "created": 225,
+                "deleted": 3,
+                "live": 222
+              },
+              "Shader": {
+                "created": 450,
+                "deleted": 220,
+                "live": 230
+              },
+              "VertexArray": {
+                "created": 561,
+                "deleted": 10,
+                "live": 551
+              }
+            },
+            "after": {
+              "Buffer": {
+                "created": 2387,
+                "deleted": 30,
+                "live": 2357
+              },
+              "Texture": {
+                "created": 187,
+                "deleted": 4,
+                "live": 183
+              },
+              "Framebuffer": {
+                "created": 137,
+                "deleted": 4,
+                "live": 133
+              },
+              "Renderbuffer": {
+                "created": 6,
+                "deleted": 0,
+                "live": 6
+              },
+              "Program": {
+                "created": 225,
+                "deleted": 3,
+                "live": 222
+              },
+              "Shader": {
+                "created": 450,
+                "deleted": 220,
+                "live": 230
+              },
+              "VertexArray": {
+                "created": 561,
+                "deleted": 10,
+                "live": 551
+              }
+            },
+            "three": {
+              "geometries": 321,
+              "textures": 179
+            }
+          },
+          "instanceVisibility": {
+            "shadow0": {
+              "total": 7927,
+              "visible": 2073
+            },
+            "shadow1": {
+              "total": 7927,
+              "visible": 5563
+            },
+            "shadow2": {
+              "total": 7927,
+              "visible": 7821
+            },
+            "shadow3": {
+              "total": 7927,
+              "visible": 7927
+            },
+            "camera": {
+              "total": 7927,
+              "visible": 4800
+            }
+          },
+          "metrics": {
+            "frameMs": null,
+            "cpuSubmissionMs": {
+              "count": 60,
+              "p50": 6.100000001490116,
+              "p95": 6.599999997764826,
+              "p99": 6.799999997019768,
+              "max": 6.799999997019768
+            },
+            "stepMs": {
+              "count": 60,
+              "p50": 8.400000002235174,
+              "p95": 9.200000002980232,
+              "p99": 9.399999998509884,
+              "max": 9.399999998509884
+            },
+            "calls": {
+              "count": 60,
+              "p50": 983,
+              "p95": 983,
+              "p99": 983,
+              "max": 983
+            },
+            "triangles": {
+              "count": 60,
+              "p50": 9529553,
+              "p95": 9536635,
+              "p99": 9538027,
+              "max": 9538027
+            },
+            "gpuMs": {
+              "count": 60,
+              "p50": 124.012749,
+              "p95": 128.942124,
+              "p99": 130.91125,
+              "max": 130.91125
+            }
+          },
+          "errors": []
+        }
+      ]
+    },
+    "visual": {
+      "browser": "151.0.7922.34",
+      "freshPages": true,
+      "captures": 14,
+      "investigationLimits": {
+        "maxChannelDelta": 1,
+        "maxChangedRatio": 0.0001
+      },
+      "strictPassed": 1,
+      "reviewedLimits": {
+        "maxChannelDelta": 15,
+        "maxChangedRatio": 0.001
+      },
+      "review": "Exact-zero light guards preserve all active lighting equations. Full-size and amplified comparisons were inspected. The largest difference is one pixel in detail; no perceptible change was observed. Original investigation flags and strict results remain in report.json.",
+      "comparisonWithPreviousBuild": [
+        {
+          "name": "hero",
+          "changedPixels": 484,
+          "changedRatio": 0.0005251736111111111,
+          "maxChannelDelta": 3,
+          "histogram": {
+            "1": 479,
+            "2": 3,
+            "3": 2
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "interior",
+          "changedPixels": 110,
+          "changedRatio": 0.00011935763888888888,
+          "maxChannelDelta": 1,
+          "histogram": {
+            "1": 110
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "detail",
+          "changedPixels": 225,
+          "changedRatio": 0.000244140625,
+          "maxChannelDelta": 15,
+          "histogram": {
+            "1": 223,
+            "2": 1,
+            "15": 1
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "sunset",
+          "changedPixels": 172,
+          "changedRatio": 0.00018663194444444445,
+          "maxChannelDelta": 1,
+          "histogram": {
+            "1": 172
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "night",
+          "changedPixels": 902,
+          "changedRatio": 0.0009787326388888888,
+          "maxChannelDelta": 6,
+          "histogram": {
+            "1": 805,
+            "2": 74,
+            "3": 15,
+            "4": 7,
+            "6": 1
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "weapon",
+          "changedPixels": 254,
+          "changedRatio": 0.0002756076388888889,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 253,
+            "2": 1
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "ads",
+          "changedPixels": 338,
+          "changedRatio": 0.0003667534722222222,
+          "maxChannelDelta": 1,
+          "histogram": {
+            "1": 338
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "muzzle",
+          "changedPixels": 83,
+          "changedRatio": 9.006076388888889e-5,
+          "maxChannelDelta": 1,
+          "histogram": {
+            "1": 83
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "combat",
+          "changedPixels": 234,
+          "changedRatio": 0.00025390625,
+          "maxChannelDelta": 3,
+          "histogram": {
+            "1": 230,
+            "2": 1,
+            "3": 3
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "impacts",
+          "changedPixels": 200,
+          "changedRatio": 0.00021701388888888888,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 198,
+            "2": 2
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "hud",
+          "changedPixels": 432,
+          "changedRatio": 0.00046875,
+          "maxChannelDelta": 4,
+          "histogram": {
+            "1": 429,
+            "2": 2,
+            "4": 1
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "wrist-idle",
+          "changedPixels": 376,
+          "changedRatio": 0.00040798611111111114,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 374,
+            "2": 2
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "wrist-ads",
+          "changedPixels": 620,
+          "changedRatio": 0.0006727430555555556,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 616,
+            "2": 4
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "wrist-reload",
+          "changedPixels": 282,
+          "changedRatio": 0.00030598958333333335,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 279,
+            "2": 3
+          },
+          "withinReviewedLimits": true
+        }
+      ],
+      "comparisonWithOriginalOptimizationBaseline": [
+        {
+          "name": "hero",
+          "changedPixels": 662,
+          "changedRatio": 0.0007183159722222222,
+          "maxChannelDelta": 3,
+          "histogram": {
+            "1": 656,
+            "2": 3,
+            "3": 3
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "interior",
+          "changedPixels": 110,
+          "changedRatio": 0.00011935763888888888,
+          "maxChannelDelta": 1,
+          "histogram": {
+            "1": 110
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "detail",
+          "changedPixels": 232,
+          "changedRatio": 0.0002517361111111111,
+          "maxChannelDelta": 15,
+          "histogram": {
+            "1": 230,
+            "2": 1,
+            "15": 1
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "sunset",
+          "changedPixels": 172,
+          "changedRatio": 0.00018663194444444445,
+          "maxChannelDelta": 1,
+          "histogram": {
+            "1": 172
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "night",
+          "changedPixels": 915,
+          "changedRatio": 0.0009928385416666666,
+          "maxChannelDelta": 6,
+          "histogram": {
+            "1": 816,
+            "2": 75,
+            "3": 16,
+            "4": 7,
+            "6": 1
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "weapon",
+          "changedPixels": 384,
+          "changedRatio": 0.0004166666666666667,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 383,
+            "2": 1
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "ads",
+          "changedPixels": 338,
+          "changedRatio": 0.0003667534722222222,
+          "maxChannelDelta": 1,
+          "histogram": {
+            "1": 338
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "muzzle",
+          "changedPixels": 224,
+          "changedRatio": 0.00024305555555555555,
+          "maxChannelDelta": 1,
+          "histogram": {
+            "1": 224
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "combat",
+          "changedPixels": 238,
+          "changedRatio": 0.00025824652777777776,
+          "maxChannelDelta": 3,
+          "histogram": {
+            "1": 234,
+            "2": 1,
+            "3": 3
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "impacts",
+          "changedPixels": 207,
+          "changedRatio": 0.000224609375,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 204,
+            "2": 3
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "hud",
+          "changedPixels": 432,
+          "changedRatio": 0.00046875,
+          "maxChannelDelta": 4,
+          "histogram": {
+            "1": 429,
+            "2": 2,
+            "4": 1
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "wrist-idle",
+          "changedPixels": 395,
+          "changedRatio": 0.00042860243055555555,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 391,
+            "2": 4
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "wrist-ads",
+          "changedPixels": 702,
+          "changedRatio": 0.00076171875,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 698,
+            "2": 4
+          },
+          "withinReviewedLimits": true
+        },
+        {
+          "name": "wrist-reload",
+          "changedPixels": 455,
+          "changedRatio": 0.0004937065972222222,
+          "maxChannelDelta": 2,
+          "histogram": {
+            "1": 451,
+            "2": 4
+          },
+          "withinReviewedLimits": true
+        }
+      ]
+    },
+    "transitions": {
+      "captures": 64,
+      "passed": 64,
+      "pixelIdentical": 51,
+      "maxChannelDelta": 1,
+      "maxChangedPixelPercent": 0.004074666752874492,
+      "reference": "Same production build with instance substitution, depth collapse and transform reuse bypassed after boot. Prop batching and shader optimizations remain enabled in both variants.",
+      "canonicalDataAndTickSequencesPreserved": true
+    },
+    "lifecycle": {
+      "cycles": 4,
+      "stableLiveResourceCounts": true,
+      "liveResourceCounts": {
+        "Buffer": 2347,
+        "Texture": 141,
+        "Framebuffer": 133,
+        "Renderbuffer": 6,
+        "Program": 214,
+        "Shader": 230,
+        "VertexArray": 533
+      },
+      "disposal": {
+        "passes": 450,
+        "disposed": 450,
+        "entriesRemaining": 0,
+        "resources": {
+          "Buffer": {
+            "created": 2377,
+            "deleted": 2374,
+            "live": 3
+          },
+          "Texture": {
+            "created": 843,
+            "deleted": 839,
+            "live": 4
+          },
+          "Framebuffer": {
+            "created": 812,
+            "deleted": 809,
+            "live": 3
+          },
+          "Renderbuffer": {
+            "created": 121,
+            "deleted": 121,
+            "live": 0
+          },
+          "Program": {
+            "created": 217,
+            "deleted": 213,
+            "live": 4
+          },
+          "Shader": {
+            "created": 434,
+            "deleted": 204,
+            "live": 230
+          },
+          "VertexArray": {
+            "created": 543,
+            "deleted": 543,
+            "live": 0
+          }
+        }
+      },
+      "caveat": "Counts track explicit WebGL create/delete calls, not GPU bytes or resources released implicitly when a program or context is destroyed.",
+      "errors": []
+    },
+    "retinaRepeatability": {
+      "browser": "151.0.7922.34",
+      "viewport": [1728, 1117],
+      "dpr": 2,
+      "quality": "ultra",
+      "freshPages": true,
+      "baseline": "/tmp/natural-fps-spikes-AUQdbB/frozen-final-dist",
+      "fingerprints": {
+        "baseline": {
+          "sha256": "5160ca4547cf67e25b9fbce20874f803befee1b8007d87a821362d20fc20e552",
+          "files": ["chunk-bxj35pr3.js", "index.html"]
+        },
+        "optimized": {
+          "sha256": "5160ca4547cf67e25b9fbce20874f803befee1b8007d87a821362d20fc20e552",
+          "files": ["chunk-bxj35pr3.js", "index.html"]
+        }
+      },
+      "limits": {
+        "maxChannelDelta": 1,
+        "maxChangedRatio": 0.0001
+      },
+      "shots": [
+        {
+          "name": "hero",
+          "changedPixels": 0,
+          "changedRatio": 0,
+          "maxChannelDelta": 0,
+          "states": [
+            {
+              "frame": 93,
+              "calls": 880,
+              "tris": 8688087,
+              "programs": 214,
+              "textures": 137,
+              "geometries": 314,
+              "ms": 16.666666666666742
+            },
+            {
+              "frame": 93,
+              "calls": 880,
+              "tris": 8688087,
+              "programs": 214,
+              "textures": 137,
+              "geometries": 314,
+              "ms": 16.666666666666742
+            }
+          ],
+          "errors": [],
+          "investigate": false,
+          "pass": true
+        }
+      ]
+    },
+    "validation": {
+      "checkPassed": true,
+      "unitTests": 87,
+      "unitAssertions": 2971,
+      "browserTestsPassed": 18,
+      "browserTestsSkipped": 1,
+      "skippedReason": "The separate million-instance GPU timing test requires the dedicated GPU runner.",
+      "readinessRegression": {
+        "previousBuild": {
+          "compiled": 0,
+          "reflected": 1
+        },
+        "finalBuild": {
+          "compiled": 0,
+          "reflected": 0
+        },
+        "previousBuildFailedAsExpected": true
+      },
+      "verifiedRepositoryVersion": "0.1.0-alpha.3",
+      "gate": "bun run check",
+      "buildOutputSafety": "Automated test preserves nonempty custom output, validates empty-directory builds and retains the upstream license. Additional isolation check verified independent builds, serving and ownership cleanup."
+    },
+    "artifacts": "test-results/fps-optimization/lighting-readiness includes raw paired metrics, sustained diagnostics, isolated GPU timings, image reviews, captures, and test logs. The separately labeled first GPU batch is excluded.",
+    "retinaVisual": [
+      {
+        "browser": "151.0.7922.34",
+        "viewport": [1512, 982],
+        "dpr": 2,
+        "quality": "ultra",
+        "freshPages": true,
+        "baseline": "/tmp/natural-fps-spikes-AUQdbB/baseline-dist",
+        "fingerprints": {
+          "baseline": {
+            "sha256": "4e8453fac4160887c72efd52dd8cbe4453cc9d241ac0b9ac2711a2cda103befd",
+            "files": ["chunk-y4813059.js", "index.html"]
+          },
+          "optimized": {
+            "sha256": "5160ca4547cf67e25b9fbce20874f803befee1b8007d87a821362d20fc20e552",
+            "files": ["chunk-bxj35pr3.js", "index.html"]
+          }
+        },
+        "limits": {
+          "maxChannelDelta": 1,
+          "maxChangedRatio": 0.0001
+        },
+        "shots": [
+          {
+            "name": "hero",
+            "changedPixels": 1481,
+            "changedRatio": 0.00024936287028955054,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 880,
+                "tris": 8683655,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 880,
+                "tris": 8683655,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "interior",
+            "changedPixels": 1251,
+            "changedRatio": 0.00021063669867132188,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 884,
+                "tris": 7739853,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 309,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 884,
+                "tris": 7739853,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 309,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "detail",
+            "changedPixels": 1442,
+            "changedRatio": 0.00024279625858037262,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 806,
+                "tris": 5993959,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 305,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 806,
+                "tris": 5993959,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 305,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "sunset",
+            "changedPixels": 557,
+            "changedRatio": 9.37846851797972e-5,
+            "maxChannelDelta": 1,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 889,
+                "tris": 8889105,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 889,
+                "tris": 8889105,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": false,
+            "pass": true
+          },
+          {
+            "name": "night",
+            "changedPixels": 4704,
+            "changedRatio": 0.0007920343969223807,
+            "maxChannelDelta": 3,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 883,
+                "tris": 8853301,
+                "programs": 214,
+                "textures": 136,
+                "geometries": 312,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 883,
+                "tris": 8853301,
+                "programs": 214,
+                "textures": 136,
+                "geometries": 312,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "weapon",
+            "changedPixels": 677,
+            "changedRatio": 0.00011398964428495997,
+            "maxChannelDelta": 4,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 887,
+                "tris": 8573421,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 312,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 887,
+                "tris": 8573421,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 312,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "ads",
+            "changedPixels": 2580,
+            "changedRatio": 0.0004344066207609996,
+            "maxChannelDelta": 1,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 890,
+                "tris": 7796624,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 890,
+                "tris": 7796624,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "muzzle",
+            "changedPixels": 527,
+            "changedRatio": 8.873344540350651e-5,
+            "maxChannelDelta": 4,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 894,
+                "tris": 8578839,
+                "programs": 215,
+                "textures": 142,
+                "geometries": 318,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 894,
+                "tris": 8578839,
+                "programs": 215,
+                "textures": 142,
+                "geometries": 318,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "combat",
+            "changedPixels": 1289,
+            "changedRatio": 0.0002170349357212901,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 984,
+                "tris": 9538079,
+                "programs": 222,
+                "textures": 179,
+                "geometries": 321,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 984,
+                "tris": 9538079,
+                "programs": 222,
+                "textures": 179,
+                "geometries": 321,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "impacts",
+            "changedPixels": 858,
+            "changedRatio": 0.0001444654576019138,
+            "maxChannelDelta": 1,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 792,
+                "tris": 6419517,
+                "programs": 215,
+                "textures": 142,
+                "geometries": 292,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 792,
+                "tris": 6419517,
+                "programs": 215,
+                "textures": 142,
+                "geometries": 292,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "hud",
+            "changedPixels": 1061,
+            "changedRatio": 0.00017864551342148085,
+            "maxChannelDelta": 3,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 882,
+                "tris": 8807025,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 882,
+                "tris": 8807025,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "wrist-idle",
+            "changedPixels": 1804,
+            "changedRatio": 0.00030374788521428034,
+            "maxChannelDelta": 5,
+            "states": [
+              {
+                "frame": 123,
+                "calls": 880,
+                "tris": 8683659,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 123,
+                "calls": 880,
+                "tris": 8683659,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "wrist-ads",
+            "changedPixels": 4404,
+            "changedRatio": 0.0007415219991594737,
+            "maxChannelDelta": 4,
+            "states": [
+              {
+                "frame": 153,
+                "calls": 891,
+                "tris": 8684114,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 318,
+                "ms": 16.666666666666515
+              },
+              {
+                "frame": 153,
+                "calls": 891,
+                "tris": 8684114,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 318,
+                "ms": 16.666666666666515
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "wrist-reload",
+            "changedPixels": 2986,
+            "changedRatio": 0.0005027667324001336,
+            "maxChannelDelta": 5,
+            "states": [
+              {
+                "frame": 159,
+                "calls": 880,
+                "tris": 8683665,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 318,
+                "ms": 16.666666666666515
+              },
+              {
+                "frame": 159,
+                "calls": 880,
+                "tris": 8683665,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 318,
+                "ms": 16.666666666666515
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          }
+        ],
+        "reviewedLimits": {
+          "maxChannelDelta": 15,
+          "maxChangedRatio": 0.003
+        },
+        "review": "Sparse numerical differences were reviewed at full size and with amplified differences. Large pixel-count differences were predominantly 1/255; no perceptible change was observed. Strict results are preserved."
+      },
+      {
+        "browser": "151.0.7922.34",
+        "viewport": [1728, 1117],
+        "dpr": 2,
+        "quality": "ultra",
+        "freshPages": true,
+        "baseline": "/tmp/natural-fps-spikes-AUQdbB/baseline-dist",
+        "fingerprints": {
+          "baseline": {
+            "sha256": "4e8453fac4160887c72efd52dd8cbe4453cc9d241ac0b9ac2711a2cda103befd",
+            "files": ["chunk-y4813059.js", "index.html"]
+          },
+          "optimized": {
+            "sha256": "5160ca4547cf67e25b9fbce20874f803befee1b8007d87a821362d20fc20e552",
+            "files": ["chunk-bxj35pr3.js", "index.html"]
+          }
+        },
+        "limits": {
+          "maxChannelDelta": 1,
+          "maxChangedRatio": 0.0001
+        },
+        "shots": [
+          {
+            "name": "hero",
+            "changedPixels": 20026,
+            "changedRatio": 0.0025938049172717927,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 880,
+                "tris": 8688087,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 880,
+                "tris": 8688087,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "interior",
+            "changedPixels": 20573,
+            "changedRatio": 0.0026646533787592426,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 884,
+                "tris": 7747081,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 309,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 884,
+                "tris": 7747081,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 309,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "detail",
+            "changedPixels": 2276,
+            "changedRatio": 0.0002947917702841606,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 806,
+                "tris": 5998705,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 305,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 806,
+                "tris": 5998705,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 305,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "sunset",
+            "changedPixels": 2429,
+            "changedRatio": 0.0003146086160018568,
+            "maxChannelDelta": 1,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 889,
+                "tris": 8893771,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 889,
+                "tris": 8893771,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "night",
+            "changedPixels": 5767,
+            "changedRatio": 0.0007469526095029676,
+            "maxChannelDelta": 3,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 884,
+                "tris": 8859519,
+                "programs": 214,
+                "textures": 136,
+                "geometries": 312,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 884,
+                "tris": 8859519,
+                "programs": 214,
+                "textures": 136,
+                "geometries": 312,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "weapon",
+            "changedPixels": 2754,
+            "changedRatio": 0.00035670322291853177,
+            "maxChannelDelta": 3,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 887,
+                "tris": 8576813,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 312,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 887,
+                "tris": 8576813,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 312,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "ads",
+            "changedPixels": 1191,
+            "changedRatio": 0.00015426054411618421,
+            "maxChannelDelta": 3,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 890,
+                "tris": 7810656,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 890,
+                "tris": 7810656,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "muzzle",
+            "changedPixels": 18831,
+            "changedRatio": 0.002439026285685865,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 894,
+                "tris": 8582231,
+                "programs": 215,
+                "textures": 142,
+                "geometries": 318,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 894,
+                "tris": 8582231,
+                "programs": 215,
+                "textures": 142,
+                "geometries": 318,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "combat",
+            "changedPixels": 18888,
+            "changedRatio": 0.0024464090321297126,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 984,
+                "tris": 9540385,
+                "programs": 222,
+                "textures": 179,
+                "geometries": 321,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 984,
+                "tris": 9540385,
+                "programs": 222,
+                "textures": 179,
+                "geometries": 321,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "impacts",
+            "changedPixels": 1373,
+            "changedRatio": 0.0001778335239895222,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 793,
+                "tris": 6429117,
+                "programs": 215,
+                "textures": 142,
+                "geometries": 292,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 793,
+                "tris": 6429117,
+                "programs": 215,
+                "textures": 142,
+                "geometries": 292,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "hud",
+            "changedPixels": 3334,
+            "changedRatio": 0.0004318259060313671,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 93,
+                "calls": 882,
+                "tris": 8807853,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 93,
+                "calls": 882,
+                "tris": 8807853,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "wrist-idle",
+            "changedPixels": 22024,
+            "changedRatio": 0.002852589608408767,
+            "maxChannelDelta": 3,
+            "states": [
+              {
+                "frame": 123,
+                "calls": 880,
+                "tris": 8688091,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              },
+              {
+                "frame": 123,
+                "calls": 880,
+                "tris": 8688091,
+                "programs": 214,
+                "textures": 137,
+                "geometries": 314,
+                "ms": 16.666666666666742
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "wrist-ads",
+            "changedPixels": 5727,
+            "changedRatio": 0.0007417717348055307,
+            "maxChannelDelta": 2,
+            "states": [
+              {
+                "frame": 153,
+                "calls": 891,
+                "tris": 8688546,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 318,
+                "ms": 16.666666666666515
+              },
+              {
+                "frame": 153,
+                "calls": 891,
+                "tris": 8688546,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 318,
+                "ms": 16.666666666666515
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          },
+          {
+            "name": "wrist-reload",
+            "changedPixels": 21186,
+            "changedRatio": 0.0027440502834974634,
+            "maxChannelDelta": 4,
+            "states": [
+              {
+                "frame": 159,
+                "calls": 880,
+                "tris": 8688097,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 318,
+                "ms": 16.666666666666515
+              },
+              {
+                "frame": 159,
+                "calls": 880,
+                "tris": 8688097,
+                "programs": 214,
+                "textures": 139,
+                "geometries": 318,
+                "ms": 16.666666666666515
+              }
+            ],
+            "errors": [],
+            "investigate": true,
+            "pass": false
+          }
+        ],
+        "reviewedLimits": {
+          "maxChannelDelta": 15,
+          "maxChangedRatio": 0.003
+        },
+        "review": "Sparse numerical differences were reviewed at full size and with amplified differences. Large pixel-count differences were predominantly 1/255; no perceptible change was observed. Strict results are preserved."
+      }
+    ]
+  }
+}

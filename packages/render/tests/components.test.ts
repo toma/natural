@@ -19,6 +19,9 @@ test("render components create isolated defaults", () => {
     metalness: 0.8,
     roughness: 0.2,
   });
+  expect(
+    MeshRenderer.create({ baseColorMap: "/asphalt.png", textureRepeat: { x: 4, y: 2 } }),
+  ).toMatchObject({ baseColorMap: "/asphalt.png", textureRepeat: { x: 4, y: 2 } });
   expect(InstancedMesh.create().count).toBe(1);
   expect(Tilemap.create().tiles).toEqual([1]);
   expect(ParticleEmitter.create().count).toBe(100);
@@ -27,4 +30,5 @@ test("render components create isolated defaults", () => {
   expect(() => Tilemap.create({ width: 2, tiles: [1] })).toThrow("Invalid value");
   expect(() => Camera3D.create({ near: 10, far: 1 })).toThrow("Invalid value");
   expect(() => MeshRenderer.create({ metalness: 2 })).toThrow("Invalid value");
+  expect(() => MeshRenderer.create({ textureRepeat: { x: 0 } })).toThrow("Invalid value");
 });

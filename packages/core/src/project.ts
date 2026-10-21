@@ -7,6 +7,7 @@ export interface ProjectDefinition {
   entryScene?: string;
   fixedTickRate?: number;
   maxFrameDelta?: number;
+  maxFixedSteps?: number;
   input?: InputMap;
   plugins?: readonly EnginePlugin[];
 }
@@ -19,6 +20,11 @@ export function defineProject(project: ProjectDefinition): Readonly<ProjectDefin
   if (!Number.isFinite(project.maxFrameDelta ?? 0.25) || (project.maxFrameDelta ?? 0.25) <= 0)
     throw new Error("maxFrameDelta must be finite and positive");
   validateInputMap(project.input ?? {});
+  if (
+    project.maxFixedSteps !== undefined &&
+    (!Number.isSafeInteger(project.maxFixedSteps) || project.maxFixedSteps < 1)
+  )
+    throw new Error("maxFixedSteps must be a positive safe integer");
   const pluginIds = new Set(project.plugins?.map((plugin) => plugin.id));
   if (pluginIds.size !== (project.plugins?.length ?? 0))
     throw new Error("Project plugin ids must be unique");

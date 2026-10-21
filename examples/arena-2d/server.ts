@@ -1,4 +1,4 @@
-import { createServer, defineBinarySchema } from "@natural-engine/natural";
+import { createServer, defineBinarySchema } from "@toma.com/natural";
 
 interface Player {
   x: number;

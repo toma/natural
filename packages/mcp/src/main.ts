@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { readFile, realpath, rename, writeFile } from "node:fs/promises";
 import { resolve, sep } from "node:path";
-import { canonicalJson, validateScene, type SceneData } from "@natural-engine/core";
+import { canonicalJson, validateScene, type SceneData } from "@toma.com/core";
 import { parse } from "jsonc-parser";
 
 interface RpcRequest {
@@ -11,6 +11,10 @@ interface RpcRequest {
   params?: Record<string, unknown>;
 }
 
+// The package manifest sits one level above both src/ and dist/, in the repo and in the tarball.
+const serverManifest = JSON.parse(
+  await readFile(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string };
 const root = await realpath(resolve(process.env.NATURAL_PROJECT ?? process.cwd()));
 
 async function safeExistingPath(path: string): Promise<string> {
@@ -102,7 +106,7 @@ async function handle(request: RpcRequest): Promise<void> {
     respond(request.id, {
       protocolVersion: "2025-06-18",
       capabilities: { tools: { listChanged: false } },
-      serverInfo: { name: "natural-engine", version: "0.1.0-alpha.0" },
+      serverInfo: { name: "natural-engine", version: serverManifest.version },
     });
     return;
   }

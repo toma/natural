@@ -5,7 +5,7 @@ import {
   type EnginePlugin,
   type Entity,
   type Game,
-} from "@natural-engine/core";
+} from "@toma.com/core";
 
 export interface UiStyle {
   display: "flex" | "none";

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { LocalTransform, World } from "@natural-engine/core";
+import { LocalTransform, World } from "@toma.com/core";
 import { AnimationPlayer, animationSystem, defineAnimationClip } from "../src/animation.ts";
 
 test("animation systems advance looping and finite clips", async () => {

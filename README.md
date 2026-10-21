@@ -1,19 +1,43 @@
 # Natural
 
-Natural is an MIT-licensed, code-first 2D and 3D game engine for TypeScript. It combines Bun's
+<!-- generated:badges:start -->
+
+[![CI](https://github.com/toma/natural/actions/workflows/ci.yml/badge.svg)](https://github.com/toma/natural/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/toma/natural/actions/workflows/codeql.yml/badge.svg)](https://github.com/toma/natural/actions/workflows/codeql.yml)
+[![Dedicated performance](https://github.com/toma/natural/actions/workflows/performance.yml/badge.svg)](https://github.com/toma/natural/actions/workflows/performance.yml)
+[![Release](https://github.com/toma/natural/actions/workflows/release.yml/badge.svg)](https://github.com/toma/natural/actions/workflows/release.yml)
+[![npm version](https://img.shields.io/npm/v/%40toma.com%2Fnatural?color=cb3837)](https://www.npmjs.com/package/@toma.com/natural)
+[![npm downloads](https://img.shields.io/npm/dt/%40toma.com%2Fnatural?color=blue)](https://www.npmjs.com/package/@toma.com/natural)
+[![License: MIT](https://img.shields.io/github/license/toma/natural?color=blue)](LICENSE)
+[![Runtime: Bun 1.3.13](https://img.shields.io/badge/runtime-Bun%201.3.13-f9f1e1?logo=bun)](https://bun.sh)
+<!-- generated:badges:end -->
+
+Natural is a desktop-quality 2D and 3D game engine in the class of Unity and Unreal Engine, and it
+runs in the browser. It is MIT-licensed, code-first, and written for TypeScript. It combines Bun's
 toolchain and authoritative server runtime with Three.js WebGPU/WebGL rendering, Rapier physics, a
 deterministic ECS, and browser and Tauri editors.
 
-The umbrella package is `@natural-engine/natural`; the installed executable is `natural`. Version
-`0.1.0-alpha.0` is a production-tested vertical slice, not a claim of full Godot parity. The exact
-implemented and planned surface is tracked in [the capability matrix](docs/godot-parity.md).
+The umbrella package is `@toma.com/natural`; the installed executable is `natural`. The current
+release is a production-tested vertical slice. The implemented and planned surface is tracked in
+[the capability matrix](docs/capability-matrix.md).
+
+## Run the demo
+
+With Bun installed, run this from the repository root:
+
+```bash
+bun run demo
+```
+
+This installs the locked dependencies and starts [NaturalFPS](examples/urban-raid/README.md).
+Open http://127.0.0.1:43400 to play. Press Ctrl+C in the terminal to stop the server.
 
 ## Create a game
 
 From a published release:
 
 ```bash
-bunx @natural-engine/cli create my-game
+bunx @toma.com/cli create my-game
 cd my-game
 bun install
 bun run dev
@@ -49,6 +73,28 @@ web/desktop exports, project metadata, and instructions for both human contribut
 - Content-addressed assets, runtime/editor plugin manifests, a noninteractive CLI, an MCP server,
   deterministic test helpers, clean-room package tests, and web/server/desktop exporters.
 
+<!-- generated:packages:start -->
+
+## Published packages
+
+Every public package is released together from the same version tag.
+
+| Package                                                                      | Purpose                                                                                                                                                     | Version         |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| [`@toma.com/assets`](https://www.npmjs.com/package/@toma.com/assets)         | Content-addressed asset import pipeline for the Natural game engine                                                                                         | `0.1.0-alpha.3` |
+| [`@toma.com/cli`](https://www.npmjs.com/package/@toma.com/cli)               | Project creation, development, inspection, testing, and export CLI for Natural                                                                              | `0.1.0-alpha.3` |
+| [`@toma.com/core`](https://www.npmjs.com/package/@toma.com/core)             | Deterministic ECS, scenes, resources, and runtime lifecycle for Natural                                                                                     | `0.1.0-alpha.3` |
+| [`@toma.com/gameplay`](https://www.npmjs.com/package/@toma.com/gameplay)     | Animation, input, audio, UI, localization, navigation, and streaming for Natural                                                                            | `0.1.0-alpha.3` |
+| [`@toma.com/mcp`](https://www.npmjs.com/package/@toma.com/mcp)               | Local Model Context Protocol server for Natural engine projects                                                                                             | `0.1.0-alpha.3` |
+| [`@toma.com/natural`](https://www.npmjs.com/package/@toma.com/natural)       | Desktop-quality 2D and 3D game engine in the class of Unity and Unreal Engine that runs in the browser, built on Bun, WebGPU, and authoritative multiplayer | `0.1.0-alpha.3` |
+| [`@toma.com/netcode`](https://www.npmjs.com/package/@toma.com/netcode)       | Authoritative multiplayer, prediction, replication, and replays for Natural                                                                                 | `0.1.0-alpha.3` |
+| [`@toma.com/physics`](https://www.npmjs.com/package/@toma.com/physics)       | GPU-friendly Rapier 2D and 3D physics integration for Natural                                                                                               | `0.1.0-alpha.3` |
+| [`@toma.com/plugin-sdk`](https://www.npmjs.com/package/@toma.com/plugin-sdk) | Manifest and extension SDK for Natural engine plugins                                                                                                       | `0.1.0-alpha.3` |
+| [`@toma.com/render`](https://www.npmjs.com/package/@toma.com/render)         | WebGPU-first 2D and 3D rendering for Natural, powered by Three.js                                                                                           | `0.1.0-alpha.3` |
+| [`@toma.com/test`](https://www.npmjs.com/package/@toma.com/test)             | Deterministic headless testing utilities for Natural games                                                                                                  | `0.1.0-alpha.3` |
+
+<!-- generated:packages:end -->
+
 ## Scale contract
 
 Natural treats visible and actively simulated objects as different budgets:
@@ -57,28 +103,57 @@ Natural treats visible and actively simulated objects as different budgets:
 - 10,000 active ECS entities updated inside a 16.7 ms p95 CPU budget.
 - 256 connected authoritative clients inside a 33.3 ms p95 server budget.
 
-Hardware-specific GPU performance is tested only on the `natural-gpu` runner. Hosted CI still runs
-the editor, both reference games, visual regression, package installation, and CPU/network gates.
+Hardware-specific GPU performance is tested only on the `natural-gpu` runner. Hosted CI runs the
+editor, all three reference games, visual regression, package installation, and CPU/network gates.
 
 ## Repository commands
 
 ```bash
-bun run check          # formatting, types, lint, unit/integration tests, coverage
+bun run check          # version sites, copy rules, formatting, types, lint, tests, coverage
 bun run build          # libraries, declarations, editor, and reference games
 bun run pack:check     # npm tarballs and clean-room consumer/generated-project smoke tests
 bun run test:e2e       # editor and real browser game loops
 bun run test:network   # 256-client authoritative-server benchmark
 bun run bench          # 10,000-active-entity CPU benchmark
+bun run version:bump   # rewrite every version site: patch, minor, major, prerelease, or X.Y.Z
 bun run release:verify # every release gate, including dependency audit
 ```
 
 Run the reference games directly with:
 
 ```bash
-bun run --filter @natural-engine/example-arena-2d dev
-bun run --filter @natural-engine/example-sandbox-3d dev
+bun run --filter @toma.com/example-arena-2d dev
+bun run --filter @toma.com/example-sandbox-3d dev
+bun run demo
 ```
+
+The FPS example at http://127.0.0.1:43400 is [NaturalFPS](examples/urban-raid/README.md).
+Click its canvas to capture the mouse for first-person controls.
 
 See [architecture](docs/architecture.md), [testing](docs/testing.md),
 [contributing](CONTRIBUTING.md), [release process](docs/releasing.md), and the
-[Godot capability matrix](docs/godot-parity.md).
+[capability matrix](docs/capability-matrix.md).
+
+## Release status
+
+Every push to `main` checks the repository version. A new version creates an immutable tag and starts
+the release workflow, which publishes the public packages and builds the desktop applications. Stable
+versions use the npm `latest` tag, and prereleases use `next`. See the [release process](docs/releasing.md)
+for credentials, reruns, and failure recovery.
+
+<!-- generated:contributions:start -->
+
+## Contribution paths
+
+Start with [CONTRIBUTING.md](CONTRIBUTING.md), then use the path that matches the change.
+
+| Area          | Start here                                             | Validation                                 |
+| ------------- | ------------------------------------------------------ | ------------------------------------------ |
+| Code          | [Packages](packages)                                   | `bun run check`                            |
+| Tests         | [Testing guide](docs/testing.md)                       | `bun run test`                             |
+| Documentation | [Documentation](docs)                                  | `bun run docs:check`                       |
+| Examples      | [Examples](examples)                                   | `bun run build` and `bun run test:e2e`     |
+| Performance   | [Performance gates](docs/testing.md#performance-gates) | `bun run test:network` and `bun run bench` |
+| Security      | [Security policy](SECURITY.md)                         | Follow the private reporting process       |
+
+<!-- generated:contributions:end -->

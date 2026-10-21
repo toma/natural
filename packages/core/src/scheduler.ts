@@ -15,6 +15,8 @@ export type Stage = (typeof stages)[number];
 export interface SystemContext {
   world: World;
   delta: number;
+  /** Clamped real frame duration, including while simulation time is scaled to zero. */
+  unscaledDelta?: number;
   elapsed: number;
   tick: number;
   alpha: number;

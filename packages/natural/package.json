@@ -1,9 +1,14 @@
 {
-  "name": "@natural-engine/natural",
-  "version": "0.1.0-alpha.0",
-  "description": "Bun-first open-source 2D and 3D game engine with WebGPU and authoritative multiplayer",
+  "name": "@toma.com/natural",
+  "version": "0.1.0-alpha.3",
+  "description": "Desktop-quality 2D and 3D game engine in the class of Unity and Unreal Engine that runs in the browser, built on Bun, WebGPU, and authoritative multiplayer",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toma/natural.git",
+    "directory": "packages/natural"
+  },
   "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -36,12 +41,12 @@
     "typescript"
   ],
   "dependencies": {
-    "@natural-engine/assets": "workspace:*",
-    "@natural-engine/core": "workspace:*",
-    "@natural-engine/gameplay": "workspace:*",
-    "@natural-engine/netcode": "workspace:*",
-    "@natural-engine/physics": "workspace:*",
-    "@natural-engine/plugin-sdk": "workspace:*",
-    "@natural-engine/render": "workspace:*"
+    "@toma.com/assets": "workspace:*",
+    "@toma.com/core": "workspace:*",
+    "@toma.com/gameplay": "workspace:*",
+    "@toma.com/netcode": "workspace:*",
+    "@toma.com/physics": "workspace:*",
+    "@toma.com/plugin-sdk": "workspace:*",
+    "@toma.com/render": "workspace:*"
   }
 }

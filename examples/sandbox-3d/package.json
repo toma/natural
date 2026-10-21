@@ -1,6 +1,6 @@
 {
-  "name": "@natural-engine/example-sandbox-3d",
-  "version": "0.1.0-alpha.0",
+  "name": "@toma.com/example-sandbox-3d",
+  "version": "0.1.0-alpha.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,6 @@
     "server": "bun server.ts"
   },
   "dependencies": {
-    "@natural-engine/natural": "workspace:*"
+    "@toma.com/natural": "workspace:*"
   }
 }

@@ -1,9 +1,4 @@
-import {
-  LocalTransform,
-  defineComponent,
-  defineSystem,
-  type Transform,
-} from "@natural-engine/core";
+import { LocalTransform, defineComponent, defineSystem, type Transform } from "@toma.com/core";
 
 export interface TransformKeyframe {
   time: number;

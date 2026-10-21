@@ -1,0 +1,29 @@
+{
+  "scope": "Historical initial import, before the requested support-wrist correction",
+  "upstreamAuthor": "mshumer",
+  "revision": "d9b237b75c9304ab8d9ef4cfa0c3568c7c11a853",
+  "browser": "Chromium 151.0.7922.34",
+  "platform": "macOS arm64, ANGLE Metal",
+  "viewport": [1280, 720],
+  "deviceScaleFactor": 1,
+  "quality": "ultra",
+  "bootFrames": 3,
+  "settleFrames": 90,
+  "freshPagePerShot": true,
+  "changedPixels": {
+    "hero": 0,
+    "interior": 0,
+    "detail": 0,
+    "sunset": 0,
+    "night": 0,
+    "weapon": 0,
+    "ads": 0,
+    "muzzle": 0,
+    "combat": 0,
+    "impacts": 0,
+    "hud": 0
+  },
+  "maxChannelDelta": 0,
+  "browserErrors": [],
+  "command": "NATURAL_FPS_UPSTREAM_URL=http://127.0.0.1:43510 NATURAL_FPS_TEST_URL=http://127.0.0.1:43410 bun run --filter @toma.com/example-urban-raid test:parity"
+}
