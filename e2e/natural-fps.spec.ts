@@ -13,7 +13,10 @@ test.use({
     ],
   },
 });
-test.setTimeout(180_000);
+// The lockstep fixtures pump 90 frames before the shutter. On a GPU host that is
+// about a second; on a software-GL host (headless CI without a GPU) each frame
+// costs seconds, so allow a generous ceiling. Fast hosts still finish quickly.
+test.setTimeout(Number(process.env.NATURAL_FPS_TIMEOUT_MS ?? 1_200_000));
 
 const url = process.env.NATURAL_FPS_TEST_URL ?? "http://127.0.0.1:43400";
 const state = (page: Page) =>
@@ -270,13 +273,16 @@ test("NaturalFPS mouse and keyboard control the first-person camera and weapon",
   await page.keyboard.up("ControlLeft");
   await page.keyboard.press("Escape");
   await expect.poll(() => page.evaluate(() => document.pointerLockElement === null)).toBe(true);
-  await expect(page.getByRole("heading", { name: "PAUSED" })).toBeVisible();
-  await expect(page.locator(".ow-menu .sub")).toHaveText("NaturalFPS");
+  await expect(page.getByRole("dialog", { name: "NaturalFPS menu" })).toBeVisible();
+  await expect(page.locator(".ow-menu .nf-brand")).toHaveText("NATURALFPS");
   await expect.poll(async () => (await state(page)).scale).toBe(0);
   const paused = await state(page);
   await page.waitForTimeout(150);
   expect((await state(page)).tick).toBe(paused.tick);
-  await page.getByRole("button", { name: "Resume", exact: true }).click({ delay: 250 });
+  await page
+    .getByRole("button", { name: /resume game|play/i })
+    .first()
+    .click({ delay: 250 });
   await expect.poll(async () => (await state(page)).scale).toBe(1);
   await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe("game");
   expect((await state(page)).ammo).toBe(paused.ammo);

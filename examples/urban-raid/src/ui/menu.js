@@ -27,7 +27,7 @@ export class PauseMenu {
     el("div", "nf-session", mast, "COMBAT TRAINING / LOCAL MATCH");
     const heading = el("div", "nf-menu-heading", inner);
     this.heading = el("h1", null, heading, "ATOMIC CUL-DE-SAC");
-    this.status = el("div", "nf-menu-status", heading, "NEVADA, USA / 1963");
+    this.status = el("div", "nf-menu-status", heading, "DESERT PROVING GROUND / 1962");
     const body = el("div", "nf-menu-body", inner);
     const aside = el("nav", "nf-menu-nav", body);
     aside.setAttribute("aria-label", "Game menu");
@@ -294,7 +294,9 @@ export class PauseMenu {
     );
     setText(
       this.status,
-      page === "loadout" ? "PRIMARY WEAPON / ALL WEAPONS AVAILABLE" : "NEVADA, USA / 1963",
+      page === "loadout"
+        ? "PRIMARY WEAPON / ALL WEAPONS AVAILABLE"
+        : "DESERT PROVING GROUND / 1962",
     );
     if (focus && this.open)
       (page === "loadout"
