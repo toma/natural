@@ -27,10 +27,10 @@ export function readSettings(raw: string | null): MenuSettings | null {
         : fallback;
     };
     return {
-      quality: QUALITY_NAMES.find((name) => name === obj["quality"]) ?? MENU_DEFAULTS.quality,
+      quality: QUALITY_NAMES.find((name) => name === obj.quality) ?? MENU_DEFAULTS.quality,
       sensitivity: numeric("sensitivity", 0.00044, 0.0066, MENU_DEFAULTS.sensitivity),
       fov: numeric("fov", 65, 120, MENU_DEFAULTS.fov),
-      invertY: obj["invertY"] === true,
+      invertY: obj.invertY === true,
     };
   } catch {
     return null;

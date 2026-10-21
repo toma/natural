@@ -13,8 +13,12 @@ export const MAP_BOUNDS = { minX: -23, maxX: 23, minZ: -39, maxZ: 39 } as const;
 export const FLOOR_HEIGHT = 3.12;
 
 /** Solid vertical spans after subtracting every opening crossing this wall column. */
-export function wallSpans(bottom: number, top: number, holes: readonly { y: number; h: number }[]) {
-  const spans: [number, number][] = [];
+export function wallSpans(
+  bottom: number,
+  top: number,
+  holes: ReadonlyArray<{ y: number; h: number }>,
+) {
+  const spans: Array<[number, number]> = [];
   let cursor = bottom;
   for (const hole of [...holes].sort((a, b) => a.y - b.y)) {
     if (hole.y > cursor) spans.push([cursor, Math.min(hole.y, top)]);

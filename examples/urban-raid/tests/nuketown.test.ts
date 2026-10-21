@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Vector3 } from "three";
+import type { Vector3 } from "three";
 import {
   HOUSES,
   LANDMARKS,

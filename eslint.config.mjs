@@ -63,6 +63,7 @@ export default tseslint.config(
           "setInterval",
           "clearInterval",
           "URLSearchParams",
+          "localStorage",
           "AudioContext",
           "OfflineAudioContext",
           "Float32Array",

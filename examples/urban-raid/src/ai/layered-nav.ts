@@ -266,7 +266,7 @@ export class LayeredNavGrid {
     costs.fill(Infinity);
     const parents = new Int32Array(this.floor.length);
     parents.fill(-1);
-    const open: { i: number; score: number }[] = [];
+    const open: Array<{ i: number; score: number }> = [];
     const push = (i: number, score: number) => {
       open.push({ i, score });
       let n = open.length - 1;
