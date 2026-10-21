@@ -1,6 +1,6 @@
 {
   "name": "@toma.com/physics",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "GPU-friendly Rapier 2D and 3D physics integration for Natural",
   "type": "module",
   "license": "MIT",

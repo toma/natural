@@ -1,6 +1,6 @@
 {
   "name": "@toma.com/test",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "Deterministic headless testing utilities for Natural games",
   "type": "module",
   "license": "MIT",

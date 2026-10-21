@@ -22,28 +22,28 @@
     },
     "apps/editor-desktop": {
       "name": "@toma.com/editor-desktop",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "devDependencies": {
         "@tauri-apps/cli": "^2.8.5",
       },
     },
     "examples/arena-2d": {
       "name": "@toma.com/example-arena-2d",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/natural": "workspace:*",
       },
     },
     "examples/sandbox-3d": {
       "name": "@toma.com/example-sandbox-3d",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/natural": "workspace:*",
       },
     },
     "examples/urban-raid": {
       "name": "@toma.com/example-urban-raid",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/natural": "workspace:*",
         "three": "^0.180.0",
@@ -54,11 +54,11 @@
     },
     "packages/assets": {
       "name": "@toma.com/assets",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
     },
     "packages/cli": {
       "name": "@toma.com/cli",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "bin": {
         "natural": "./src/main.ts",
       },
@@ -69,11 +69,11 @@
     },
     "packages/core": {
       "name": "@toma.com/core",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
     },
     "packages/editor": {
       "name": "@toma.com/editor",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@tauri-apps/api": "^2.8.0",
         "@tauri-apps/plugin-dialog": "^2.4.0",
@@ -85,14 +85,14 @@
     },
     "packages/gameplay": {
       "name": "@toma.com/gameplay",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/core": "workspace:*",
       },
     },
     "packages/mcp": {
       "name": "@toma.com/mcp",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "bin": {
         "natural-mcp": "./src/main.ts",
       },
@@ -103,7 +103,7 @@
     },
     "packages/natural": {
       "name": "@toma.com/natural",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/assets": "workspace:*",
         "@toma.com/core": "workspace:*",
@@ -116,14 +116,14 @@
     },
     "packages/netcode": {
       "name": "@toma.com/netcode",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/core": "workspace:*",
       },
     },
     "packages/physics": {
       "name": "@toma.com/physics",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@dimforge/rapier2d-compat": "^0.19.0",
         "@dimforge/rapier3d-compat": "^0.19.0",
@@ -132,14 +132,14 @@
     },
     "packages/plugin-sdk": {
       "name": "@toma.com/plugin-sdk",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/core": "workspace:*",
       },
     },
     "packages/render": {
       "name": "@toma.com/render",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/core": "workspace:*",
         "three": "^0.180.0",
@@ -147,7 +147,7 @@
     },
     "packages/test": {
       "name": "@toma.com/test",
-      "version": "0.1.0-alpha.3",
+      "version": "0.1.0-alpha.4",
       "dependencies": {
         "@toma.com/core": "workspace:*",
       },

@@ -15,9 +15,9 @@ export const projectPackage = (name: string): string =>
         typecheck: "tsc --noEmit",
         check: "bun run typecheck && bun test",
       },
-      dependencies: { "@toma.com/natural": "^0.1.0-alpha.3" },
+      dependencies: { "@toma.com/natural": "^0.1.0-alpha.4" },
       devDependencies: {
-        "@toma.com/cli": "^0.1.0-alpha.3",
+        "@toma.com/cli": "^0.1.0-alpha.4",
         "@tauri-apps/cli": "^2.8.5",
         "@types/bun": "^1.3.0",
         typescript: "^5.9.2",

@@ -1,6 +1,6 @@
 {
   "name": "@toma.com/assets",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "Content-addressed asset import pipeline for the Natural game engine",
   "type": "module",
   "license": "MIT",

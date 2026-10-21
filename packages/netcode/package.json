@@ -1,6 +1,6 @@
 {
   "name": "@toma.com/netcode",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "Authoritative multiplayer, prediction, replication, and replays for Natural",
   "type": "module",
   "license": "MIT",

@@ -3,7 +3,18 @@
 Natural follows Semantic Versioning. This file records user-visible engine, editor, tooling, and
 compatibility changes.
 
-## 0.1.0-alpha.3 - 2026-09-06
+## 0.1.0-alpha.4 - 2026-10-21
+
+- Rebrand the NaturalFPS demo map to the original Atomic Cul-de-sac: a 1950s desert test-site
+  suburb with original, engine-generated signage in place of the previous copied in-game text.
+  Rename the world sources, builder, material keys, map test, and the design document.
+- Fix the repository merge gate so it passes: correct `check-copy` matching its own
+  forbidden-character definitions, format and lint the FPS example, and clear high-severity
+  dependency advisories by bumping `brace-expansion`.
+- Add `homepage` and `bugs` metadata to every published package manifest, and add GitHub issue
+  and pull request templates for the public repository.
+- Regenerate the FPS screenshot baselines and allow a longer fixture timeout so the lockstep
+  captures complete on software-GL hosts.
 
 - Correct the FPS rifle's inverted left wrist with a palm-up support grip aligned to the
   forearm, preserving fingertip contact and the reload hand targets derived from that grip.

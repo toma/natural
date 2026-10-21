@@ -1,6 +1,6 @@
 {
   "name": "@toma.com/natural",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "Desktop-quality 2D and 3D game engine in the class of Unity and Unreal Engine that runs in the browser, built on Bun, WebGPU, and authoritative multiplayer",
   "type": "module",
   "license": "MIT",

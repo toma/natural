@@ -1,6 +1,6 @@
 {
   "name": "@toma.com/render",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "WebGPU-first 2D and 3D rendering for Natural, powered by Three.js",
   "type": "module",
   "license": "MIT",
