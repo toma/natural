@@ -913,9 +913,12 @@ function bus(A, box) {
   // blocks sightlines and gives cover in the cul-de-sac.
   const K = kit(A, box.x, box.z, box.yaw);
   K.box("ac-dark", 0, 0.77, 0, 11.3, 0.5, 2.5, true);
-  K.box("ac-bus", 0, 1.35, 0, 11.1, 0.95, 2.62, true);
-  K.box("ac-bus", 0.7, 2.86, 0, 9.7, 0.22, 2.72, true);
-  K.box("ac-bus", -4.8, 1.64, 0, 1.4, 0.46, 2.55, true);
+  K.round("ac-bus", 0, 1.35, 0, 11.1, 0.95, 2.62, 0.22, true);
+  K.round("ac-bus", 0.7, 2.86, 0, 9.7, 0.3, 2.72, 0.3, true);
+  K.round("ac-bus", -4.8, 1.64, 0, 1.4, 0.46, 2.55, 0.2, true);
+  // Rounded wheel arches over each wheel.
+  for (const x of [-3.7, 3.7])
+    for (const s of [-1, 1]) K.round("ac-dark", x, 0.78, s * 1.25, 1.3, 0.6, 0.2, 0.18, false);
   K.box("ac-glass", -3.94, 2.26, 0, 0.04, 0.98, 2.42, true);
   K.box("ac-bus", 5.47, 2.22, 0, 0.17, 1.2, 2.62, true);
   for (const side of [-1, 1]) {
@@ -947,9 +950,9 @@ function bus(A, box) {
 function truck(A, box) {
   const K = kit(A, box.x, box.z, box.yaw);
   K.box("ac-dark", 0, 0.85, 0, 13.5, 0.35, 2.4, true);
-  K.box("ac-red", -5.5, 1.43, 0, 2.3, 1.2, 2.55, true);
-  K.box("ac-red", -5.1, 2.49, 0, 2.2, 0.95, 2.5, true);
-  K.box("ac-red", -5.1, 3.03, 0, 2.4, 0.15, 2.65, false);
+  K.round("ac-red", -5.5, 1.43, 0, 2.3, 1.2, 2.55, 0.18, true);
+  K.round("ac-red", -5.1, 2.49, 0, 2.2, 0.95, 2.5, 0.22, true);
+  K.round("ac-red", -5.1, 3.03, 0, 2.4, 0.18, 2.65, 0.1, false);
   K.box("ac-glass", -6.23, 2.58, 0, 0.025, 0.65, 2.24, false);
   for (const z of [-1.28, 1.28]) {
     K.box("ac-glass", -5.45, 2.56, z, 1.22, 0.65, 0.025, false);
@@ -980,22 +983,44 @@ function truck(A, box) {
 
 function car(A, box, color = "ac-car") {
   const K = kit(A, box.x, box.z, box.yaw);
-  K.box(color, 0, 0.74, 0, 4.8, 0.63, 1.85, true);
-  K.box(color, 0, 1.34, 0, 2.5, 0.67, 1.7, true);
-  K.box("ac-glass", -1.23, 1.4, 0, 0.03, 0.5, 1.54, false);
-  K.box("ac-glass", 1.23, 1.4, 0, 0.03, 0.5, 1.54, false);
-  for (const s of [-1, 1]) {
-    K.box("ac-glass", 0, 1.44, s * 0.862, 2.2, 0.43, 0.025, false);
-    K.box("ac-chrome", 0, 0.9, s * 0.96, 4.7, 0.05, 0.04, false);
-    K.box("ac-chrome", 0, 1.4, s * 0.88, 0.05, 0.58, 0.03, false);
+  const trim = "ac-chrome",
+    glass = "ac-glass",
+    tire = "ac-rubber";
+  // Rounded body with a waistline, sloping hood and trunk, and a domed cabin.
+  K.round(color, 0, 0.66, 0, 4.7, 0.5, 1.95, 0.26, true);
+  K.round(color, 0.1, 0.96, 0, 3.1, 0.34, 1.9, 0.3, true);
+  K.round(color, 1.5, 1.0, 0, 1.5, 0.22, 1.82, 0.18, false, 0, 0, -0.07);
+  K.round(color, -1.55, 1.02, 0, 1.25, 0.2, 1.82, 0.18, false, 0, 0, 0.06);
+  K.round(color, -0.15, 1.42, 0, 2.1, 0.5, 1.64, 0.3, true);
+  K.round(color, -0.2, 1.68, 0, 1.85, 0.16, 1.5, 0.34, false);
+  // Tinted glass: windshield, backlight, side windows.
+  K.box(glass, 0.95, 1.46, 0, 0.05, 0.42, 1.46, false, 0, 0, 0.42);
+  K.box(glass, -1.18, 1.47, 0, 0.05, 0.4, 1.46, false, 0, 0, -0.38);
+  for (const s of [-1, 1]) K.box(glass, -0.15, 1.5, s * 0.8, 1.9, 0.42, 0.04, false);
+  // Fenders over each wheel.
+  for (const xx of [1.5, -1.5])
+    for (const s of [-1, 1]) K.round(color, xx, 0.62, s * 0.9, 1.35, 0.5, 0.34, 0.24, false);
+  // Chrome bumpers with overriders, grille, side spear.
+  for (const xx of [2.42, -2.42]) {
+    K.cylinder(trim, xx, 0.6, 0, 0.1, 2.0, Math.PI / 2);
+    for (const s of [-1, 1]) K.round(trim, xx, 0.64, s * 0.52, 0.16, 0.36, 0.17, 0.05, false);
   }
-  for (const xx of [-2.43, 2.43]) K.box("ac-chrome", xx, 0.65, 0, 0.12, 0.18, 1.98, false);
-  for (const xx of [-1.5, 1.5])
-    for (const zz of [-0.91, 0.91]) {
-      K.cylinder("ac-rubber", xx, 0.45, zz, 0.39, 0.2, Math.PI / 2);
-      K.cylinder("ac-chrome", xx, 0.45, zz * 1.13, 0.24, 0.035, Math.PI / 2);
+  for (let z = -0.5; z <= 0.5; z += 0.13) K.box(trim, 2.44, 0.8, z, 0.08, 0.34, 0.05, false);
+  for (const s of [-1, 1]) K.box(trim, 0, 0.84, s * 0.99, 4.0, 0.05, 0.03, false);
+  // Headlights, tail lights.
+  for (const s of [-1, 1]) {
+    K.cylinder(trim, 2.42, 0.93, s * 0.66, 0.15, 0.12, 0, Math.PI / 2);
+    K.sphere("ac-bulb", 2.48, 0.93, s * 0.66, 0.11, 0.11, 0.08);
+    K.sphere("ac-red", -2.44, 0.93, s * 0.62, 0.06, 0.15, 0.1);
+  }
+  // Whitewall wheels with chrome hubcaps.
+  for (const xx of [1.5, -1.5])
+    for (const zz of [-0.96, 0.96]) {
+      K.cylinder(tire, xx, 0.45, zz, 0.42, 0.26, Math.PI / 2);
+      K.cylinder("ac-white", xx, 0.45, zz * 1.03, 0.31, 0.27, Math.PI / 2);
+      K.cylinder(trim, xx, 0.45, zz * 1.1, 0.2, 0.06, Math.PI / 2);
+      K.sphere("ac-dark", xx, 0.45, zz * 1.16, 0.05, 0.05, 0.05);
     }
-  for (const s of [-1, 1]) K.sphere("ac-bulb", -2.46, 0.95, s * 0.69, 0.045, 0.15, 0.15);
 }
 
 function garden(A, h, rng) {

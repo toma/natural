@@ -67,8 +67,8 @@ export interface PropBox {
 export const VEHICLES: readonly PropBox[] = [
   { id: "bus", x: -2, z: 0, yaw: 0.42, w: 11.3, d: 2.62 },
   { id: "truck", x: 2.4, z: 5.7, yaw: 0, w: 13.5, d: 2.95 },
-  { id: "car-green", x: -15, z: -6.4, yaw: 0, w: 4.8, d: 1.85 },
-  { id: "car-yellow", x: 16.4, z: 6.4, yaw: Math.PI, w: 4.8, d: 1.85 },
+  { id: "car-green", x: -15, z: -6.4, yaw: 0, w: 5, d: 2 },
+  { id: "car-yellow", x: 16.4, z: 6.4, yaw: Math.PI, w: 5, d: 2 },
 ];
 
 /** Utility poles, world space; footprint is the pole plus its crossarm. */
