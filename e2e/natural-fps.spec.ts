@@ -226,7 +226,8 @@ test("NaturalFPS anatomical support arm stays connected during idle, aiming, and
     }
     return results;
   })()`);
-  expect(reaches).toHaveLength(24);
+  // Six-weapon loadout (five primaries plus the pistol), eight clips each.
+  expect(reaches).toHaveLength(48);
   for (const reach of reaches) {
     expect(reach.gap, `${reach.id} ${reach.name} wrist connection`).toBeLessThan(0.00001);
   }
