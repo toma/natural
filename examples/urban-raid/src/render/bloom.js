@@ -3,9 +3,9 @@ import { COMMON } from "./glsl.js";
 import { Pass, hdrTarget } from "./pass.js";
 
 /**
- * Physically-motivated bloom: the progressive dual-filter pyramid from
- * "Next Generation Post Processing in Call of Duty: Advanced Warfare"
- * (Jimenez 2014). Not UnrealBloomPass.
+ * Physically-motivated bloom: a progressive dual-filter downsample/upsample
+ * pyramid, following Jimenez's SIGGRAPH 2014 Advances in Real-Time Rendering
+ * course notes. This is a distinct approach from a fixed Gaussian bloom pass.
  *
  *  - A SOFT-KNEE threshold on the first level only, in exposure-scaled linear
  *    light. Veiling glare over the whole image is physically real but it is

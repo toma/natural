@@ -274,23 +274,45 @@ visual fixture.
   replacement over `git ls-files -c -o --exclude-standard`, hand-edit the escaped regex in
   `scripts/versions.ts`, then run `bun run docs:generate`; the README badges and package table
   derive from the manifests. The scope owner must exist on npm before the first publish.
-- The owner requested a NaturalFPS rebuild close to the original Black Ops Nuketown, with
-  weapon selection in the same menu UI and controls and UX close to the original. Killstreaks
-  and elaborate progression are outside that request. The proposed implementation and its
-  acceptance criteria are in `docs/natural-fps-nuketown-plan.md`. The owner approved that
-  complete plan. Continue implementation and verification without another scope approval.
+- The NaturalFPS demo map is Atomic Cul-de-sac: an original recreation of a small,
+  symmetrical 1950s desert test-site suburb (two facing two-story pastel houses with
+  garages and backyards, a central school bus and moving truck, picket fences, mannequins,
+  vintage cars, a welcome sign and clock tower, and a desert horizon). It is inspired by the
+  cul-de-sac archetype of that genre but is an original work: all geometry and textures are
+  engine-generated and all signage copy is original. Because the repo is public, keep it that
+  way. Do not add third-party names, logos, textures, ripped assets, or copied in-game copy,
+  and name the map Atomic Cul-de-sac (not any trademarked map name) in code, UI, and docs.
+  The design and acceptance criteria are in `docs/atomic-culdesac-plan.md`.
+- The map builder and layout live in `examples/urban-raid/src/world/atomic-culdesac.js` and
+  `atomic-culdesac-layout.ts`; the map unit test is `tests/atomic-culdesac.test.ts`. Material
+  and geometry-cache keys use the `ac-` prefix. The world builder entry is `buildAtomicCuldesac`.
 - The current FPS navigation grid samples only the highest surface at each X/Z coordinate.
-  It cannot represent a house interior beneath a roof or overlapping floors. The minimap
-  also contains market-specific scan bounds. A replacement level must update navigation,
-  minimap data, world queries, spawns, capture cameras, and benchmark routes together.
-- The current FPS movement is tuned for tactical sprint and sliding. The original Black Ops
-  PC manual instead binds C to crouch, Ctrl to prone or a sprinting dive, and Tab to scores.
-  Weapon input currently hardcodes the three imported guns and uses Tab to cycle them.
-  Melee and player grenades have action names but no gameplay consumers in the current port.
+  It cannot represent a house interior beneath a roof or overlapping floors. A replacement
+  level must update navigation, minimap data, world queries, spawns, capture cameras, and
+  benchmark routes together.
+- The current FPS movement is tuned for tactical sprint and sliding. The intended classic
+  layout binds C to crouch, Ctrl to prone or a sprinting dive, and Tab to scores. Weapon
+  input currently hardcodes the three imported guns and uses Tab to cycle them. Melee and
+  player grenades have action names but no gameplay consumers in the current port.
 - FPS `setWeapon()` starts a holster animation; paused simulation cannot finish that transition.
   Menu weapon previews and staged loadout choices must work without advancing gameplay time.
   The current input key handler also prevents default on ordinary keys even while a menu is
   open, so keyboard menu navigation needs explicit focus handling.
+- The urban-raid example was first committed failing `format:check`, `lint`, and `check:copy`,
+  so `bun run check` was red on `main`. The fixes: run Prettier over the example, add the
+  `localStorage` browser global and apply the auto-fixable style rules in `eslint.config.mjs`
+  scope, and bump `brace-expansion` (via `bun audit fix`) to clear four high advisories. Run
+  the full gate before pushing.
+- `scripts/check-copy.ts` used to flag itself: it held the forbidden em/en/ellipsis characters
+  as literal regexes while being exempt only from the word rule, so it reported three
+  violations against its own source. The patterns now use Unicode escapes (`\u2014`, `\u2013`,
+  `\u2026`) so the definition file contains none of the characters it forbids.
+- The browser e2e screenshots render through Playwright's bundled Chromium, which uses
+  SwiftShader (deterministic CPU rendering) on both ubuntu CI and a headless Linux VM, so
+  captures match between them without a GPU. But each lockstep capture frame costs about two
+  seconds under SwiftShader, so a `__PUMP__(90)` fixture exceeds the spec's 180 s per-test
+  timeout on a CPU-only host. Regenerate baselines with a standalone capture driver and generous
+  timeouts, or on a GPU host, not through the timed test runner.
 
 ## 4. Copy rules
 
