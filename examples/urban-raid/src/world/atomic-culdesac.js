@@ -835,25 +835,17 @@ function house(A, spec) {
   stairs(K, -4.72, -3.3, 1.65);
   wall(K, "ac-cream", 1.1, -0.7, 9.4, 2.83, [{ x: -1.9, y: 0.16, w: 1.6, h: 2.4 }], 0);
   wall(K, "ac-cream", 0, -0.2, 11.6, 2.83, [{ x: -2.8, y: y + 0.16, w: 1.8, h: 2.4 }], 0, y + 0.16);
-  // Roofs and chimney distinguish the two houses at a glance.
+  // Roofs and chimney distinguish the two houses at a glance: the green house
+  // has a gable with its ridge along the street, the yellow a perpendicular
+  // gable. Both carry eave overhangs, fascia boards, and a ridge cap.
   if (spec.id === "green") {
     const rise = 1.7,
-      half = 6.6,
-      angle = Math.atan2(rise, half);
+      half = 6.9,
+      angle = Math.atan2(rise, half),
+      len = Math.hypot(half, rise) + 0.4;
     for (const s of [-1, 1])
-      K.box(
-        "ac-roof",
-        s * 3.3,
-        7.15,
-        0,
-        Math.hypot(half, rise),
-        0.17,
-        11.2,
-        false,
-        0,
-        0,
-        -s * angle,
-      );
+      K.box("ac-roof", s * 3.45, 7.15, 0, len, 0.17, 11.9, false, 0, 0, -s * angle);
+    K.box("ac-roof", 0, 7.95, 0, 0.34, 0.22, 11.9, false);
     for (const z of [-5, 5]) {
       const shape = new THREE.Shape();
       shape.moveTo(-6, 0);
@@ -862,9 +854,43 @@ function house(A, spec) {
       shape.closePath();
       K.geo(key, new THREE.ShapeGeometry(shape), 0, 6.4, z, 1, 1, 1, 0, z < 0 ? Math.PI : 0);
     }
+    for (const s of [-1, 1]) {
+      K.box("ac-white", s * 6.75, 6.28, 0, 0.12, 0.34, 11.9, false); // eave fascia
+      for (const z of [-5.95, 5.95])
+        K.box("ac-white", s * 3.45, 7.2, z, len, 0.14, 0.14, false, 0, 0, -s * angle); // rake
+    }
   } else {
-    K.box("ac-roof", 0, 6.77, 0, 13.2, 0.18, 11.2, false, 0, 0, -0.09);
-    K.box("ac-white", 0, 6.76, 5.6, 13.2, 0.32, 0.14, false, 0, 0, -0.09);
+    const rise = 1.55,
+      half = 5,
+      angle = Math.atan2(rise, half),
+      len = Math.hypot(half, rise) + 0.4;
+    for (const s of [-1, 1])
+      K.box("ac-roof", 0, 7.0, s * 2.5, 13.9, 0.17, len, false, s * angle, 0, 0);
+    K.box("ac-roof", 0, 7.78, 0, 13.9, 0.22, 0.34, false);
+    for (const x of [-6, 6]) {
+      const shape = new THREE.Shape();
+      shape.moveTo(-5, 0);
+      shape.lineTo(5, 0);
+      shape.lineTo(0, 1.55);
+      shape.closePath();
+      K.geo(
+        key,
+        new THREE.ShapeGeometry(shape),
+        x,
+        6.23,
+        0,
+        1,
+        1,
+        1,
+        0,
+        x < 0 ? -Math.PI / 2 : Math.PI / 2,
+      );
+    }
+    for (const s of [-1, 1]) {
+      K.box("ac-white", 0, 6.13, s * 5.3, 13.9, 0.34, 0.12, false); // eave fascia
+      for (const x of [-6.95, 6.95])
+        K.box("ac-white", x, 7.05, s * 2.5, 0.14, 0.14, len, false, s * angle, 0, 0); // rake
+    }
   }
   K.box("ac-stone", -4.55, 4.1, 4.9, 1.9, 8.2, 0.85, true);
   K.box("ac-dark", -4.55, 8.29, 4.9, 2.18, 0.18, 1.06, false);
