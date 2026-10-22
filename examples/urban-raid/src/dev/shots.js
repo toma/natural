@@ -46,6 +46,29 @@ export const SHOTS = {
     doc: "Night - artificial lights, exposure adaptation, shadow quality in the dark.",
   },
 
+  // ---- reference-comparison framings ----
+  yellow: {
+    pos: [-9.5, 3.6, 3.5],
+    look: [0.5, 4.0, 14],
+    fov: 76,
+    time: 16.5,
+    doc: "Yellow modernist house from the street: shed roof, stone chimney, carport.",
+  },
+  yardgreen: {
+    pos: [-8, 2.4, -27],
+    look: [0, 3.2, -18],
+    fov: 74,
+    time: 16.5,
+    doc: "Green house backyard: deck, stairs, stone chimney, shed.",
+  },
+  yardyellow: {
+    pos: [8, 2.4, 27],
+    look: [1, 3.2, 18],
+    fov: 74,
+    time: 16.5,
+    doc: "Yellow house backyard: deck, carport, board fences.",
+  },
+
   // ---- weapon / viewmodel ----
   weapon: {
     pos: [-13, 1.7, -2.5],

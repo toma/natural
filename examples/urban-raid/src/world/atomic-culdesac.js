@@ -127,13 +127,13 @@ function materials(A, rng) {
     return A.registerMaterial(key, A.materials.get(name, opts), surf);
   };
   surface("ac-green", "#5fb48d", "wood");
-  surface("ac-yellow", "#d8c36a", "wood");
+  surface("ac-yellow", "#cfc156", "wood");
   surface("ac-white", "#ece6d6", "wood");
   surface("ac-blue", "#4a7d86", "wood");
   surface("ac-wood", "#8e6b47", "wood");
   surface("ac-fence", "#b6a17a", "wood");
   surface("ac-roof", "#606560", "roof");
-  surface("ac-stone", "#938c81", "stone");
+  surface("ac-stone", "#aca69b", "stone");
   surface("ac-road", "#514b42", "road");
   surface("ac-line", "#cfc8b0", "concrete");
   surface("ac-tar", "#1c1f1d", "road");
@@ -563,43 +563,6 @@ function drips(K, cx, topY, z, half, key = "ac-grime", n = 9) {
  * decorative massing that breaks an otherwise plain slope and varies the
  * roofline. Crisp, real-scale members, no blobby forms.
  */
-function dormerZ(K, cx, cz, baseY, key, w = 1.5) {
-  const depth = 1.3,
-    wallH = 0.78,
-    gable = 0.62,
-    zf = cz + depth / 2;
-  for (const s of [-1, 1])
-    K.box(key, cx + s * (w / 2), baseY + wallH / 2, cz, 0.1, wallH, depth, false); // cheeks
-  K.box(key, cx, baseY + wallH / 2, cz - depth / 2, w, wallH, 0.12, false); // back into the roof
-  K.box(key, cx, baseY + 0.13, zf, w, 0.26, 0.1, false); // apron below the sash
-  K.box("ac-glass", cx, baseY + wallH * 0.56, zf, w * 0.74, wallH * 0.62, 0.05, false);
-  K.box("ac-white", cx, baseY + wallH * 0.56, zf + 0.012, 0.04, wallH * 0.62, 0.05, false); // mullion
-  for (const yy of [baseY + 0.26, baseY + wallH])
-    K.box("ac-white", cx, yy, zf, w + 0.06, 0.07, 0.12, false); // sill and head
-  const shape = new THREE.Shape();
-  shape.moveTo(-w / 2 - 0.05, 0);
-  shape.lineTo(w / 2 + 0.05, 0);
-  shape.lineTo(0, gable);
-  shape.closePath();
-  K.geo(key, new THREE.ShapeGeometry(shape), cx, baseY + wallH, zf + 0.006);
-  const rlen = Math.hypot(w / 2 + 0.2, gable),
-    rang = Math.atan2(gable, w / 2 + 0.2);
-  for (const s of [-1, 1])
-    K.box(
-      "ac-roof",
-      cx + s * (w / 4),
-      baseY + wallH + gable / 2,
-      cz,
-      rlen,
-      0.08,
-      depth + 0.34,
-      false,
-      0,
-      0,
-      -s * rang,
-    );
-}
-
 /**
  * A flat-topped mesa/butte: a low, irregular tapered prism with a flat cap and
  * eroded flanks, the landform that reads as a dry desert test-site basin rather
@@ -1037,58 +1000,65 @@ function house(A, spec, rng) {
       );
     }
   } else {
-    const rise = 1.55,
-      half = 5,
-      angle = Math.atan2(rise, half),
-      len = Math.hypot(half, rise) + 0.4;
-    for (const s of [-1, 1])
-      K.box("ac-roof", 0, 7.0, s * 2.5, 13.9, 0.17, len, false, s * angle, 0, 0);
-    K.box("ac-roof", 0, 7.78, 0, 13.9, 0.22, 0.34, false);
-    for (const x of [-6, 6]) {
-      const shape = new THREE.Shape();
-      shape.moveTo(-5, 0);
-      shape.lineTo(5, 0);
-      shape.lineTo(0, 1.55);
-      shape.closePath();
-      K.geo(
-        key,
-        new THREE.ShapeGeometry(shape),
-        x,
-        6.23,
-        0,
-        1,
-        1,
-        1,
-        0,
-        x < 0 ? -Math.PI / 2 : Math.PI / 2,
-      );
+    // MODERNIST SPLIT-LEVEL. The yellow house is the mid-century opposite of the
+    // green house's clapboard gable: a thin low-slope shed roof that falls toward
+    // the carport side, a clerestory ribbon in the step under its high eave, and
+    // a massive stacked-stone chimney at the street front. No gable, no dormers.
+    const tilt = 0.145,
+      s = Math.sin(tilt);
+    // Underside of the sloped slab at world x (the slab centre is x=-0.4, y=7.7).
+    const roofBottom = (x) => 7.62 + (x + 0.4) * s;
+    K.box("ac-roof", -0.4, 7.7, 0, 15.8, 0.16, 11.2, false, 0, 0, tilt);
+    for (const z of [5.65, -5.65])
+      K.box("ac-white", -0.4, 7.62, z, 15.8, 0.22, 0.1, false, 0, 0, tilt); // front/back fascia
+    K.box("ac-white", 7.5, 7.98, 0, 0.1, 0.24, 11.2, false); // high side fascia
+    // Side-wall infill between the old wall head (6.4) and the rising roof.
+    for (const sgn of [-1, 1]) {
+      const top = roofBottom(sgn * 6);
+      if (top > 6.5) K.box(key, sgn * 6, (6.4 + top) / 2, 0, 10, top - 6.4, 0.24, false);
     }
-    for (const s of [-1, 1]) {
-      K.box("ac-white", 0, 6.13, s * 5.3, 13.9, 0.34, 0.12, false); // eave fascia
-      K.box("ac-white", 0, 5.99, s * 4.85, 13.9, 0.05, 0.9, false); // eave soffit
-      K.cylinder("ac-white", 0, 6.05, s * 5.41, 0.08, 13.9, 0, Math.PI / 2); // gutter
-      for (const x of [-6.6, 6.6]) K.box("ac-white", x, 3.1, s * 5.41, 0.07, 6.0, 0.07, false); // downspout
-      for (const x of [-6.95, 6.95])
-        K.box("ac-white", x, 7.05, s * 2.5, 0.14, 0.14, len, false, s * angle, 0, 0); // rake
+    // Front (glazed clerestory) and back (solid) ramped walls under the slope.
+    for (const [z, glaze] of [
+      [5, true],
+      [-5, false],
+    ]) {
+      for (let x = -5.6; x <= 5.6; x += 1.0) {
+        const top = roofBottom(x),
+          h = top - 6.42;
+        if (h <= 0.06) continue;
+        if (glaze && x > -4.8 && x < 5.2 && h > 0.55) {
+          K.box(key, x, 6.56, z, 1.02, 0.28, 0.24, false); // sill
+          K.box("ac-glass", x, 6.72 + (h - 0.42) / 2, z + 0.02, 0.96, h - 0.42, 0.05, false);
+        } else {
+          K.box(key, x, (6.42 + top) / 2, z, 1.02, h, 0.24, false);
+        }
+      }
+      K.box("ac-white", -0.4, 6.48, z, 12.6, 0.1, 0.26, false); // sill band at the clerestory base
     }
-    // Two gabled dormers on the street-facing slope break the long plain roof
-    // and vary the roofline against the green house's single front gable.
-    for (const dx of [-3.4, 3.4]) dormerZ(K, dx, 2.75, 6.42, key, 1.5);
+    // The signature: a tall square stacked-stone chimney at the street front,
+    // through the roof, capped. It sits on the high side of the shed slope.
+    K.box("ac-stone", 4.4, 5.0, 5.0, 1.45, 9.9, 1.3, true);
+    K.box("ac-dark", 4.4, 10.0, 5.0, 1.72, 0.24, 1.58, false); // concrete cap
   }
-  K.box("ac-stone", -4.55, 4.1, 4.9, 1.9, 8.2, 0.85, true);
-  K.box("ac-dark", -4.55, 8.29, 4.9, 2.18, 0.18, 1.06, false);
-  for (const x of [-5.3, -3.8]) K.box("ac-metal", x, 8.52, 4.9, 0.045, 0.45, 0.85, false);
-  K.box("ac-metal", -4.55, 8.76, 4.9, 2.13, 0.06, 1, false);
-  // Close-up roofline and porch hardware: chimney spark-arrestor cage, a period
-  // TV aerial, roof plumbing vents, a porch light, and a front electric meter.
-  for (const dz of [-0.42, 0.42]) K.box("ac-metal", -4.55, 8.98, 4.9 + dz, 0.95, 0.34, 0.03, false);
-  K.cylinder("ac-metal", -4.55, 10.0, 4.9, 0.03, 2.4);
-  for (let i = 0; i < 4; i++) {
-    const yy = 9.5 + i * 0.4,
-      w = 0.72 - i * 0.13;
-    K.line("ac-metal", [-4.55, yy, 4.9 - w], [-4.55, yy, 4.9 + w], 0.014);
-    K.line("ac-metal", [-4.9, yy - 0.05, 4.9], [-4.2, yy + 0.05, 4.9], 0.012);
+  if (spec.id === "green") {
+    // The green house's tall stacked-stone chimney runs up the rear-left corner
+    // (seen from the backyard), with a spark-arrestor cage and a period TV aerial.
+    const cx = -5.3,
+      cz = -4.3;
+    K.box("ac-stone", cx, 4.1, cz, 1.7, 8.2, 0.85, true);
+    K.box("ac-dark", cx, 8.29, cz, 1.96, 0.18, 1.06, false);
+    for (const dx of [-0.75, 0.75]) K.box("ac-metal", cx + dx, 8.52, cz, 0.045, 0.45, 0.85, false);
+    K.box("ac-metal", cx, 8.76, cz, 1.9, 0.06, 1, false);
+    for (const dz of [-0.42, 0.42]) K.box("ac-metal", cx, 8.98, cz + dz, 0.95, 0.34, 0.03, false);
+    K.cylinder("ac-metal", cx, 10.0, cz, 0.03, 2.4);
+    for (let i = 0; i < 4; i++) {
+      const yy = 9.5 + i * 0.4,
+        w = 0.72 - i * 0.13;
+      K.line("ac-metal", [cx, yy, cz - w], [cx, yy, cz + w], 0.014);
+      K.line("ac-metal", [cx - 0.35, yy - 0.05, cz], [cx + 0.35, yy + 0.05, cz], 0.012);
+    }
   }
+  // Roof plumbing vents, a porch light, and a front electric meter.
   K.cylinder("ac-dark", 2.0, 8.25, -1.4, 0.06, 0.7);
   K.cylinder("ac-dark", -1.4, 8.15, 1.9, 0.055, 0.6);
   K.box("ac-metal", 3.0, 8.05, 1.1, 0.42, 0.22, 0.42, false);
@@ -1097,14 +1067,26 @@ function house(A, spec, rng) {
   K.cylinder("ac-metal", 5.4, 1.5, 5.26, 0.16, 0.13, 0, Math.PI / 2);
   K.sphere("ac-glass", 5.4, 1.5, 5.35, 0.12, 0.12, 0.05);
   K.line("ac-metal", [5.4, 1.35, 5.25], [5.4, 0.42, 5.25], 0.025);
-  // Attached garage with front and rear access.
-  K.box("ac-concrete", -9, 0, 1, 6.2, 0.32, 8.2, true);
-  wall(K, key, -9, 5, 6, 2.9, [{ x: 0, y: 0.16, w: 4.65, h: 2.55 }]);
-  wall(K, key, -12, 1, 8, 2.9, [], Math.PI / 2);
-  wall(K, key, -9, -3, 6, 2.9, [{ x: 1.6, y: 0.16, w: 1.5, h: 2.4 }], Math.PI);
-  for (const s of [-1, 1])
-    K.box("ac-roof", -9 + s * 1.7, 3.6, 1, 3.65, 0.15, 8.7, false, 0, 0, -s * 0.32);
-  K.box("ac-blue", -9, 2.77, 4.8, 4.6, 0.25, 0.9, false);
+  if (spec.id === "green") {
+    // Green house: enclosed attached gabled garage with front and rear access.
+    K.box("ac-concrete", -9, 0, 1, 6.2, 0.32, 8.2, true);
+    wall(K, key, -9, 5, 6, 2.9, [{ x: 0, y: 0.16, w: 4.65, h: 2.55 }]);
+    wall(K, key, -12, 1, 8, 2.9, [], Math.PI / 2);
+    wall(K, key, -9, -3, 6, 2.9, [{ x: 1.6, y: 0.16, w: 1.5, h: 2.4 }], Math.PI);
+    for (const s of [-1, 1])
+      K.box("ac-roof", -9 + s * 1.7, 3.6, 1, 3.65, 0.15, 8.7, false, 0, 0, -s * 0.32);
+    K.box("ac-white", -9, 2.77, 4.8, 4.6, 0.25, 0.9, false); // garage door head
+    for (let i = 0; i < 4; i++) K.box("ac-white", -9, 1.1 + i * 0.6, 4.86, 4.5, 0.42, 0.06, false); // door panels
+  } else {
+    // Yellow house: an open modernist carport, a thin shed roof falling steeply
+    // to slim posts over the driveway, with a small enclosed store behind.
+    K.box("ac-concrete", -9, 0, 1, 6.4, 0.32, 8.4, true);
+    wall(K, key, -9, -3, 6, 2.6, [{ x: 1.4, y: 0.16, w: 1.4, h: 2.2 }], Math.PI); // back store wall
+    wall(K, key, -12, -1.6, 3.4, 2.6, [], Math.PI / 2); // short left return
+    K.box("ac-roof", -9.2, 4.4, 1, 7.4, 0.14, 8.6, false, 0, 0, 0.34); // slanted carport slab
+    K.box("ac-white", -9.2, 4.32, 5.1, 7.4, 0.18, 0.1, false, 0, 0, 0.34); // fascia
+    for (const z of [-2.8, 1, 4.6]) K.box("ac-white", -12.2, 1.72, z, 0.16, 3.3, 0.16, true); // posts
+  }
   K.box("ac-wood", -10.9, 0.9, -1.6, 1.4, 1.5, 0.8, true);
   K.box("ac-wood", -7.4, 0.61, -1.9, 1.2, 0.9, 1.1, true);
   // Rear deck and external staircase form the second route upstairs.
@@ -1283,7 +1265,9 @@ function bus(A, box) {
   // small radius on its vertical corners and a gently curved roof, not a pillow.
   // The earlier 22-30 cm roundovers inflated it into a soft toy.
   K.round("ac-bus", 0, 1.35, 0, 11.1, 0.95, 2.62, 0.05, true);
-  K.round("ac-bus", 0.7, 2.86, 0, 9.7, 0.3, 2.72, 0.1, true);
+  // Cream rounded roof over the window line: the white-roofed 1940s coach.
+  K.round("ac-cream", 0.7, 2.86, 0, 9.7, 0.34, 2.72, 0.12, true);
+  K.round("ac-cream", 0.7, 2.66, 0, 9.75, 0.22, 2.7, 0.06, false);
   K.round("ac-bus", -4.8, 1.64, 0, 1.4, 0.46, 2.55, 0.06, true);
   // Wheel arches over each wheel keep their curve.
   for (const x of [-3.7, 3.7])
@@ -1336,16 +1320,19 @@ function truck(A, box) {
   for (let z = -0.52; z < 0.58; z += 0.12) K.box("ac-dark", -6.8, 1.4, z, 0.035, 0.85, 0.05, false);
   K.box("ac-chrome", -6.91, 0.75, 0, 0.18, 0.29, 2.82, false);
   for (const z of [-1, 1]) headlight(K, -6.8, 1.57, z, 0.17, -1);
-  // Open moving trailer: the lateral gap is a playable passage.
+  // Open moving trailer: a ribbed silver aluminum box, the lateral gap a passage.
   K.box("ac-wood", 1.9, 1.02, 0, 8.85, 0.2, 2.75, true);
-  K.box("ac-white", 1.9, 3.73, 0, 9, 0.15, 2.95, true);
-  K.box("ac-white", 6.35, 2.4, 0, 0.14, 2.65, 2.85, true);
-  K.box("ac-white", -2.55, 2.4, 0, 0.14, 2.65, 2.85, true);
+  K.box("ac-chrome", 1.9, 3.73, 0, 9, 0.15, 2.95, true);
+  K.box("ac-metal", 6.35, 2.4, 0, 0.14, 2.65, 2.85, true);
+  K.box("ac-metal", -2.55, 2.4, 0, 0.14, 2.65, 2.85, true);
   for (const s of [-1, 1]) {
-    K.box("ac-white", 0.45, 2.38, s * 1.44, 6, 2.58, 0.08, true);
-    K.art("ac-moving", 0.45, 2.4, s * 1.49, 5.8, 2.5, s < 0 ? Math.PI : 0);
-    for (let x = -2.5; x < 3.4; x += 0.25)
-      K.box("ac-chrome", x, 2.4, s * 1.51, 0.016, 2.5, 0.016, false);
+    K.box("ac-metal", 0.45, 2.38, s * 1.44, 6, 2.58, 0.08, true);
+    // Corrugated flutes down the aluminum side.
+    for (let x = -2.5; x < 3.4; x += 0.16)
+      K.box("ac-chrome", x, 2.4, s * 1.49, 0.03, 2.5, 0.03, false);
+    // A painted logo band on the upper side, original haulier name.
+    K.box("ac-rust", 0.45, 3.2, s * 1.495, 5.6, 0.92, 0.02, false);
+    K.art("ac-moving", 0.45, 3.2, s * 1.52, 4.8, 0.78, s < 0 ? Math.PI : 0);
     // Ramps at the open rear third of the trailer.
     K.box("ac-wood", 4.85, 0.6, s * 2.1, 2.35, 0.12, 1.7, true, s * 0.5);
   }
