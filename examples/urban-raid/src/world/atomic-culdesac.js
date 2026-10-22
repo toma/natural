@@ -905,6 +905,24 @@ function house(A, spec, rng) {
   K.box("ac-dark", -4.55, 8.29, 4.9, 2.18, 0.18, 1.06, false);
   for (const x of [-5.3, -3.8]) K.box("ac-metal", x, 8.52, 4.9, 0.045, 0.45, 0.85, false);
   K.box("ac-metal", -4.55, 8.76, 4.9, 2.13, 0.06, 1, false);
+  // Close-up roofline and porch hardware: chimney spark-arrestor cage, a period
+  // TV aerial, roof plumbing vents, a porch light, and a front electric meter.
+  for (const dz of [-0.42, 0.42]) K.box("ac-metal", -4.55, 8.98, 4.9 + dz, 0.95, 0.34, 0.03, false);
+  K.cylinder("ac-metal", -4.55, 10.0, 4.9, 0.03, 2.4);
+  for (let i = 0; i < 4; i++) {
+    const yy = 9.5 + i * 0.4,
+      w = 0.72 - i * 0.13;
+    K.line("ac-metal", [-4.55, yy, 4.9 - w], [-4.55, yy, 4.9 + w], 0.014);
+    K.line("ac-metal", [-4.9, yy - 0.05, 4.9], [-4.2, yy + 0.05, 4.9], 0.012);
+  }
+  K.cylinder("ac-dark", 2.0, 8.25, -1.4, 0.06, 0.7);
+  K.cylinder("ac-dark", -1.4, 8.15, 1.9, 0.055, 0.6);
+  K.box("ac-metal", 3.0, 8.05, 1.1, 0.42, 0.22, 0.42, false);
+  K.cylinder("ac-dark", -3.1, 2.63, 6.0, 0.12, 0.09);
+  K.sphere("ac-bulb", -3.1, 2.53, 6.0, 0.1, 0.1, 0.1);
+  K.cylinder("ac-metal", 5.4, 1.5, 5.26, 0.16, 0.13, 0, Math.PI / 2);
+  K.sphere("ac-glass", 5.4, 1.5, 5.35, 0.12, 0.12, 0.05);
+  K.line("ac-metal", [5.4, 1.35, 5.25], [5.4, 0.42, 5.25], 0.025);
   // Attached garage with front and rear access.
   K.box("ac-concrete", -9, 0, 1, 6.2, 0.32, 8.2, true);
   wall(K, key, -9, 5, 6, 2.9, [{ x: 0, y: 0.16, w: 4.65, h: 2.55 }]);
