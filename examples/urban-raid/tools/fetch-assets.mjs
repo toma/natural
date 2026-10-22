@@ -88,8 +88,13 @@ async function fetchTexture(t) {
   }
   const zipPath = join(dir, "_set.zip");
   await writeFile(zipPath, buf);
-  const members = Object.keys(MAPS).map((m) => `${t.id}_2K-JPG_${m}.jpg`);
-  run("unzip", ["-o", "-j", zipPath, ...members, "-d", dir]);
+  // Extract each map on its own so a set that omits one (some have no AO) does
+  // not abort the rest; unzip returns non-zero when a member is absent.
+  for (const m of Object.keys(MAPS)) {
+    spawnSync("unzip", ["-o", "-j", zipPath, `${t.id}_2K-JPG_${m}.jpg`, "-d", dir], {
+      stdio: "ignore",
+    });
+  }
   await rm(zipPath);
   for (const [suffix, channel] of Object.entries(MAPS)) {
     const src = join(dir, `${t.id}_2K-JPG_${suffix}.jpg`);

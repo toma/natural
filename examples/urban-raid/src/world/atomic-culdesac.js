@@ -4,6 +4,7 @@ import { newTrs, rockGeometry } from "./util.js";
 import { registerProps } from "./props.js";
 import { furnishRoom } from "./interiors.js";
 import { windowUnit, doorUnit } from "./kit.js";
+import { loadPbrSet } from "../materials/textures.js";
 import {
   HOUSES,
   FLOOR_HEIGHT,
@@ -158,6 +159,7 @@ function materials(A, rng) {
   surface("ac-enamel", "#ebe7d4", "metal", 0.28, 0.05);
   surface("ac-orange", "#b5733f", "fabric");
   surface("ac-sofa", "#809263", "fabric");
+  enhancePbr(A);
   A.registerMaterial(
     "ac-glass",
     A.materials.get("glass", {
@@ -1172,6 +1174,35 @@ function furnishHouse(A, rng, h) {
     y: 0.13,
     h: 2.6,
   });
+}
+
+/**
+ * Progressive enhancement: swap the procedural ground maps for the CC0
+ * photoscanned sets once they have been fetched (see assets/ASSETS.md). The
+ * material library's shader still world-projects, parallaxes, and weathers the
+ * maps, so tiling stays hidden and the surface keeps its macro variation. A
+ * set that is not present leaves the procedural surface untouched, so the
+ * demo, the gate, and a fresh clone all work with no network.
+ */
+function enhancePbr(A) {
+  const jobs = [
+    ["ac-road", "asphalt"],
+    ["ac-concrete", "concrete"],
+    ["ac-grass", "grass"],
+  ];
+  for (const [key, name] of jobs) {
+    const mat = A.mat(key);
+    if (!mat) continue;
+    loadPbrSet(name)
+      .then((set) => {
+        if (!set) return;
+        mat.map = set.albedo;
+        if (set.normal) mat.normalMap = set.normal;
+        mat.roughnessMap = set.orm;
+        mat.needsUpdate = true;
+      })
+      .catch(() => {});
+  }
 }
 
 export function buildAtomicCuldesac(A, rng) {
