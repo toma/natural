@@ -205,6 +205,11 @@ export const PALETTE = {
     surface: "metal",
     opts: { vertexMasks: true, tint: 0x76806a, scale: 1.3 },
   },
+  metal_cream: {
+    name: "metal_painted",
+    surface: "metal",
+    opts: { vertexMasks: true, tint: 0xe6e0d0, scale: 1.3 },
+  },
   metal_dark: {
     name: "metal_painted",
     surface: "metal",

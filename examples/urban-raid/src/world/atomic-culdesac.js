@@ -126,14 +126,14 @@ function materials(A, rng) {
     }
     return A.registerMaterial(key, A.materials.get(name, opts), surf);
   };
-  surface("ac-green", "#8a9856", "wood");
+  surface("ac-green", "#5fb48d", "wood");
   surface("ac-yellow", "#d8c36a", "wood");
   surface("ac-white", "#ece6d6", "wood");
   surface("ac-blue", "#4a7d86", "wood");
   surface("ac-wood", "#8e6b47", "wood");
   surface("ac-fence", "#b6a17a", "wood");
   surface("ac-roof", "#606560", "roof");
-  surface("ac-stone", "#817461", "stone");
+  surface("ac-stone", "#938c81", "stone");
   surface("ac-road", "#514b42", "road");
   surface("ac-line", "#cfc8b0", "concrete");
   surface("ac-tar", "#1c1f1d", "road");
@@ -779,7 +779,7 @@ function kitFront(A, rng, spec) {
   const base = newTrs(spec.x, 0, spec.z, spec.yaw);
   const pm = new THREE.Matrix4().multiplyMatrices(base, newTrs(0, 0, 5.12, Math.PI));
   const y = FLOOR_HEIGHT;
-  const shutterKey = spec.id === "green" ? "metal_blue" : "metal_green";
+  const shutterKey = spec.id === "green" ? "metal_cream" : "metal_green";
   windowUnit(A, pm, { x: -1.6, y: 1.05 + 1.65 / 2, w: 3.0, h: 1.52 }, rng, {
     t: 0.34,
     state: "glazed",
@@ -808,19 +808,33 @@ function house(A, spec, rng) {
     key = `ac-${spec.id}`,
     y = FLOOR_HEIGHT;
   const win = (x, base = 1.15, w = 2, h = 1.5) => ({ x, y: base, w, h });
+  // The green house is the classic two-tone: mint-green lap siding on the ground
+  // storey, white clapboard above a white belt course at the floor line. The
+  // yellow house is a single body colour, so both keys collapse to its own.
+  const lowerKey = key;
+  const upperKey = spec.id === "green" ? "ac-white" : key;
+  const BELT = FLOOR_HEIGHT;
+  const TOP = 0.16 + 6.24;
+  const splitWall = (sx, sz, w, holes, ry = 0) => {
+    if (upperKey === lowerKey) {
+      wall(K, lowerKey, sx, sz, w, 6.24, holes, ry, 0.16);
+      return;
+    }
+    const lo = holes.filter((h) => h.y < BELT - 0.02);
+    const up = holes.filter((h) => h.y >= BELT - 0.02);
+    wall(K, lowerKey, sx, sz, w, BELT - 0.16, lo, ry, 0.16);
+    wall(K, upperKey, sx, sz, w, TOP - BELT, up, ry, BELT);
+  };
   K.box("ac-concrete", 0, 0, 0, 12.4, 0.32, 10.4, true);
-  wall(K, key, 0, 5, 12, 6.24, [
+  splitWall(0, 5, 12, [
     { x: -3.1, y: 0.16, w: 1.6, h: 2.35 },
     win(1.6, 1.05, 3.2, 1.65),
     win(0, y + 0.85, 3.4, 1.85),
   ]);
-  wall(
-    K,
-    key,
+  splitWall(
     0,
     -5,
     12,
-    6.24,
     [
       { x: -0.8, y: 0.16, w: 1.6, h: 2.35 },
       { x: -3.2, y: y + 0.16, w: 1.5, h: 2.25 },
@@ -828,17 +842,14 @@ function house(A, spec, rng) {
     ],
     Math.PI,
   );
-  wall(
-    K,
-    key,
+  splitWall(
     -6,
     0,
     10,
-    6.24,
     [{ x: -0.2, y: 0.16, w: 1.7, h: 2.3 }, win(2.6, y + 1.1, 1.6, 1.5)],
     Math.PI / 2,
   );
-  wall(K, key, 6, 0, 10, 6.24, [win(-2, 1.1, 2, 1.5), win(2, y + 1.1, 2, 1.5)], Math.PI / 2);
+  splitWall(6, 0, 10, [win(-2, 1.1, 2, 1.5), win(2, y + 1.1, 2, 1.5)], Math.PI / 2);
   // Lap siding is modeled, with holes preserved at doors and windows.
   for (let i = 0; i < 27; i++) {
     const sy = 0.33 + i * 0.225;
@@ -855,25 +866,36 @@ function house(A, spec, rng) {
         b = cuts[j + 1],
         m = (a + b) / 2;
       if (!holes.some((h) => Math.abs(m - h.x) < h.w / 2))
-        K.box(key, m, sy, 5.145, b - a, 0.032, 0.045, false);
+        K.box(sy < BELT ? lowerKey : upperKey, m, sy, 5.145, b - a, 0.032, 0.045, false);
     }
   }
   for (const x of [-6.1, 6.1])
     for (const z of [-5.1, 5.1]) K.box("ac-white", x, 3.25, z, 0.15, 6.3, 0.15, false);
+  // White belt course along the floor line wraps all four walls so the two-tone
+  // reads from every angle, not only the front.
+  if (upperKey !== lowerKey) {
+    for (const [bx, bz, bw, ry] of [
+      [0, 5.2, 12.5, 0],
+      [0, -5.2, 12.5, 0],
+      [-6.2, 0, 10.5, Math.PI / 2],
+      [6.2, 0, 10.5, Math.PI / 2],
+    ])
+      K.box("ac-white", bx, BELT, bz, bw, 0.26, 0.22, false, 0, ry);
+  }
   K.box("ac-white", 0, y, 5.18, 12.5, 0.28, 0.24, false);
   K.box("ac-white", 0, 6.33, 5.15, 12.6, 0.24, 0.3, false);
   for (const x of [-2.25, 2.25]) {
-    K.box(spec.id === "green" ? "ac-blue" : "ac-orange", x, y + 1.8, 5.22, 0.68, 2.1, 0.09, false);
+    K.box(spec.id === "green" ? "ac-green" : "ac-orange", x, y + 1.8, 5.22, 0.68, 2.1, 0.09, false);
     for (let i = 0; i < 14; i++)
       K.box("ac-wood", x, y + 0.86 + i * 0.14, 5.28, 0.59, 0.028, 0.035, false);
   }
   // Sills under the two front windows, and shutters flanking the ground window.
   K.box("ac-white", 1.6, 0.22, 5.24, 3.5, 0.08, 0.2, false);
   K.box("ac-white", 0, y + 0.02, 5.24, 3.7, 0.08, 0.2, false);
-  // Grimy test-site wear: dirt and water stains dripping below the window sills
-  // and the eave line, and rust weeping from the metal wall vent.
-  drips(K, 0, y + 0.78, 5.27, 1.6);
-  for (const sx of [-5.3, 5.3]) drips(K, sx, 6.2, 5.27, 0.55, "ac-grime", 5);
+  // Light test-site wear: a faint stain below the picture-window sill and a
+  // little rust weeping from the metal wall vent. Kept subtle so the bright
+  // pastel paint of the reference stays clean rather than reading as dingy.
+  drips(K, 0, y + 0.78, 5.27, 1.2, "ac-grime", 5);
   drips(K, 5.4, 1.32, 5.28, 0.12, "ac-rust", 3);
   // Window flower box under the front picture window and a foundation planting
   // bed along the frontage: colour, life, and a softened wall-to-ground line.
@@ -905,7 +927,7 @@ function house(A, spec, rng) {
     }
   }
   for (const sx of [-0.2, 3.4]) {
-    K.box(spec.id === "green" ? "ac-blue" : "ac-orange", sx, 1.05, 5.22, 0.5, 1.6, 0.08, false);
+    K.box(spec.id === "green" ? "ac-white" : "ac-orange", sx, 1.05, 5.22, 0.5, 1.6, 0.08, false);
     for (let i = 0; i < 11; i++)
       K.box("ac-wood", sx, 0.4 + i * 0.14, 5.28, 0.42, 0.028, 0.035, false);
   }
@@ -954,7 +976,7 @@ function house(A, spec, rng) {
       shape.lineTo(6, 0);
       shape.lineTo(0, 1.55);
       shape.closePath();
-      K.geo(key, new THREE.ShapeGeometry(shape), 0, 6.4, z, 1, 1, 1, 0, z < 0 ? Math.PI : 0);
+      K.geo(upperKey, new THREE.ShapeGeometry(shape), 0, 6.4, z, 1, 1, 1, 0, z < 0 ? Math.PI : 0);
     }
     for (const s of [-1, 1]) {
       K.box("ac-white", s * 6.75, 6.28, 0, 0.12, 0.34, 11.9, false); // eave fascia
@@ -975,8 +997,8 @@ function house(A, spec, rng) {
       for (const s of [-1, 0, 1])
         K.box("ac-white", s * hw * 0.82, oy0 - 0.16, zf + 0.2, 0.16, 0.42, 0.44, false); // corbels
       for (const s of [-1, 1])
-        K.box(key, s * hw, (oy0 + oy1) / 2, zf + proj / 2, 0.12, oy1 - oy0, proj, false); // cheeks
-      K.box(key, 0, oy0, zf + proj / 2, hw * 2, 0.12, proj, false); // floor slab
+        K.box(upperKey, s * hw, (oy0 + oy1) / 2, zf + proj / 2, 0.12, oy1 - oy0, proj, false); // cheeks
+      K.box(upperKey, 0, oy0, zf + proj / 2, hw * 2, 0.12, proj, false); // floor slab
       K.box(
         "ac-glass",
         0,

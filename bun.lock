@@ -60,7 +60,7 @@
       "name": "@toma.com/cli",
       "version": "0.1.0-alpha.4",
       "bin": {
-        "natural": "./src/main.ts",
+        "natural": "./dist/main.js",
       },
       "dependencies": {
         "@toma.com/core": "workspace:*",
@@ -94,7 +94,7 @@
       "name": "@toma.com/mcp",
       "version": "0.1.0-alpha.4",
       "bin": {
-        "natural-mcp": "./src/main.ts",
+        "natural-mcp": "./dist/main.js",
       },
       "dependencies": {
         "@toma.com/core": "workspace:*",
