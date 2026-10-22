@@ -435,12 +435,22 @@ function fence(K, x0, z0, x1, z1, height = 1.35, key = "ac-white", picket = true
     yaw = -Math.atan2(z1 - z0, x1 - x0);
   K.box(null, (x0 + x1) / 2, height / 2 + 0.15, (z0 + z1) / 2, length, height, 0.08, true, 0, yaw);
   // Collision panel is continuous; individual boards give the visible fence depth.
-  for (let i = 0; i <= length / 0.24; i++) {
-    const t = i / Math.floor(length / 0.24),
+  // Picket runs use thin, real-scale slats (~8.5 cm wide, ~2.4 cm thick) at a
+  // tight pitch with crisp pointed tops; boarded perimeter runs keep wide,
+  // near-solid boards for a privacy fence. The earlier 18 cm boards with fat
+  // rounded caps read as oversized toy pickets.
+  const pitch = picket ? 0.14 : 0.24,
+    bw = picket ? 0.085 : 0.18,
+    bd = picket ? 0.024 : 0.12,
+    steps = Math.max(1, Math.floor(length / pitch));
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps,
       x = x0 + (x1 - x0) * t,
       z = z0 + (z1 - z0) * t;
-    K.box(key, x, height / 2 + 0.15, z, 0.18, height, 0.12, false, 0, yaw);
-    if (picket) K.box(key, x, height + 0.16, z, 0.127, 0.127, 0.12, false, 0, yaw, Math.PI / 4);
+    K.box(key, x, height / 2 + 0.15, z, bw, height, bd, false, 0, yaw);
+    // Pointed cap: a thin square turned 45 degrees stays below the bevel
+    // threshold, so the point reads sharp instead of as a rounded knob.
+    if (picket) K.box(key, x, height + 0.15, z, bw, bw, bd, false, 0, yaw, Math.PI / 4);
   }
   for (let i = 0; i <= length / 2.4; i++) {
     const t = i / Math.max(1, Math.floor(length / 2.4));
@@ -449,17 +459,16 @@ function fence(K, x0, z0, x1, z1, height = 1.35, key = "ac-white", picket = true
       x0 + (x1 - x0) * t,
       height / 2 + 0.12,
       z0 + (z1 - z0) * t,
-      0.17,
-      height + 0.24,
-      0.17,
+      0.11,
+      height + 0.2,
+      0.11,
       false,
     );
-    if (picket)
-      K.box(key, x0 + (x1 - x0) * t, height + 0.32, z0 + (z1 - z0) * t, 0.22, 0.09, 0.22, false);
+    K.box(key, x0 + (x1 - x0) * t, height + 0.24, z0 + (z1 - z0) * t, 0.15, 0.05, 0.15, false);
   }
   // Horizontal rails tie the boards together, the way a real fence is framed.
-  for (const f of [0.28, 0.74]) {
-    K.box(key, (x0 + x1) / 2, 0.15 + f * height, (z0 + z1) / 2, length, 0.09, 0.14, false, 0, yaw);
+  for (const f of [0.26, 0.76]) {
+    K.box(key, (x0 + x1) / 2, 0.15 + f * height, (z0 + z1) / 2, length, 0.05, 0.08, false, 0, yaw);
   }
 }
 
