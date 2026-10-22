@@ -54,6 +54,8 @@ and wrapped in a distance LOD; a missing model falls back to procedural dressing
 | Porch potted plants    | potted_plant_01 | https://polyhaven.com/a/potted_plant_01 |
 | Kerbside bins          | metal_trash_can | https://polyhaven.com/a/metal_trash_can |
 | Lawn chairs            | GreenChair_01   | https://polyhaven.com/a/GreenChair_01   |
+| Kerb lamp posts        | street_lamp_01  | https://polyhaven.com/a/street_lamp_01  |
+| Corner hydrant         | fire_hydrant    | https://polyhaven.com/a/fire_hydrant    |
 
 Poly Haven publishes all of its assets as CC0 1.0: https://polyhaven.com/license
 

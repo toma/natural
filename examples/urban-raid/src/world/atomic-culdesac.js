@@ -456,6 +456,12 @@ function fence(K, x0, z0, x1, z1, height = 1.35, key = "ac-white", picket = true
       0.17,
       false,
     );
+    if (picket)
+      K.box(key, x0 + (x1 - x0) * t, height + 0.32, z0 + (z1 - z0) * t, 0.22, 0.09, 0.22, false);
+  }
+  // Horizontal rails tie the boards together, the way a real fence is framed.
+  for (const f of [0.28, 0.74]) {
+    K.box(key, (x0 + x1) / 2, 0.15 + f * height, (z0 + z1) / 2, length, 0.09, 0.14, false, 0, yaw);
   }
 }
 
@@ -1182,6 +1188,16 @@ function dressYards(A, rng) {
     m("GreenChair_01", 2.4, 5.6, 1.0, 2.5);
     m("GreenChair_01", 3.7, 5.7, 1.0, 3.4);
   }
+  // Street furniture on the kerb verge: period lamp posts and a hydrant.
+  for (const [x, z, yaw] of [
+    [-18, -8.5, 0],
+    [17, 8.5, Math.PI],
+    [-18, 8.5, 0],
+    [17, -8.5, Math.PI],
+  ]) {
+    A.models.push({ id: "street_lamp_01", x, z, y: 0.13, yaw, scale: 1, far: 90 });
+  }
+  A.models.push({ id: "fire_hydrant", x: -15.2, z: -8.7, y: 0.13, yaw: 0.6, scale: 1 });
 }
 
 /**

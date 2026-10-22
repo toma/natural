@@ -25,7 +25,14 @@ const modelsDir = join(root, "assets", "models");
 
 // CC0 1.0, Poly Haven (https://polyhaven.com/license). Fetched as glTF (a
 // .gltf plus its .bin and textures) at 1K so the set stays small.
-const MODELS = ["GreenChair_01", "metal_trash_can", "potted_plant_01", "shrub_01"];
+const MODELS = [
+  "GreenChair_01",
+  "metal_trash_can",
+  "potted_plant_01",
+  "shrub_01",
+  "street_lamp_01",
+  "fire_hydrant",
+];
 
 // The ambientCG map suffixes mapped to the engine's channel names. Color is the
 // albedo, NormalGL is the OpenGL-convention tangent normal, and Displacement is
