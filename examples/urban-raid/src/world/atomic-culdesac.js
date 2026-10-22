@@ -934,7 +934,10 @@ function bodyRing(wBot, wTop, yBot, yTop, K) {
   const pts = [];
   const yc = (yBot + yTop) / 2,
     hy = (yTop - yBot) / 2,
-    e = 0.6;
+    // Lower exponent -> flatter faces and a crisper shoulder line, so the body
+    // side reads as a flat panel with a defined crease instead of an inflated
+    // soap-bar ellipsoid. The earlier 0.6 bulged every section outward.
+    e = 0.42;
   for (let k = 0; k < K; k++) {
     const a = -Math.PI / 2 + (k / K) * Math.PI * 2;
     const sy = Math.sin(a),
@@ -1168,6 +1171,11 @@ function car(A, box, color = "ac-car") {
     K.line(color, [-0.95, 1.02, s * 0.58], [-0.62, 1.5, s * 0.5], 0.035); // C-pillar
     K.line(trim, [0.33, 1.5, s * 0.52], [-0.62, 1.5, s * 0.52], 0.02); // drip rail
     K.line(trim, [0.6, 1.01, s * 0.6], [-0.95, 1.01, s * 0.6], 0.02); // beltline chrome
+    // Door and panel shut-lines: thin recessed grooves that break the monolithic
+    // body side into hood, two doors, and a rear quarter, the way sheet metal is.
+    for (const sx of [1.0, 0.1, -1.05, -1.7])
+      K.line("ac-dark", [sx, 0.52, s * 1.0], [sx, 1.0, s * 1.0], 0.007);
+    K.line("ac-dark", [0.95, 0.9, s * 1.0], [-1.6, 0.9, s * 1.0], 0.006); // body-side feature crease
   }
   // ---- Chrome side spear, overrider bumpers, eggcrate grille ----
   for (const s of [-1, 1]) K.box(trim, -0.1, 0.84, s * 0.995, 3.6, 0.06, 0.03, false);
