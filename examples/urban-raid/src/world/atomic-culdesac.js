@@ -157,6 +157,7 @@ function materials(A, rng) {
   surface("ac-lips", "#8f5142", "skin", 0.55);
   surface("ac-trousers", "#665e4f", "fabric");
   surface("ac-soil", "#635944", "sand");
+  surface("ac-grime", "#4b4336", "concrete", 0.92);
   surface("ac-curtain", "#397887", "fabric");
   surface("ac-plaster", "#d7d1bc", "plaster");
   surface("ac-enamel", "#ebe7d4", "metal", 0.28, 0.05);
@@ -529,6 +530,20 @@ function balustrade(K, x0, z0, x1, z1, y = 0.16, height = 0.82, key = "ac-white"
 }
 
 /**
+ * A fan of thin vertical weather streaks dripping below a sill, ledge, or
+ * fixture, a few millimetres proud of the wall. Original procedural grime (dirt
+ * and water stains, rust where keyed to a metal tone), no copied art. (cx, topY)
+ * is the ledge centre on the wall face at depth z.
+ */
+function drips(K, cx, topY, z, half, key = "ac-grime", n = 9) {
+  for (let i = 0; i < n; i++) {
+    const t = n === 1 ? 0 : (i / (n - 1) - 0.5) * 2;
+    const len = 0.26 + Math.abs(Math.sin(i * 2.17 + cx * 1.3)) * 0.82;
+    K.box(key, cx + t * half, topY - len / 2, z, 0.028 + (i % 3) * 0.013, len, 0.014, false);
+  }
+}
+
+/**
  * A gabled roof dormer facing +z in house-local space, seated on a front roof
  * slope: cheek walls, a sashed window, a gable, and a little pitched roof. Pure
  * decorative massing that breaks an otherwise plain slope and varies the
@@ -840,6 +855,11 @@ function house(A, spec, rng) {
   // Sills under the two front windows, and shutters flanking the ground window.
   K.box("ac-white", 1.6, 0.22, 5.24, 3.5, 0.08, 0.2, false);
   K.box("ac-white", 0, y + 0.02, 5.24, 3.7, 0.08, 0.2, false);
+  // Grimy test-site wear: dirt and water stains dripping below the window sills
+  // and the eave line, and rust weeping from the metal wall vent.
+  drips(K, 0, y + 0.78, 5.27, 1.6);
+  for (const sx of [-5.3, 5.3]) drips(K, sx, 6.2, 5.27, 0.55, "ac-grime", 5);
+  drips(K, 5.4, 1.32, 5.28, 0.12, "ac-rust", 3);
   // Window flower box under the front picture window and a foundation planting
   // bed along the frontage: colour, life, and a softened wall-to-ground line.
   K.box("ac-wood", 1.6, 0.98, 5.34, 2.4, 0.2, 0.26, false);
