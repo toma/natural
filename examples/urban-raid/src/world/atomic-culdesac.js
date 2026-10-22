@@ -812,6 +812,35 @@ function house(A, spec, rng) {
   // Sills under the two front windows, and shutters flanking the ground window.
   K.box("ac-white", 1.6, 0.22, 5.24, 3.5, 0.08, 0.2, false);
   K.box("ac-white", 0, y + 0.02, 5.24, 3.7, 0.08, 0.2, false);
+  // Window flower box under the front picture window and a foundation planting
+  // bed along the frontage: colour, life, and a softened wall-to-ground line.
+  K.box("ac-wood", 1.6, 0.98, 5.34, 2.4, 0.2, 0.26, false);
+  for (let i = 0; i < 10; i++) {
+    const bx = 0.6 + i * 0.22;
+    K.sphere("ac-hedge", bx, 1.12, 5.35, 0.1, 0.13, 0.1);
+    K.sphere(
+      ["ac-red", "ac-orange", "ac-white", "ac-blue"][i % 4],
+      bx,
+      1.2,
+      5.36,
+      0.07,
+      0.07,
+      0.07,
+    );
+  }
+  for (const [x0b, x1b] of [
+    [-6, -4.2],
+    [-2, 5.8],
+  ]) {
+    K.box("ac-soil", (x0b + x1b) / 2, 0.24, 5.55, x1b - x0b, 0.12, 0.5, false);
+    const n = Math.round((x1b - x0b) / 0.7);
+    for (let i = 0; i < n; i++) {
+      const bx = x0b + 0.35 + i * 0.7;
+      K.sphere("ac-hedge", bx, 0.42, 5.55, 0.28, 0.32, 0.28);
+      if (i % 2)
+        K.sphere(["ac-red", "ac-orange", "ac-white"][i % 3], bx, 0.58, 5.55, 0.08, 0.08, 0.08);
+    }
+  }
   for (const sx of [-0.2, 3.4]) {
     K.box(spec.id === "green" ? "ac-blue" : "ac-orange", sx, 1.05, 5.22, 0.5, 1.6, 0.08, false);
     for (let i = 0; i < 11; i++)
