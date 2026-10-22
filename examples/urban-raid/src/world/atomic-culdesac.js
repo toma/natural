@@ -138,7 +138,7 @@ function materials(A, rng) {
   surface("ac-road", "#514b42", "road");
   surface("ac-line", "#cfc8b0", "concrete");
   surface("ac-tar", "#1c1f1d", "road");
-  surface("ac-concrete", "#bdb9aa", "concrete");
+  surface("ac-concrete", "#a7a294", "concrete");
   surface("ac-grass", "#5f8236", "grass");
   surface("ac-hedge", "#4a6529", "grass");
   surface("ac-sand", "#bfa780", "sand");
@@ -1695,6 +1695,39 @@ function roadWear(A, rng) {
   ]) {
     K.cylinder("ac-metal", mx, 0.142, mz, 0.42, 0.02);
     K.cylinder("ac-dark", mx, 0.146, mz, 0.37, 0.012);
+  }
+  // Sidewalk grime: hairline cracks and mildew stains on the kerb walks.
+  for (let i = 0; i < 44; i++) {
+    const x = rng.range(-22, 22),
+      side = rng.range(0, 1) < 0.5 ? 1 : -1,
+      z = side * rng.range(7.1, 8.1);
+    if (rng.range(0, 1) < 0.5)
+      K.box(
+        "ac-tar",
+        x,
+        0.295,
+        z,
+        rng.range(0.3, 1.2),
+        0.004,
+        0.02,
+        false,
+        0,
+        rng.range(0, Math.PI),
+        0,
+      );
+    else
+      K.geo(
+        "ac-dark",
+        new THREE.CircleGeometry(rng.range(0.15, 0.5), 14),
+        x,
+        0.296,
+        z,
+        1,
+        rng.range(0.5, 1),
+        1,
+        -Math.PI / 2,
+        rng.range(0, Math.PI),
+      );
   }
 }
 
