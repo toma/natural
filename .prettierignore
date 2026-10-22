@@ -1,0 +1,7 @@
+# Fetched CC0 art assets (see examples/urban-raid/.gitignore and ASSETS.md) are
+# downloaded on demand and are not source, so Prettier must not lint them: a
+# local `bun run assets` then `bun run check` would otherwise fail format:check
+# on the glTF JSON. Also skip build output.
+examples/urban-raid/assets/
+examples/urban-raid/dist/
+examples/urban-raid/test-results/

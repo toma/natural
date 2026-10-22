@@ -515,7 +515,16 @@ function balustrade(K, x0, z0, x1, z1, y = 0.16, height = 0.82, key = "ac-white"
   const n = Math.max(2, Math.round(len / 0.14));
   for (let i = 0; i <= n; i++) {
     const t = i / n;
-    K.box(key, x0 + (x1 - x0) * t, y + height * 0.5, z0 + (z1 - z0) * t, 0.035, height * 0.72, 0.035, false);
+    K.box(
+      key,
+      x0 + (x1 - x0) * t,
+      y + height * 0.5,
+      z0 + (z1 - z0) * t,
+      0.035,
+      height * 0.72,
+      0.035,
+      false,
+    );
   }
 }
 
@@ -904,12 +913,42 @@ function house(A, spec, rng) {
       for (const s of [-1, 1])
         K.box(key, s * hw, (oy0 + oy1) / 2, zf + proj / 2, 0.12, oy1 - oy0, proj, false); // cheeks
       K.box(key, 0, oy0, zf + proj / 2, hw * 2, 0.12, proj, false); // floor slab
-      K.box("ac-glass", 0, (oy0 + oy1) / 2 + 0.05, zf + proj, hw * 2 - 0.2, oy1 - oy0 - 0.3, 0.05, false);
+      K.box(
+        "ac-glass",
+        0,
+        (oy0 + oy1) / 2 + 0.05,
+        zf + proj,
+        hw * 2 - 0.2,
+        oy1 - oy0 - 0.3,
+        0.05,
+        false,
+      );
       for (const s of [-1, 0, 1])
-        K.box("ac-white", s * (hw - 0.12), (oy0 + oy1) / 2, zf + proj - 0.008, 0.07, oy1 - oy0 - 0.25, 0.07, false); // mullions
+        K.box(
+          "ac-white",
+          s * (hw - 0.12),
+          (oy0 + oy1) / 2,
+          zf + proj - 0.008,
+          0.07,
+          oy1 - oy0 - 0.25,
+          0.07,
+          false,
+        ); // mullions
       for (const yy of [oy0 + 0.14, oy1 - 0.06])
         K.box("ac-white", 0, yy, zf + proj, hw * 2 + 0.06, 0.08, 0.1, false); // sill and head
-      K.box("ac-roof", 0, oy1 + 0.18, zf + proj / 2 + 0.03, hw * 2 + 0.3, 0.1, proj + 0.28, false, 0.4, 0, 0);
+      K.box(
+        "ac-roof",
+        0,
+        oy1 + 0.18,
+        zf + proj / 2 + 0.03,
+        hw * 2 + 0.3,
+        0.1,
+        proj + 0.28,
+        false,
+        0.4,
+        0,
+        0,
+      );
     }
   } else {
     const rise = 1.55,
