@@ -138,7 +138,7 @@ function materials(A, rng) {
   surface("ac-line", "#cfc8b0", "concrete");
   surface("ac-tar", "#1c1f1d", "road");
   surface("ac-concrete", "#a7a294", "concrete");
-  surface("ac-grass", "#5f8236", "grass");
+  surface("ac-grass", "#8c8a4e", "grass");
   surface("ac-hedge", "#4a6529", "grass");
   surface("ac-sand", "#bfa780", "sand");
   surface("ac-cream", "#ded3b7", "wood");
@@ -1622,6 +1622,44 @@ function groundCover(A, rng) {
         -Math.cos(a) * lean,
       );
     }
+  }
+  // Dry bare-earth patches worn into the lawns: the dead-grass spots of a
+  // neglected test-site yard, flat so they read as ground, not clods.
+  for (let i = 0; i < 48; i++) {
+    const x = rng.range(-22, 22),
+      z = vergeZ();
+    K.box(
+      rng.range(0, 1) < 0.6 ? "ac-soil" : "ac-sand",
+      x,
+      0.122,
+      z,
+      rng.range(0.5, 1.7),
+      0.01,
+      rng.range(0.4, 1.3),
+      false,
+      0,
+      rng.range(0, Math.PI),
+      0,
+    );
+  }
+  // Wind-blown dust drifting off the road onto its shoulders.
+  for (let i = 0; i < 72; i++) {
+    const x = rng.range(-22, 22),
+      side = rng.range(0, 1) < 0.5 ? 1 : -1,
+      z = side * (7.5 + rng.range(-0.6, 0.9));
+    K.box(
+      "ac-sand",
+      x,
+      0.168,
+      z,
+      rng.range(0.3, 1.1),
+      0.004,
+      rng.range(0.15, 0.5),
+      false,
+      0,
+      rng.range(-0.3, 0.3),
+      0,
+    );
   }
   for (let i = 0; i < 140; i++) {
     const x = rng.range(-22.5, 22.5),
