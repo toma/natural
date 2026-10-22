@@ -779,19 +779,20 @@ function kitFront(A, rng, spec) {
   const y = FLOOR_HEIGHT;
   const shutterKey = spec.id === "green" ? "metal_blue" : "metal_green";
   windowUnit(A, pm, { x: -1.6, y: 1.05 + 1.65 / 2, w: 3.0, h: 1.52 }, rng, {
-    t: 0.24,
+    t: 0.34,
     state: "glazed",
     back: false,
     frameKey: "wood_dark",
     curtain: true,
   });
   windowUnit(A, pm, { x: 0, y: y + 0.85 + 1.85 / 2, w: 3.2, h: 1.7 }, rng, {
-    t: 0.24,
+    t: 0.34,
     state: "glazed",
     back: false,
     frameKey: "wood_dark",
     shutters: true,
     shutterKey,
+    curtain: true,
   });
   doorUnit(A, pm, { x: 3.1, y: 0.16 + 2.35 / 2, w: 1.5, h: 2.3 }, rng, {
     t: 0.24,
