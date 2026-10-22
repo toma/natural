@@ -133,7 +133,10 @@ function materials(A, rng) {
   surface("ac-wood", "#8e6b47", "wood");
   surface("ac-fence", "#b6a17a", "wood");
   surface("ac-roof", "#606560", "roof");
-  surface("ac-stone", "#aca69b", "stone");
+  // Pale grey stacked-stone look. The brick base bakes a dark red no tint can
+  // lift, so route the stone onto the concrete base: it carries the chimneys,
+  // wainscots, gateposts and steps as the reference's light grey masonry.
+  surface("ac-stone", "#b9b5ab", "concrete");
   surface("ac-road", "#514b42", "road");
   surface("ac-line", "#cfc8b0", "concrete");
   surface("ac-tar", "#1c1f1d", "road");
@@ -1666,7 +1669,9 @@ function enhancePbr(A) {
     ["ac-road", "asphalt", { roughnessFloor: 0.82, desaturate: 0.5, warm: [1.08, 1.0, 0.88] }],
     ["ac-concrete", "concrete", { roughnessFloor: 0.7 }],
     ["ac-grass", "grass", {}],
-    ["ac-stone", "bricks", {}],
+    // Keep the pale grey albedo and take only the masonry relief, or the brick
+    // scan's dark red albedo overrides the stone colour back to brown brick.
+    ["ac-stone", "bricks", { grainOnly: true, normalScale: 0.9, roughnessFloor: 0.7 }],
     ["ac-roof", "roof", { roughnessFloor: 0.58 }],
     ["ac-fence", "planks", {}],
     // Painted vehicle panels keep their solid colour; the scan contributes only
