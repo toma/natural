@@ -9,6 +9,9 @@ export default tseslint.config(
       "node_modules/**",
       "**/target/**",
       "**/.natural/**",
+      // Fetched CC0 art (and the Basis transcoder copied beside it) is not ours
+      // to lint; it is git-ignored and absent on a fresh clone. See assets/ASSETS.md.
+      "examples/urban-raid/assets/**",
       "eslint.config.mjs",
     ],
   },
