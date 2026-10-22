@@ -860,8 +860,8 @@ function house(A, spec, rng) {
     for (const s of [-1, 1]) {
       K.box("ac-white", s * 6.75, 6.28, 0, 0.12, 0.34, 11.9, false); // eave fascia
       K.box("ac-white", s * 6.3, 6.14, 0, 0.9, 0.05, 11.9, false); // eave soffit
-      K.cylinder("ac-chrome", s * 6.86, 6.2, 0, 0.08, 11.9, Math.PI / 2); // gutter
-      for (const z of [-5.6, 5.6]) K.box("ac-chrome", s * 6.86, 3.2, z, 0.07, 6.2, 0.07, false); // downspout
+      K.cylinder("ac-white", s * 6.86, 6.2, 0, 0.08, 11.9, Math.PI / 2); // gutter
+      for (const z of [-5.6, 5.6]) K.box("ac-white", s * 6.86, 3.2, z, 0.07, 6.2, 0.07, false); // downspout
       for (const z of [-5.95, 5.95])
         K.box("ac-white", s * 3.45, 7.2, z, len, 0.14, 0.14, false, 0, 0, -s * angle); // rake
     }
@@ -895,8 +895,8 @@ function house(A, spec, rng) {
     for (const s of [-1, 1]) {
       K.box("ac-white", 0, 6.13, s * 5.3, 13.9, 0.34, 0.12, false); // eave fascia
       K.box("ac-white", 0, 5.99, s * 4.85, 13.9, 0.05, 0.9, false); // eave soffit
-      K.cylinder("ac-chrome", 0, 6.05, s * 5.41, 0.08, 13.9, 0, Math.PI / 2); // gutter
-      for (const x of [-6.6, 6.6]) K.box("ac-chrome", x, 3.1, s * 5.41, 0.07, 6.0, 0.07, false); // downspout
+      K.cylinder("ac-white", 0, 6.05, s * 5.41, 0.08, 13.9, 0, Math.PI / 2); // gutter
+      for (const x of [-6.6, 6.6]) K.box("ac-white", x, 3.1, s * 5.41, 0.07, 6.0, 0.07, false); // downspout
       for (const x of [-6.95, 6.95])
         K.box("ac-white", x, 7.05, s * 2.5, 0.14, 0.14, len, false, s * angle, 0, 0); // rake
     }
@@ -1624,6 +1624,58 @@ function tree(A, x, z, rng, scale = 1) {
   }
 }
 
+/**
+ * Wear on the asphalt so the road is not a clean grey strip: oil stains along
+ * the driving line, hairline cracks branching off the seams, skid marks at the
+ * crossing, and two cast-iron utility covers.
+ */
+function roadWear(A, rng) {
+  const K = kit(A);
+  for (let i = 0; i < 16; i++) {
+    const x = rng.range(-20, 20),
+      z = rng.range(-6.4, 6.4),
+      r = rng.range(0.25, 0.85);
+    K.geo(
+      "ac-dark",
+      new THREE.CircleGeometry(r, 18),
+      x,
+      0.141,
+      z,
+      1,
+      rng.range(0.55, 1),
+      1,
+      -Math.PI / 2,
+      rng.range(0, Math.PI),
+    );
+  }
+  for (let i = 0; i < 30; i++) {
+    const x = rng.range(-21, 21),
+      z = rng.range(-7, 7);
+    K.box(
+      "ac-tar",
+      x,
+      0.139,
+      z,
+      rng.range(0.5, 2.3),
+      0.004,
+      0.022,
+      false,
+      0,
+      rng.range(0, Math.PI),
+      0,
+    );
+  }
+  for (const s of [-1, 1])
+    K.box("ac-tar", s * 2.2, 0.14, 1.3, 3.4, 0.004, 0.11, false, 0, s * 0.12, 0);
+  for (const [mx, mz] of [
+    [-6, 1.8],
+    [9, -2.2],
+  ]) {
+    K.cylinder("ac-metal", mx, 0.142, mz, 0.42, 0.02);
+    K.cylinder("ac-dark", mx, 0.146, mz, 0.37, 0.012);
+  }
+}
+
 export function buildAtomicCuldesac(A, rng) {
   materials(A, rng);
   registerProps(A, rng);
@@ -1652,6 +1704,7 @@ export function buildAtomicCuldesac(A, rng) {
   for (const h of HOUSES) furnishHouse(A, rng, h);
   dressYards(A, rng);
   groundCover(A, rng);
+  roadWear(A, rng);
   for (const [tx, tz, ts] of [
     [-16, 15, 1.1],
     [15, 15.5, 0.95],
