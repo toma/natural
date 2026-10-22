@@ -374,11 +374,11 @@ function kit(A, ox = 0, oz = 0, yaw = 0) {
       sy,
       sz,
     );
-  const line = (key, a, b, r = 0.03) => {
+  const line = (key, a, b, r = 0.03, sides = 8) => {
     const p = new THREE.Vector3(...a),
       q = new THREE.Vector3(...b),
       v = q.clone().sub(p);
-    const g = A.cache("ac-rod", () => new THREE.CylinderGeometry(1, 1, 1, 8));
+    const g = A.cache(`ac-rod:${sides}`, () => new THREE.CylinderGeometry(1, 1, 1, sides));
     const m = new THREE.Matrix4().compose(
       p.add(q).multiplyScalar(0.5),
       new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), v.clone().normalize()),
@@ -533,8 +533,15 @@ function mannequin(K, x, z, y = 0.16, ry = 0, female = false) {
     s = Math.sin(ry),
     point = (px, py, pz) => [x + c * px + s * pz, y + py, z - s * px + c * pz];
   const ball = (key, px, py, pz, sx, sy, sz) =>
-    K.geo(key, new THREE.SphereGeometry(1, 24, 16), ...point(px, py, pz), sx, sy, sz, 0, ry);
+    K.geo(key, new THREE.SphereGeometry(1, 32, 24), ...point(px, py, pz), sx, sy, sz, 0, ry);
   const line = (key, a, b, r) => K.line(key, point(...a), point(...b), r);
+  // Smooth, rounded limb: a 16-sided tube with a ball joint at each end so the
+  // arms and legs read as continuous flesh, not faceted flat-capped capsules.
+  const limb = (key, a, b, ra, rb = ra) => {
+    K.line(key, point(...a), point(...b), (ra + rb) / 2, 16);
+    ball(key, a[0], a[1], a[2], ra, ra, ra);
+    ball(key, b[0], b[1], b[2], rb, rb, rb);
+  };
   const block = (key, px, py, pz, w, h, d, r = 0.02) =>
     K.round(key, ...point(px, py, pz), w, h, d, r, false, 0, ry);
   const shirt = female ? "ac-orange" : "ac-shirt";
@@ -587,24 +594,29 @@ function mannequin(K, x, z, y = 0.16, ry = 0, female = false) {
     block("ac-dark", 0, 1.02, 0.005, 0.36, 0.04, 0.25, 0.015);
     block("ac-chrome", 0, 1.02, 0.14, 0.05, 0.038, 0.012, 0.005);
     for (const side of [-1, 1]) {
-      line("ac-trousers", [side * 0.097, 0.89, 0], [side * 0.12, 0.48, 0.017], 0.086);
-      line("ac-trousers", [side * 0.12, 0.48, 0.017], [side * 0.127, 0.13, 0.018], 0.068);
+      limb("ac-trousers", [side * 0.097, 0.89, 0], [side * 0.12, 0.48, 0.017], 0.09, 0.072);
+      limb("ac-trousers", [side * 0.12, 0.48, 0.017], [side * 0.127, 0.13, 0.018], 0.072, 0.06);
       line("ac-dark", [side * 0.12, 0.83, 0.084], [side * 0.13, 0.15, 0.08], 0.003);
     }
   }
   for (const side of [-1, 1]) {
     if (female) {
-      line("ac-skin", [side * 0.105, 0.58, 0], [side * 0.11, 0.13, 0.022], 0.05);
+      limb("ac-skin", [side * 0.105, 0.58, 0], [side * 0.11, 0.13, 0.022], 0.054, 0.046);
       ball("ac-skin", side * 0.11, 0.48, 0.01, 0.055, 0.065, 0.052);
     }
     block("ac-dark", side * 0.12, 0.076, 0.065, 0.15, 0.1, 0.29, 0.045);
     const shoulder = [side * (female ? 0.183 : 0.228), 1.34, 0],
       elbow = [side * 0.255, 1.055, 0.007],
       wrist = [side * 0.27, 0.86, 0.072];
-    line(shirt, shoulder, [side * 0.246, 1.16, 0.005], female ? 0.058 : 0.071);
-    line("ac-skin", [side * 0.247, 1.16, 0.005], elbow, 0.052);
-    ball("ac-skin", ...elbow, 0.051, 0.059, 0.052);
-    line("ac-skin", elbow, wrist, 0.045);
+    limb(
+      shirt,
+      shoulder,
+      [side * 0.246, 1.16, 0.005],
+      female ? 0.062 : 0.075,
+      female ? 0.056 : 0.069,
+    );
+    limb("ac-skin", [side * 0.247, 1.16, 0.005], elbow, 0.053, 0.05);
+    limb("ac-skin", elbow, wrist, 0.05, 0.043);
     ball("ac-skin", side * 0.27, 0.819, 0.072, 0.041, 0.069, 0.021);
     for (let finger = 0; finger < 4; finger++)
       line(
