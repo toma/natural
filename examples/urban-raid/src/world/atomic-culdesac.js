@@ -571,6 +571,35 @@ function dormerZ(K, cx, cz, baseY, key, w = 1.5) {
     );
 }
 
+/**
+ * A flat-topped mesa/butte: a low, irregular tapered prism with a flat cap and
+ * eroded flanks, the landform that reads as a dry desert test-site basin rather
+ * than rounded hills. Returns a ~unit geometry (y in [-0.5, 0.5], flat top at
+ * +0.5) to be scaled and placed like the rock backdrop.
+ */
+function mesaGeometry(rng, sides = 7) {
+  const g = new THREE.CylinderGeometry(0.66, 1.0, 1.0, sides, 4, false);
+  const p = g.attributes.position;
+  const perSide = [];
+  for (let i = 0; i < sides + 1; i++) perSide.push(rng.range(0.8, 1.14));
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i),
+      y = p.getY(i),
+      z = p.getZ(i),
+      r = Math.hypot(x, z);
+    if (r < 1e-4) continue; // keep cap/base centres on axis
+    const ang = Math.atan2(z, x);
+    const seg = Math.round(((ang + Math.PI) / (Math.PI * 2)) * sides);
+    const lower = Math.max(0, 0.5 - y); // 0 at top, 1 at base: erode the flanks
+    const j = perSide[seg] * (1 + (rng.range(-0.08, 0.08) + 0.12 * lower) * (y < 0.49 ? 1 : 0));
+    p.setX(i, x * j);
+    p.setZ(i, z * j);
+    if (y < 0.49 && y > -0.49) p.setY(i, y + rng.range(-0.05, 0.05)); // ragged ledges
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
 function stairs(
   K,
   x,
@@ -1956,34 +1985,36 @@ export function buildAtomicCuldesac(A, rng) {
           0.014,
         );
       }
-  // Layered desert mountains: a taller far range and a nearer ridge for depth,
-  // read against the sky's atmospheric haze.
+  // Layered desert backdrop: a far range of flat-topped mesas and buttes, then
+  // a nearer ridge of lower mesas and rounded foothills, read against the sky's
+  // dusty aerial haze. Mesas are broad and flat, wider than they are tall.
   for (let i = 0; i < 30; i++) {
     const a = (i * Math.PI) / 15,
       r = 170 + rng.range(0, 90);
     K.geo(
       "ac-sand",
-      rockGeometry(rng, 1, 3, 0.5),
+      mesaGeometry(rng),
       Math.sin(a) * r,
       -3,
       Math.cos(a) * r,
-      rng.range(40, 85),
-      rng.range(34, 72),
-      rng.range(34, 66),
+      rng.range(55, 120),
+      rng.range(24, 52),
+      rng.range(55, 110),
     );
   }
   for (let i = 0; i < 26; i++) {
     const a = (i * Math.PI) / 13 + 0.12,
-      r = 95 + rng.range(0, 45);
+      r = 95 + rng.range(0, 45),
+      butte = rng.range(0, 1) < 0.55;
     K.geo(
       "ac-sand",
-      rockGeometry(rng, 1, 3, 0.5),
+      butte ? mesaGeometry(rng) : rockGeometry(rng, 1, 3, 0.5),
       Math.sin(a) * r,
       -2,
       Math.cos(a) * r,
-      rng.range(26, 50),
-      rng.range(14, 30),
-      rng.range(22, 40),
+      rng.range(30, 58),
+      butte ? rng.range(12, 26) : rng.range(14, 30),
+      rng.range(26, 48),
     );
   }
   // Boundary collision is independent of dressing, including fence tops.
