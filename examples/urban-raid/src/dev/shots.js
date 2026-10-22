@@ -99,6 +99,22 @@ export const SHOTS = {
     apply: (e) => e.ctx.peek("ui")?.debugState?.("combat"),
     doc: "Full HUD in combat - layout, typography, readability, hit feedback.",
   },
+
+  // ---- geometry close-ups (bevels, silhouettes) ----
+  carcu: {
+    pos: [-11.3, 1.2, -4.6],
+    look: [-15, 0.8, -6.4],
+    fov: 46,
+    time: 16.5,
+    doc: "Close-up of a car body and wheel - panel curvature, edges, silhouette.",
+  },
+  corner: {
+    pos: [-9.6, 1.5, -6.4],
+    look: [-6, 1.7, -10],
+    fov: 50,
+    time: 16.5,
+    doc: "House front corner - edge bevels, siding, trim, roof slab, silhouette.",
+  },
 };
 
 export function installShotApi(engine, { capture, lockstep = false } = {}) {
