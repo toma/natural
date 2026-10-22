@@ -144,7 +144,7 @@ function materials(A, rng) {
   surface("ac-sand", "#bfa780", "sand");
   surface("ac-cream", "#ded3b7", "wood");
   surface("ac-rust", "#914e3e", "metal", 0.53, 0.35);
-  surface("ac-bus", "#ffc21e", "metal", 0.4, 0.35);
+  surface("ac-bus", "#e2b02e", "metal", 0.4, 0.35);
   surface("ac-red", "#a73e35", "metal", 0.4, 0.35);
   surface("ac-car", "#79894a", "metal", 0.16, 0.45);
   surface("ac-metal", "#777e79", "metal", 0.42, 0.65);
@@ -1164,6 +1164,12 @@ function bus(A, box) {
   for (const z of [-1, 1]) K.sphere("ac-red", 5.59, 1.5, z, 0.04, 0.12, 0.12);
   K.art("ac-bus-sign", -3.94, 2.85, 0, 2.2, 0.3, -Math.PI / 2);
   for (const z of [-1, 1]) headlight(K, -5.64, 1.57, z, 0.15, -1);
+  // Road grime and rust weeps down the lower panels and around the wheel arches.
+  for (const side of [-1, 1]) {
+    for (let x = -4.6; x < 5.3; x += 0.78)
+      K.box("ac-rust", x, 0.98, side * 1.33, 0.05, 0.42, 0.008, false);
+    for (const x of [-3.7, 3.7]) K.box("ac-rust", x, 0.72, side * 1.3, 0.9, 0.12, 0.01, false);
+  }
   wheels(A, K, [-3.7, 3.7], 0);
 }
 
