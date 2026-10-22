@@ -808,8 +808,16 @@ function house(A, spec, rng) {
   K.box("ac-roof", -3.1, 2.74, 6.0, 2.4, 0.12, 2.0, false, 0, 0, 0.08);
   K.box("ac-white", -3.1, 2.64, 6.98, 2.4, 0.18, 0.1, false);
   K.box("ac-white", -3.1, 2.5, 6.0, 2.3, 0.12, 0.1, false, 0, 0, 0.08);
-  for (let i = 0; i < 3; i++)
+  for (let i = 0; i < 3; i++) {
     K.box("ac-stone", -3.1, 0.13 - i * 0.04, 5.55 + i * 0.3, 2.4 - i * 0.2, 0.14, 0.32, true);
+    K.box("ac-white", -3.1, 0.22 - i * 0.04, 5.72 + i * 0.3, 2.5 - i * 0.2, 0.025, 0.05, false); // nosing
+  }
+  // Cheek walls flanking the stoop read as a stoop railing base.
+  for (const s of [-1, 1]) K.box("ac-stone", -3.1 + s * 1.2, 0.34, 5.95, 0.18, 0.52, 1.1, true);
+  // Foundation skirting: a proud masonry base course grounding the street-facing walls.
+  K.box("ac-stone", 2.0, 0.34, 5.23, 8.2, 0.36, 0.1, false);
+  K.box("ac-stone", -5.05, 0.34, 5.23, 1.9, 0.36, 0.1, false);
+  K.box("ac-stone", 6.23, 0.34, 0, 0.1, 0.36, 10.4, false);
   // Floor leaves a real stair opening along the left wall.
   K.box("ac-wood", 1.1, y + 0.04, 0, 9.6, 0.2, 9.75, true);
   K.box("ac-wood", -4.75, y + 0.04, 3.1, 2.1, 0.2, 3.6, true);
@@ -838,6 +846,9 @@ function house(A, spec, rng) {
     }
     for (const s of [-1, 1]) {
       K.box("ac-white", s * 6.75, 6.28, 0, 0.12, 0.34, 11.9, false); // eave fascia
+      K.box("ac-white", s * 6.3, 6.14, 0, 0.9, 0.05, 11.9, false); // eave soffit
+      K.cylinder("ac-chrome", s * 6.86, 6.2, 0, 0.08, 11.9, Math.PI / 2); // gutter
+      for (const z of [-5.6, 5.6]) K.box("ac-chrome", s * 6.86, 3.2, z, 0.07, 6.2, 0.07, false); // downspout
       for (const z of [-5.95, 5.95])
         K.box("ac-white", s * 3.45, 7.2, z, len, 0.14, 0.14, false, 0, 0, -s * angle); // rake
     }
@@ -870,6 +881,9 @@ function house(A, spec, rng) {
     }
     for (const s of [-1, 1]) {
       K.box("ac-white", 0, 6.13, s * 5.3, 13.9, 0.34, 0.12, false); // eave fascia
+      K.box("ac-white", 0, 5.99, s * 4.85, 13.9, 0.05, 0.9, false); // eave soffit
+      K.cylinder("ac-chrome", 0, 6.05, s * 5.41, 0.08, 13.9, 0, Math.PI / 2); // gutter
+      for (const x of [-6.6, 6.6]) K.box("ac-chrome", x, 3.1, s * 5.41, 0.07, 6.0, 0.07, false); // downspout
       for (const x of [-6.95, 6.95])
         K.box("ac-white", x, 7.05, s * 2.5, 0.14, 0.14, len, false, s * angle, 0, 0); // rake
     }
