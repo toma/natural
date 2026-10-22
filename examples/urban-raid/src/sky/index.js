@@ -139,10 +139,12 @@ export class SkySystem {
 
     // ---- weather / atmosphere state ---------------------------------------
     this.weather = {
-      /** Aerosol multiplier. 1 clear, 2-3 hazy, 5 dust storm. A touch above
-       *  pristine reads as real suburban daylight: period reference photos
-       *  carry visible aerial perspective on anything past the near houses. */
-      turbidity: 1.5,
+      /** Aerosol multiplier. 1 clear, 2-3 hazy, 5 dust storm. A dry desert
+       *  test-site basin carries real dust: this sits in the hazy band so the
+       *  light warms and the distant mesas fade into aerial perspective, while
+       *  the near houses stay crisp (the height-graded fog below keeps the
+       *  foreground clear). */
+      turbidity: 2.1,
       /** Fewer, deeper cumulus. Below ~0.34 the deck breaks into discrete
        *  masses with clean blue between them instead of one lumpy sheet. Pulled
        *  down further so the daytime sky is not dominated by round cotton-ball
@@ -164,7 +166,8 @@ export class SkySystem {
       cirrusOpacity: 0.15,
       windSpeed: 0.0042, // km/s at the cloud deck (~4 m/s)
       windAngle: 0.7,
-      horizonMurk: 0.13,
+      // Dustier horizon so the far mesas sit in haze rather than on a hard line.
+      horizonMurk: 0.2,
     };
 
     /**
@@ -186,8 +189,8 @@ export class SkySystem {
        * volumetrics.js) rather than grey - distance reads as colour temperature,
        * which is how it reads in a photograph.
        */
-      scatter: 3.6e-3, // 1/m at the fog base
-      extinction: 1.45e-3, // 1/m at the fog base
+      scatter: 4.2e-3, // 1/m at the fog base (dustier desert basin)
+      extinction: 1.9e-3, // 1/m at the fog base (distant mesas read through haze)
       /**
        * 18 m of e-folding, not 30. Dust and exhaust settle: the bottom of a
        * street is measurably hazier than roof height, and that vertical
