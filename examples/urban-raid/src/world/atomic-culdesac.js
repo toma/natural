@@ -1066,12 +1066,15 @@ function bus(A, box) {
   // blocks sightlines and gives cover in the cul-de-sac.
   const K = kit(A, box.x, box.z, box.yaw);
   K.box("ac-dark", 0, 0.77, 0, 11.3, 0.5, 2.5, true);
-  K.round("ac-bus", 0, 1.35, 0, 11.1, 0.95, 2.62, 0.22, true);
-  K.round("ac-bus", 0.7, 2.86, 0, 9.7, 0.3, 2.72, 0.3, true);
-  K.round("ac-bus", -4.8, 1.64, 0, 1.4, 0.46, 2.55, 0.2, true);
-  // Rounded wheel arches over each wheel.
+  // Slab-sided body with crisp corners: a school bus is a hard-edged box with a
+  // small radius on its vertical corners and a gently curved roof, not a pillow.
+  // The earlier 22-30 cm roundovers inflated it into a soft toy.
+  K.round("ac-bus", 0, 1.35, 0, 11.1, 0.95, 2.62, 0.05, true);
+  K.round("ac-bus", 0.7, 2.86, 0, 9.7, 0.3, 2.72, 0.1, true);
+  K.round("ac-bus", -4.8, 1.64, 0, 1.4, 0.46, 2.55, 0.06, true);
+  // Wheel arches over each wheel keep their curve.
   for (const x of [-3.7, 3.7])
-    for (const s of [-1, 1]) K.round("ac-dark", x, 0.78, s * 1.25, 1.3, 0.6, 0.2, 0.18, false);
+    for (const s of [-1, 1]) K.round("ac-dark", x, 0.78, s * 1.25, 1.3, 0.6, 0.2, 0.1, false);
   K.box("ac-glass", -3.94, 2.26, 0, 0.04, 0.98, 2.42, true);
   K.box("ac-bus", 5.47, 2.22, 0, 0.17, 1.2, 2.62, true);
   for (const side of [-1, 1]) {
@@ -1107,9 +1110,9 @@ function bus(A, box) {
 function truck(A, box) {
   const K = kit(A, box.x, box.z, box.yaw);
   K.box("ac-dark", 0, 0.85, 0, 13.5, 0.35, 2.4, true);
-  K.round("ac-red", -5.5, 1.43, 0, 2.3, 1.2, 2.55, 0.18, true);
-  K.round("ac-red", -5.1, 2.49, 0, 2.2, 0.95, 2.5, 0.22, true);
-  K.round("ac-red", -5.1, 3.03, 0, 2.4, 0.18, 2.65, 0.1, false);
+  K.round("ac-red", -5.5, 1.43, 0, 2.3, 1.2, 2.55, 0.06, true);
+  K.round("ac-red", -5.1, 2.49, 0, 2.2, 0.95, 2.5, 0.07, true);
+  K.round("ac-red", -5.1, 3.03, 0, 2.4, 0.18, 2.65, 0.05, false);
   K.box("ac-glass", -6.23, 2.58, 0, 0.025, 0.65, 2.24, false);
   for (const z of [-1.28, 1.28]) {
     K.box("ac-glass", -5.45, 2.56, z, 1.22, 0.65, 0.025, false);
