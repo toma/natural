@@ -144,8 +144,10 @@ export class SkySystem {
        *  carry visible aerial perspective on anything past the near houses. */
       turbidity: 1.5,
       /** Fewer, deeper cumulus. Below ~0.34 the deck breaks into discrete
-       *  masses with clean blue between them instead of one lumpy sheet. */
-      cloudCoverage: 0.18,
+       *  masses with clean blue between them instead of one lumpy sheet. Pulled
+       *  down further so the daytime sky is not dominated by round cotton-ball
+       *  puffs (the "bubbly" note); the wispy character moves up to the cirrus. */
+      cloudCoverage: 0.14,
       /** Raised with the coverage drop: a cloud that survives the erosion is
        *  now optically deep, so its self-shadowed base sits 2-3 stops under its
        *  sunlit top and the billow reads as a solid with volume. */
@@ -158,8 +160,8 @@ export class SkySystem {
        * blue for free and at the old settings it dominated the upper half of every
        * daylight frame and read as hatching.
        */
-      cirrusCoverage: 0.09,
-      cirrusOpacity: 0.12,
+      cirrusCoverage: 0.15,
+      cirrusOpacity: 0.15,
       windSpeed: 0.0042, // km/s at the cloud deck (~4 m/s)
       windAngle: 0.7,
       horizonMurk: 0.13,
