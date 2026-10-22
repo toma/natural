@@ -1189,6 +1189,7 @@ function enhancePbr(A) {
     ["ac-road", "asphalt"],
     ["ac-concrete", "concrete"],
     ["ac-grass", "grass"],
+    ["ac-stone", "bricks"],
   ];
   for (const [key, name] of jobs) {
     const mat = A.mat(key);
