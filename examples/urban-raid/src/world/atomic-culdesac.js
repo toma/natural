@@ -500,6 +500,68 @@ function shrub(K, x, y, z, r, key = "ac-hedge", top = 0.4) {
   }
 }
 
+/**
+ * A post-and-rail balustrade along a run in house-local space: a top and bottom
+ * rail with thin, real-scale balusters (3.5 cm, below the bevel threshold so
+ * they read crisp, not as fat rounded spindles).
+ */
+function balustrade(K, x0, z0, x1, z1, y = 0.16, height = 0.82, key = "ac-white") {
+  const len = Math.hypot(x1 - x0, z1 - z0),
+    yaw = -Math.atan2(z1 - z0, x1 - x0),
+    cx = (x0 + x1) / 2,
+    cz = (z0 + z1) / 2;
+  K.box(key, cx, y + height, cz, len, 0.07, 0.1, false, 0, yaw);
+  K.box(key, cx, y + 0.14, cz, len, 0.05, 0.07, false, 0, yaw);
+  const n = Math.max(2, Math.round(len / 0.14));
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    K.box(key, x0 + (x1 - x0) * t, y + height * 0.5, z0 + (z1 - z0) * t, 0.035, height * 0.72, 0.035, false);
+  }
+}
+
+/**
+ * A gabled roof dormer facing +z in house-local space, seated on a front roof
+ * slope: cheek walls, a sashed window, a gable, and a little pitched roof. Pure
+ * decorative massing that breaks an otherwise plain slope and varies the
+ * roofline. Crisp, real-scale members, no blobby forms.
+ */
+function dormerZ(K, cx, cz, baseY, key, w = 1.5) {
+  const depth = 1.3,
+    wallH = 0.78,
+    gable = 0.62,
+    zf = cz + depth / 2;
+  for (const s of [-1, 1])
+    K.box(key, cx + s * (w / 2), baseY + wallH / 2, cz, 0.1, wallH, depth, false); // cheeks
+  K.box(key, cx, baseY + wallH / 2, cz - depth / 2, w, wallH, 0.12, false); // back into the roof
+  K.box(key, cx, baseY + 0.13, zf, w, 0.26, 0.1, false); // apron below the sash
+  K.box("ac-glass", cx, baseY + wallH * 0.56, zf, w * 0.74, wallH * 0.62, 0.05, false);
+  K.box("ac-white", cx, baseY + wallH * 0.56, zf + 0.012, 0.04, wallH * 0.62, 0.05, false); // mullion
+  for (const yy of [baseY + 0.26, baseY + wallH])
+    K.box("ac-white", cx, yy, zf, w + 0.06, 0.07, 0.12, false); // sill and head
+  const shape = new THREE.Shape();
+  shape.moveTo(-w / 2 - 0.05, 0);
+  shape.lineTo(w / 2 + 0.05, 0);
+  shape.lineTo(0, gable);
+  shape.closePath();
+  K.geo(key, new THREE.ShapeGeometry(shape), cx, baseY + wallH, zf + 0.006);
+  const rlen = Math.hypot(w / 2 + 0.2, gable),
+    rang = Math.atan2(gable, w / 2 + 0.2);
+  for (const s of [-1, 1])
+    K.box(
+      "ac-roof",
+      cx + s * (w / 4),
+      baseY + wallH + gable / 2,
+      cz,
+      rlen,
+      0.08,
+      depth + 0.34,
+      false,
+      0,
+      0,
+      -s * rang,
+    );
+}
+
 function stairs(
   K,
   x,
@@ -774,14 +836,17 @@ function house(A, spec, rng) {
     for (let i = 0; i < 11; i++)
       K.box("ac-wood", sx, 0.4 + i * 0.14, 5.28, 0.42, 0.028, 0.035, false);
   }
-  // Front porch over the door: posts, a shed roof, fascia, and stone steps.
+  // Front porch over the door: a deeper covered stoop on posts, with a shed
+  // roof, fascia, a timber balustrade down each side, and stone steps.
   for (const px of [-3.95, -2.25]) {
-    K.round("ac-white", px, 1.35, 6.0, 0.16, 2.4, 0.16, 0.04, true);
-    K.round("ac-white", px, 2.57, 6.0, 0.22, 0.12, 0.22, 0.03, false);
+    K.round("ac-white", px, 1.42, 6.45, 0.16, 2.54, 0.16, 0.04, true);
+    K.round("ac-white", px, 2.73, 6.45, 0.22, 0.12, 0.22, 0.03, false);
   }
-  K.box("ac-roof", -3.1, 2.74, 6.0, 2.4, 0.12, 2.0, false, 0, 0, 0.08);
-  K.box("ac-white", -3.1, 2.64, 6.98, 2.4, 0.18, 0.1, false);
-  K.box("ac-white", -3.1, 2.5, 6.0, 2.3, 0.12, 0.1, false, 0, 0, 0.08);
+  K.box("ac-roof", -3.1, 2.9, 6.1, 2.5, 0.12, 2.75, false, 0, 0, 0.08);
+  K.box("ac-white", -3.1, 2.78, 7.42, 2.5, 0.2, 0.1, false);
+  K.box("ac-white", -3.1, 2.64, 6.1, 2.4, 0.12, 0.1, false, 0, 0, 0.08);
+  // Balustrade down each open side, from the wall to the front post.
+  for (const s of [-1, 1]) balustrade(K, -3.1 + s * 0.85, 5.35, -3.1 + s * 0.85, 6.45);
   for (let i = 0; i < 3; i++) {
     K.box("ac-stone", -3.1, 0.13 - i * 0.04, 5.55 + i * 0.3, 2.4 - i * 0.2, 0.14, 0.32, true);
     K.box("ac-white", -3.1, 0.22 - i * 0.04, 5.72 + i * 0.3, 2.5 - i * 0.2, 0.025, 0.05, false); // nosing
@@ -826,6 +891,26 @@ function house(A, spec, rng) {
       for (const z of [-5.95, 5.95])
         K.box("ac-white", s * 3.45, 7.2, z, len, 0.14, 0.14, false, 0, 0, -s * angle); // rake
     }
+    // Second-storey bay oriel under the front gable: projects the upper window
+    // forward on corbels, so the gable-end facade is no longer one flat plane.
+    {
+      const oy0 = y + 0.5,
+        oy1 = y + 2.3,
+        proj = 0.6,
+        hw = 1.9,
+        zf = 5.2;
+      for (const s of [-1, 0, 1])
+        K.box("ac-white", s * hw * 0.82, oy0 - 0.16, zf + 0.2, 0.16, 0.42, 0.44, false); // corbels
+      for (const s of [-1, 1])
+        K.box(key, s * hw, (oy0 + oy1) / 2, zf + proj / 2, 0.12, oy1 - oy0, proj, false); // cheeks
+      K.box(key, 0, oy0, zf + proj / 2, hw * 2, 0.12, proj, false); // floor slab
+      K.box("ac-glass", 0, (oy0 + oy1) / 2 + 0.05, zf + proj, hw * 2 - 0.2, oy1 - oy0 - 0.3, 0.05, false);
+      for (const s of [-1, 0, 1])
+        K.box("ac-white", s * (hw - 0.12), (oy0 + oy1) / 2, zf + proj - 0.008, 0.07, oy1 - oy0 - 0.25, 0.07, false); // mullions
+      for (const yy of [oy0 + 0.14, oy1 - 0.06])
+        K.box("ac-white", 0, yy, zf + proj, hw * 2 + 0.06, 0.08, 0.1, false); // sill and head
+      K.box("ac-roof", 0, oy1 + 0.18, zf + proj / 2 + 0.03, hw * 2 + 0.3, 0.1, proj + 0.28, false, 0.4, 0, 0);
+    }
   } else {
     const rise = 1.55,
       half = 5,
@@ -861,6 +946,9 @@ function house(A, spec, rng) {
       for (const x of [-6.95, 6.95])
         K.box("ac-white", x, 7.05, s * 2.5, 0.14, 0.14, len, false, s * angle, 0, 0); // rake
     }
+    // Two gabled dormers on the street-facing slope break the long plain roof
+    // and vary the roofline against the green house's single front gable.
+    for (const dx of [-3.4, 3.4]) dormerZ(K, dx, 2.75, 6.42, key, 1.5);
   }
   K.box("ac-stone", -4.55, 4.1, 4.9, 1.9, 8.2, 0.85, true);
   K.box("ac-dark", -4.55, 8.29, 4.9, 2.18, 0.18, 1.06, false);
