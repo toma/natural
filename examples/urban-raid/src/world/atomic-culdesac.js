@@ -49,19 +49,19 @@ function materials(A, rng) {
         // geometry); bare timber keeps the wood grain. Weathering stays light.
         const painted = ["ac-green", "ac-yellow", "ac-white", "ac-blue", "ac-cream"].includes(key);
         if (painted) {
-          // Clean painted clapboard: a light base, minimal weathering, and a
-          // flattened macro/patch so the colour reads as a uniform vivid pastel
-          // rather than a mottled, grimed wash.
+          // Weathered painted clapboard: a muted base with real value
+          // variation, grime and fading so the siding reads as decades-old
+          // paint rather than a flat, uniform poster colour.
           name = "plaster";
           surf = "wood";
           opts = {
             tint,
             scale: 1.7,
-            normalStrength: 0.45,
-            weather: [0.08, 0.05, 0.08, 0.2],
-            macro: [0.05, 0.16, 0.07, 0.25],
-            macroBig: [1.6, 0.06, 0.03, 0],
-            patch: [0.08, 2.0, 0.07, -0.04],
+            normalStrength: 0.7,
+            weather: [0.22, 0.16, 0.2, 0.42],
+            macro: [0.14, 0.22, 0.13, 0.42],
+            macroBig: [1.6, 0.14, 0.06, 0],
+            patch: [0.16, 2.0, 0.13, -0.09],
           };
         } else {
           name = "wood";
@@ -127,10 +127,10 @@ function materials(A, rng) {
     }
     return A.registerMaterial(key, A.materials.get(name, opts), surf);
   };
-  surface("ac-green", "#c6f06a", "wood");
-  surface("ac-yellow", "#ffe238", "wood");
-  surface("ac-white", "#f4efe2", "wood");
-  surface("ac-blue", "#3a93a6", "wood");
+  surface("ac-green", "#8a9856", "wood");
+  surface("ac-yellow", "#d8c36a", "wood");
+  surface("ac-white", "#ece6d6", "wood");
+  surface("ac-blue", "#4a7d86", "wood");
   surface("ac-wood", "#8e6b47", "wood");
   surface("ac-fence", "#b6a17a", "wood");
   surface("ac-roof", "#606560", "roof");
@@ -146,7 +146,7 @@ function materials(A, rng) {
   surface("ac-rust", "#914e3e", "metal", 0.53, 0.35);
   surface("ac-bus", "#ffc21e", "metal", 0.4, 0.35);
   surface("ac-red", "#a73e35", "metal", 0.4, 0.35);
-  surface("ac-car", "#90a64d", "metal", 0.35, 0.4);
+  surface("ac-car", "#79894a", "metal", 0.35, 0.4);
   surface("ac-metal", "#777e79", "metal", 0.42, 0.65);
   surface("ac-chrome", "#b5bab5", "metal", 0.22, 0.85);
   surface("ac-dark", "#242826", "concrete");
@@ -1571,6 +1571,59 @@ function groundCover(A, rng) {
   }
 }
 
+/**
+ * A mature deciduous tree: a tapered trunk stepping up through a few bark
+ * segments, five limbs radiating to the crown, and an irregular canopy of
+ * overlapping leaf clusters in two greens. Solid cluster foliage reads as a
+ * full tree from the street and avoids the transparent-sort pipeline.
+ */
+function tree(A, x, z, rng, scale = 1) {
+  const K = kit(A, x, z, rng.range(0, Math.PI * 2));
+  const h = 5.5 * scale;
+  const segs = 5;
+  const trunkTop = h * 0.46;
+  for (let i = 0; i < segs; i++) {
+    const t = i / segs,
+      r = (0.22 - 0.12 * t) * scale,
+      seg = trunkTop / segs;
+    K.cylinder(
+      "ac-wood",
+      rng.range(-0.03, 0.03),
+      (i + 0.5) * seg,
+      rng.range(-0.03, 0.03),
+      r,
+      seg + 0.04,
+    );
+  }
+  const clusters = [[0, trunkTop + 0.7 * scale, 0]];
+  const nb = 5;
+  for (let b = 0; b < nb; b++) {
+    const a = (b / nb) * Math.PI * 2 + rng.range(-0.35, 0.35),
+      reach = rng.range(1.0, 1.7) * scale,
+      bx = Math.cos(a) * reach,
+      bz = Math.sin(a) * reach,
+      by = trunkTop + rng.range(0.2, 1.1) * scale;
+    K.line("ac-wood", [0, trunkTop - 0.2, 0], [bx, by, bz], 0.07 * scale);
+    clusters.push([bx, by, bz]);
+  }
+  for (const [cx, cy, cz] of clusters) {
+    const n = 5 + Math.floor(rng.range(0, 3));
+    for (let i = 0; i < n; i++) {
+      const g = rng.range(0, 1) < 0.5 ? "ac-hedge" : "ac-grass",
+        rr = rng.range(0.75, 1.25) * scale;
+      K.sphere(
+        g,
+        cx + rng.range(-0.6, 0.6),
+        cy + rng.range(-0.4, 0.6),
+        cz + rng.range(-0.6, 0.6),
+        rr,
+        rr * 0.82,
+        rr,
+      );
+    }
+  }
+}
+
 export function buildAtomicCuldesac(A, rng) {
   materials(A, rng);
   registerProps(A, rng);
@@ -1599,6 +1652,15 @@ export function buildAtomicCuldesac(A, rng) {
   for (const h of HOUSES) furnishHouse(A, rng, h);
   dressYards(A, rng);
   groundCover(A, rng);
+  for (const [tx, tz, ts] of [
+    [-16, 15, 1.1],
+    [15, 15.5, 0.95],
+    [-17.5, -15, 1.05],
+    [16.5, -14.5, 1.15],
+    [-19, 16.5, 0.9],
+    [19, -16.5, 1.0],
+  ])
+    tree(A, tx, tz, rng, ts);
   const vehicle = (id) => VEHICLES.find((v) => v.id === id);
   bus(A, vehicle("bus"));
   truck(A, vehicle("truck"));
