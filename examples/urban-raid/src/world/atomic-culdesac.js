@@ -138,9 +138,11 @@ function materials(A, rng) {
   surface("ac-line", "#cfc8b0", "concrete");
   surface("ac-tar", "#1c1f1d", "road");
   surface("ac-concrete", "#a7a294", "concrete");
-  surface("ac-grass", "#8c8a4e", "grass");
+  surface("ac-grass", "#5d8a37", "grass");
   surface("ac-hedge", "#4a6529", "grass");
   surface("ac-sand", "#bfa780", "sand");
+  // Warm rocky brown for the big desert range that sits close behind the suburb.
+  surface("ac-mtn", "#8a6f52", "sand");
   surface("ac-cream", "#ded3b7", "wood");
   surface("ac-rust", "#914e3e", "metal", 0.53, 0.35);
   surface("ac-bus", "#e2b02e", "metal", 0.4, 0.35);
@@ -1721,44 +1723,6 @@ function groundCover(A, rng) {
       );
     }
   }
-  // Dry bare-earth patches worn into the lawns: the dead-grass spots of a
-  // neglected test-site yard, flat so they read as ground, not clods.
-  for (let i = 0; i < 48; i++) {
-    const x = rng.range(-22, 22),
-      z = vergeZ();
-    K.box(
-      rng.range(0, 1) < 0.6 ? "ac-soil" : "ac-sand",
-      x,
-      0.122,
-      z,
-      rng.range(0.5, 1.7),
-      0.01,
-      rng.range(0.4, 1.3),
-      false,
-      0,
-      rng.range(0, Math.PI),
-      0,
-    );
-  }
-  // Wind-blown dust drifting off the road onto its shoulders.
-  for (let i = 0; i < 72; i++) {
-    const x = rng.range(-22, 22),
-      side = rng.range(0, 1) < 0.5 ? 1 : -1,
-      z = side * (7.5 + rng.range(-0.6, 0.9));
-    K.box(
-      "ac-sand",
-      x,
-      0.168,
-      z,
-      rng.range(0.3, 1.1),
-      0.004,
-      rng.range(0.15, 0.5),
-      false,
-      0,
-      rng.range(-0.3, 0.3),
-      0,
-    );
-  }
   for (let i = 0; i < 140; i++) {
     const x = rng.range(-22.5, 22.5),
       z = vergeZ(),
@@ -2083,36 +2047,58 @@ export function buildAtomicCuldesac(A, rng) {
           0.014,
         );
       }
-  // Layered desert backdrop: a far range of flat-topped mesas and buttes, then
-  // a nearer ridge of lower mesas and rounded foothills, read against the sky's
-  // dusty aerial haze. Mesas are broad and flat, wider than they are tall.
-  for (let i = 0; i < 30; i++) {
-    const a = (i * Math.PI) / 15,
-      r = 170 + rng.range(0, 90);
+  // Layered desert backdrop. The reference sits a big, rugged brown range CLOSE
+  // behind the suburb, filling much of the sky, with paler hazed ridges fading
+  // behind it. Three layers: a dominant near range (tall, rocky, warm brown), a
+  // mid range, and a far haze range that aerial perspective washes to pale tan.
+  // The ranges wrap the full circle so every street and backyard angle looks out
+  // onto mountains rather than a flat horizon.
+  // Far hazed range: broad, tall, washed out by the dusty air.
+  for (let i = 0; i < 34; i++) {
+    const a = (i * Math.PI) / 17,
+      r = 240 + rng.range(0, 140);
     K.geo(
-      "ac-sand",
+      "ac-mtn",
       mesaGeometry(rng),
+      Math.sin(a) * r,
+      -4,
+      Math.cos(a) * r,
+      rng.range(90, 180),
+      rng.range(55, 110),
+      rng.range(90, 170),
+    );
+  }
+  // Dominant near range: big rugged peaks close behind the houses. A mix of
+  // peaked rock massifs and the odd flat-topped mesa, overlapping into one
+  // continuous ridgeline rather than scattered buttes.
+  for (let i = 0; i < 44; i++) {
+    const a = (i * Math.PI) / 22 + 0.07,
+      r = 104 + rng.range(0, 48),
+      mesa = rng.range(0, 1) < 0.3;
+    K.geo(
+      "ac-mtn",
+      mesa ? mesaGeometry(rng) : rockGeometry(rng, 1, 4, 0.55),
       Math.sin(a) * r,
       -3,
       Math.cos(a) * r,
-      rng.range(55, 120),
-      rng.range(24, 52),
-      rng.range(55, 110),
+      rng.range(62, 104),
+      mesa ? rng.range(40, 66) : rng.range(58, 98),
+      rng.range(62, 100),
     );
   }
-  for (let i = 0; i < 26; i++) {
-    const a = (i * Math.PI) / 13 + 0.12,
-      r = 95 + rng.range(0, 45),
-      butte = rng.range(0, 1) < 0.55;
+  // Foothills skirting the near range so its base meets the desert floor.
+  for (let i = 0; i < 24; i++) {
+    const a = (i * Math.PI) / 12 + 0.18,
+      r = 92 + rng.range(0, 30);
     K.geo(
-      "ac-sand",
-      butte ? mesaGeometry(rng) : rockGeometry(rng, 1, 3, 0.5),
+      "ac-mtn",
+      rockGeometry(rng, 1, 3, 0.5),
       Math.sin(a) * r,
       -2,
       Math.cos(a) * r,
-      rng.range(30, 58),
-      butte ? rng.range(12, 26) : rng.range(14, 30),
-      rng.range(26, 48),
+      rng.range(34, 60),
+      rng.range(16, 34),
+      rng.range(30, 52),
     );
   }
   // Boundary collision is independent of dressing, including fence tops.

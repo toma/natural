@@ -134,7 +134,9 @@ export class SkySystem {
     const q = ctx.config.q;
 
     this.celestial = new Celestial();
-    this.hour = 14.5;
+    // Warm late-afternoon desert light: the reference reads as a hazy golden
+    // hour, so gameplay runs at the same hour the hero/house captures use.
+    this.hour = 16.5;
     this.timeRate = 0;
 
     // ---- weather / atmosphere state ---------------------------------------
@@ -144,12 +146,12 @@ export class SkySystem {
        *  light warms and the distant mesas fade into aerial perspective, while
        *  the near houses stay crisp (the height-graded fog below keeps the
        *  foreground clear). */
-      turbidity: 2.1,
+      turbidity: 5.3,
       /** Fewer, deeper cumulus. Below ~0.34 the deck breaks into discrete
        *  masses with clean blue between them instead of one lumpy sheet. Pulled
        *  down further so the daytime sky is not dominated by round cotton-ball
        *  puffs (the "bubbly" note); the wispy character moves up to the cirrus. */
-      cloudCoverage: 0.14,
+      cloudCoverage: 0.08,
       /** Raised with the coverage drop: a cloud that survives the erosion is
        *  now optically deep, so its self-shadowed base sits 2-3 stops under its
        *  sunlit top and the billow reads as a solid with volume. */
@@ -167,7 +169,9 @@ export class SkySystem {
       windSpeed: 0.0042, // km/s at the cloud deck (~4 m/s)
       windAngle: 0.7,
       // Dustier horizon so the far mesas sit in haze rather than on a hard line.
-      horizonMurk: 0.2,
+      // Pushed up for the heavy warm dust haze of the reference: the sky washes
+      // toward pale tan near the horizon and the distant ranges fade into it.
+      horizonMurk: 0.46,
     };
 
     /**
