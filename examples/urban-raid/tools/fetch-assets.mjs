@@ -57,6 +57,26 @@ const TEXTURES = [
     id: "Bricks094",
     sha256: "51be701039d6d2bd609744fb1d715b8c6df2fe2f42db167d20c840b47f5a954b",
   },
+  {
+    name: "roof",
+    id: "RoofingTiles010",
+    sha256: "54f92d5abfc1bbb51f8c6fd6680402306c52a910420a42403088b0b4963369e8",
+  },
+  {
+    name: "planks",
+    id: "Planks018",
+    sha256: "67de89450524150189b4817a501584809b8ec9f5937ae61f6d361ab20e7da17c",
+  },
+  {
+    name: "metal",
+    id: "PaintedMetal002",
+    sha256: "c95fc5a065582deded194e7bc4d9592706b58aa0259110989931ec8f8ad1a9a0",
+  },
+  {
+    name: "siding",
+    id: "WoodSiding001",
+    sha256: "f6391718002cd2f5da737f89a371e2a3dae573540b8c2b301271d7f02cec4e54",
+  },
 ];
 
 const sizeArg = process.argv.find((a) => a.startsWith("--size="));

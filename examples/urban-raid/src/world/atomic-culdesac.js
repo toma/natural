@@ -1194,6 +1194,17 @@ function enhancePbr(A) {
     ["ac-concrete", "concrete", { roughnessFloor: 0.7 }],
     ["ac-grass", "grass", {}],
     ["ac-stone", "bricks", {}],
+    ["ac-roof", "roof", { roughnessFloor: 0.58 }],
+    ["ac-fence", "planks", {}],
+    // Painted vehicle panels keep their solid colour; the scan contributes only
+    // panel scratches and a semi-gloss roughness, so the paint does not go camo.
+    ["ac-bus", "metal", { grainOnly: true, normalScale: 0.5, roughnessFloor: 0.3 }],
+    ["ac-car", "metal", { grainOnly: true, normalScale: 0.5, roughnessFloor: 0.3 }],
+    ["ac-red", "metal", { grainOnly: true, normalScale: 0.5, roughnessFloor: 0.3 }],
+    // Siding keeps its pastel albedo; take only the plank grain normal and a
+    // matte roughness so the colour is untouched.
+    ["ac-green", "siding", { grainOnly: true, normalScale: 0.4 }],
+    ["ac-yellow", "siding", { grainOnly: true, normalScale: 0.4 }],
   ];
   for (const [key, name, opts] of jobs) {
     const mat = A.mat(key);
@@ -1201,9 +1212,14 @@ function enhancePbr(A) {
     loadPbrSet(name, "/assets/pbr", opts)
       .then((set) => {
         if (!set) return;
-        mat.map = set.albedo;
-        if (set.normal) mat.normalMap = set.normal;
-        mat.roughnessMap = set.orm;
+        if (!opts.grainOnly && set.albedo) mat.map = set.albedo;
+        if (set.normal) {
+          mat.normalMap = set.normal;
+          if (opts.normalScale && mat.normalScale) {
+            mat.normalScale.set(opts.normalScale, opts.normalScale);
+          }
+        }
+        if (set.orm) mat.roughnessMap = set.orm;
         mat.needsUpdate = true;
       })
       .catch(() => {});

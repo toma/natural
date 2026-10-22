@@ -23,12 +23,16 @@ product. Credits are listed anyway, which is good open-source manners.
 
 ## Textures (ambientCG, by Lennart Demes, CC0 1.0)
 
-| Surface                    | Asset       | Source                                    |
-| -------------------------- | ----------- | ----------------------------------------- |
-| Asphalt road               | Asphalt026C | https://ambientcg.com/view?id=Asphalt026C |
-| Grass / lawn               | Grass004    | https://ambientcg.com/view?id=Grass004    |
-| Concrete curb and sidewalk | Concrete034 | https://ambientcg.com/view?id=Concrete034 |
-| Brick chimney              | Bricks094   | https://ambientcg.com/view?id=Bricks094   |
+| Surface                                      | Asset           | Source                                        |
+| -------------------------------------------- | --------------- | --------------------------------------------- |
+| Asphalt road                                 | Asphalt026C     | https://ambientcg.com/view?id=Asphalt026C     |
+| Grass / lawn                                 | Grass004        | https://ambientcg.com/view?id=Grass004        |
+| Concrete curb and sidewalk                   | Concrete034     | https://ambientcg.com/view?id=Concrete034     |
+| Brick chimney                                | Bricks094       | https://ambientcg.com/view?id=Bricks094       |
+| Roof shingles                                | RoofingTiles010 | https://ambientcg.com/view?id=RoofingTiles010 |
+| Wood fence planks                            | Planks018       | https://ambientcg.com/view?id=Planks018       |
+| Painted vehicle metal                        | PaintedMetal002 | https://ambientcg.com/view?id=PaintedMetal002 |
+| Lap siding grain (normal and roughness only) | WoodSiding001   | https://ambientcg.com/view?id=WoodSiding001   |
 
 ambientCG releases all of its material scans under CC0 1.0:
 https://docs.ambientcg.com/books/licensing/page/the-license
