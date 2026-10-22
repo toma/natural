@@ -44,9 +44,20 @@ function materials(A, rng) {
         // geometry); bare timber keeps the wood grain. Weathering stays light.
         const painted = ["ac-green", "ac-yellow", "ac-white", "ac-blue", "ac-cream"].includes(key);
         if (painted) {
+          // Clean painted clapboard: a light base, minimal weathering, and a
+          // flattened macro/patch so the colour reads as a uniform vivid pastel
+          // rather than a mottled, grimed wash.
           name = "plaster";
           surf = "wood";
-          opts = { tint, scale: 1.7, normalStrength: 0.6, weather: [0.18, 0.12, 0.2, 0.35] };
+          opts = {
+            tint,
+            scale: 1.7,
+            normalStrength: 0.45,
+            weather: [0.08, 0.05, 0.08, 0.2],
+            macro: [0.05, 0.16, 0.07, 0.25],
+            macroBig: [1.6, 0.06, 0.03, 0],
+            patch: [0.08, 2.0, 0.07, -0.04],
+          };
         } else {
           name = "wood";
           surf = "wood";
@@ -111,8 +122,8 @@ function materials(A, rng) {
     }
     return A.registerMaterial(key, A.materials.get(name, opts), surf);
   };
-  surface("ac-green", "#b6e36a", "wood");
-  surface("ac-yellow", "#ffdc45", "wood");
+  surface("ac-green", "#c6f06a", "wood");
+  surface("ac-yellow", "#ffe238", "wood");
   surface("ac-white", "#f4efe2", "wood");
   surface("ac-blue", "#3a93a6", "wood");
   surface("ac-wood", "#8e6b47", "wood");
