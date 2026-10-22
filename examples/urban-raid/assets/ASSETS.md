@@ -43,6 +43,20 @@ loader packs them into the engine's layout: albedo RGB plus height in alpha, and
 an occlusion/roughness/metalness map, then lets the material library's world
 projection, macro variation, and vertex weathering blend out the tiling.
 
+## Models (Poly Haven, CC0 1.0)
+
+Fetched as glTF (a .gltf plus its .bin and 1K textures). Loaded asynchronously
+and wrapped in a distance LOD; a missing model falls back to procedural dressing.
+
+| Use                    | Asset           | Source                                  |
+| ---------------------- | --------------- | --------------------------------------- |
+| Hedges along the fence | shrub_01        | https://polyhaven.com/a/shrub_01        |
+| Porch potted plants    | potted_plant_01 | https://polyhaven.com/a/potted_plant_01 |
+| Kerbside bins          | metal_trash_can | https://polyhaven.com/a/metal_trash_can |
+| Lawn chairs            | GreenChair_01   | https://polyhaven.com/a/GreenChair_01   |
+
+Poly Haven publishes all of its assets as CC0 1.0: https://polyhaven.com/license
+
 ## How to add more
 
 Add an entry to the manifest in `tools/fetch-assets.mjs` with its id, CC0

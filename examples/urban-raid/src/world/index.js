@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Assembler } from "./builder.js";
 import { buildAtomicCuldesac } from "./atomic-culdesac.js";
+import { placeModels, updateModelLods } from "./models.js";
 import { HOUSES, MAP_BOUNDS, MAP_SPAWNS, outdoorOpen } from "./atomic-culdesac-layout.ts";
 
 /**
@@ -92,6 +93,12 @@ export class WorldSystem {
 
     A.finalize(this.root, physics);
     A.releaseCache();
+
+    // Optional CC0 glTF models load asynchronously and attach to the world
+    // root; a set that is not fetched is simply skipped (procedural dressing
+    // stays). Their LODs are driven from update().
+    this.modelLods = [];
+    void placeModels(this.root, A.xform, A.models ?? [], this.modelLods);
 
     // -------------------------------------------------------------- queries --
     this._v = new THREE.Vector3();
@@ -266,6 +273,7 @@ export class WorldSystem {
   update(dt, ctx) {
     // Distance LOD for the scatter clouds: one bounding-sphere test per batch.
     this.A?.updateLod(ctx.camera);
+    if (this.modelLods?.length) updateModelLods(this.modelLods, ctx.camera);
 
     // Street lamps come on as the sun goes down, driven by the sky's real solar
     // altitude rather than a timer, so it is right at any time of day.

@@ -1156,6 +1156,32 @@ function dressYards(A, rng) {
   P("bucket", -3, 6);
   A.jitter = null;
   A.skirts = false;
+
+  // CC0 glTF models where they clearly beat the procedural prop: a hedge row
+  // along the front fence, a potted plant by the porch, a kerbside bin, and
+  // lawn chairs in the yard. Loaded asynchronously by the world system; absent
+  // models are skipped. See assets/ASSETS.md.
+  A.models = A.models ?? [];
+  for (const h of HOUSES) {
+    const m = (id, lx, lz, scale, yaw = 0) => {
+      const p = housePoint(h, lx, lz);
+      A.models.push({
+        id,
+        x: p.x,
+        z: p.z,
+        y: 0.13,
+        yaw: yaw + h.yaw + rng.range(-0.25, 0.25),
+        scale,
+      });
+    };
+    for (const lx of [-5.5, -1.8, 1.8, 5.5]) m("shrub_01", lx, 7.9, rng.range(1.1, 1.4));
+    m("potted_plant_01", -1.4, 6.0, 1.2);
+    m("potted_plant_01", 1.2, 6.0, 1.1, 1.3);
+    m("metal_trash_can", -7.6, 7.3, 1.0);
+    m("metal_trash_can", -6.9, 7.3, 1.0, 2.0);
+    m("GreenChair_01", 2.4, 5.6, 1.0, 2.5);
+    m("GreenChair_01", 3.7, 5.7, 1.0, 3.4);
+  }
 }
 
 /**

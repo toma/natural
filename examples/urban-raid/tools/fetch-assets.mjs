@@ -21,6 +21,11 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const pbrDir = join(root, "assets", "pbr");
+const modelsDir = join(root, "assets", "models");
+
+// CC0 1.0, Poly Haven (https://polyhaven.com/license). Fetched as glTF (a
+// .gltf plus its .bin and textures) at 1K so the set stays small.
+const MODELS = ["GreenChair_01", "metal_trash_can", "potted_plant_01", "shrub_01"];
 
 // The ambientCG map suffixes mapped to the engine's channel names. Color is the
 // albedo, NormalGL is the OpenGL-convention tangent normal, and Displacement is
@@ -145,6 +150,26 @@ async function fetchTexture(t) {
   process.stdout.write("done\n");
 }
 
+async function fetchModel(id) {
+  const dir = join(modelsDir, id);
+  await mkdir(dir, { recursive: true });
+  process.stdout.write(`${id}: downloading... `);
+  const meta = await (await fetch(`https://api.polyhaven.com/files/${id}`)).json();
+  const g = meta.gltf?.["1k"]?.gltf;
+  if (!g?.url) throw new Error("no 1k glTF");
+  const write = async (url, dest) => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+    await mkdir(dirname(dest), { recursive: true });
+    await writeFile(dest, Buffer.from(await res.arrayBuffer()));
+  };
+  await write(g.url, join(dir, g.url.split("/").pop()));
+  for (const [rel, info] of Object.entries(g.include ?? {})) {
+    await write(info.url, join(dir, rel));
+  }
+  process.stdout.write("done\n");
+}
+
 async function main() {
   if (targetWidth && !hasFfmpeg) {
     console.warn("ffmpeg not found; keeping full 2K maps.");
@@ -155,6 +180,14 @@ async function main() {
       await fetchTexture(t);
     } catch (err) {
       console.error(`${t.name}: ${err.message}`);
+    }
+  }
+  await mkdir(modelsDir, { recursive: true });
+  for (const id of MODELS) {
+    try {
+      await fetchModel(id);
+    } catch (err) {
+      console.error(`${id}: ${err.message}`);
     }
   }
   console.info("Assets ready under assets/. See assets/ASSETS.md for credits.");
