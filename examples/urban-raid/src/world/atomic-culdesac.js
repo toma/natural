@@ -2008,8 +2008,29 @@ export function buildAtomicCuldesac(A, rng) {
   const vehicle = (id) => VEHICLES.find((v) => v.id === id);
   bus(A, vehicle("bus"));
   truck(A, vehicle("truck"));
-  car(A, vehicle("car-green"));
-  car(A, vehicle("car-yellow"), "ac-rust");
+  // Parked cars: a realistic CC0 covered car (Poly Haven) when the model set is
+  // installed, else the procedural sedan as a fallback. The model's length runs
+  // along its local Z, so it is turned a quarter-turn to lie along the bay. A
+  // collision box matches the silhouette; the layout OBB is unchanged, so the
+  // prop-overlap and entrance-clearance tests still hold.
+  A.models = A.models ?? [];
+  for (const id of ["car-green", "car-yellow"]) {
+    const v = vehicle(id);
+    if (A.useModels) {
+      A.models.push({
+        id: "covered_car",
+        x: v.x,
+        z: v.z,
+        y: -0.05,
+        yaw: v.yaw + Math.PI / 2,
+        scale: 1,
+        far: 140,
+      });
+      kit(A, v.x, v.z, v.yaw).box(null, 0, 0.6, 0, 4.5, 1.5, 1.9, true);
+    } else {
+      car(A, v, id === "car-yellow" ? "ac-rust" : "ac-car");
+    }
+  }
   // Welcome sign and test clock terminate the street vista.
   K.box("ac-white", 14.5, 1.7, -9, 3.65, 2.65, 0.22, true);
   K.art("ac-welcome", 14.5, 1.74, -8.85, 3.35, 2.35);

@@ -32,6 +32,10 @@ const MODELS = [
   "shrub_01",
   "street_lamp_01",
   "fire_hydrant",
+  // Realistic CC0 replacements for the weak hand-sculpted props (see ASSETS.md).
+  "covered_car", // parked car under a fitted cover
+  "modular_electricity_poles", // utility poles
+  "power_box_01", // pole transformer / distribution box
 ];
 
 // The ambientCG map suffixes mapped to the engine's channel names. Color is the

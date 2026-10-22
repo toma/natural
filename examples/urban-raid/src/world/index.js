@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Assembler } from "./builder.js";
 import { buildAtomicCuldesac } from "./atomic-culdesac.js";
-import { placeModels, updateModelLods } from "./models.js";
+import { assetsAvailable, placeModels, updateModelLods } from "./models.js";
 import { HOUSES, MAP_BOUNDS, MAP_SPAWNS, outdoorOpen } from "./atomic-culdesac-layout.ts";
 
 /**
@@ -84,6 +84,11 @@ export class WorldSystem {
     const A = new Assembler({ materials, rng, render });
     this.A = A;
     A.setTransform(LEVEL_YAW, LEVEL_TX, LEVEL_TZ);
+
+    // When the CC0 model set is installed, build model-backed props as glTF;
+    // otherwise fall back to their procedural geometry. Probed once, awaited
+    // before the build so the choice is made synchronously inside it.
+    A.useModels = await assetsAvailable();
 
     this.buildings = buildAtomicCuldesac(A, rng);
     this.mapBounds = MAP_BOUNDS;
