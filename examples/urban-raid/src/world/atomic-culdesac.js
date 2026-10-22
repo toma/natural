@@ -6,6 +6,7 @@ import { furnishRoom } from "./interiors.js";
 import { windowUnit, doorUnit } from "./kit.js";
 import { loadPbrSet } from "../materials/textures.js";
 import { beveledBoxGeometry } from "./box-bevel.js";
+import { emptyMesh, vcount, computeNormals, weldNormals } from "../ai/geo.js";
 import {
   HOUSES,
   FLOOR_HEIGHT,
@@ -935,6 +936,106 @@ function house(A, spec, rng) {
   return { spec };
 }
 
+/** Convert a {p,n,uv,i} mesh record from the character loft toolkit into a BufferGeometry. */
+function meshToGeometry(m) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(m.p, 3));
+  g.setAttribute("normal", new THREE.Float32BufferAttribute(m.n, 3));
+  g.setAttribute("uv", new THREE.Float32BufferAttribute(m.uv, 2));
+  g.setIndex(m.i);
+  return g;
+}
+
+/**
+ * One closed car-body cross-section in the YZ plane: a rounded rectangle whose
+ * half-width tapers from the sills (wBot) up to the roof or deck (wTop), so a
+ * run of these lofts into a continuous shell with fenders and a greenhouse.
+ */
+function bodyRing(wBot, wTop, yBot, yTop, K) {
+  const pts = [];
+  const yc = (yBot + yTop) / 2,
+    hy = (yTop - yBot) / 2,
+    e = 0.6;
+  for (let k = 0; k < K; k++) {
+    const a = -Math.PI / 2 + (k / K) * Math.PI * 2;
+    const sy = Math.sin(a),
+      cx = Math.cos(a);
+    const yy = yc + hy * Math.sign(sy) * Math.abs(sy) ** e;
+    const tTop = (sy + 1) / 2;
+    const w = wBot + (wTop - wBot) * (tTop * tTop * (3 - 2 * tTop));
+    pts.push([w * Math.sign(cx) * Math.abs(cx) ** e, yy]);
+  }
+  return pts;
+}
+
+/** Loft {x, pts:[[z,y],...]} stations (equal point counts) into a capped, outward-oriented tube along X. */
+function buildTube(stations, K) {
+  const m = emptyMesh();
+  let ymid = 0;
+  for (const st of stations) {
+    let arc = 0;
+    for (let k = 0; k < K; k++) {
+      const [z, y] = st.pts[k];
+      m.p.push(st.x, y, z);
+      m.n.push(0, 0, 0);
+      if (k > 0) arc += Math.hypot(z - st.pts[k - 1][0], y - st.pts[k - 1][1]);
+      m.uv.push(arc, st.x);
+      ymid += y;
+    }
+  }
+  ymid /= stations.length * K;
+  for (let s = 0; s + 1 < stations.length; s++)
+    for (let k = 0; k < K; k++) {
+      const k2 = (k + 1) % K;
+      const a = s * K + k,
+        b = s * K + k2,
+        c = (s + 1) * K + k,
+        d = (s + 1) * K + k2;
+      m.i.push(a, c, b, b, c, d);
+    }
+  const cap = (s, flip) => {
+    let cy = 0,
+      cz = 0;
+    for (const [z, y] of stations[s].pts) {
+      cy += y;
+      cz += z;
+    }
+    const ci = vcount(m);
+    m.p.push(stations[s].x, cy / K, cz / K);
+    m.n.push(0, 0, 0);
+    m.uv.push(0, stations[s].x);
+    const base = s * K;
+    for (let k = 0; k < K; k++) {
+      const k2 = (k + 1) % K;
+      if (flip) m.i.push(ci, base + k2, base + k);
+      else m.i.push(ci, base + k, base + k2);
+    }
+  };
+  cap(0, true);
+  cap(stations.length - 1, false);
+  computeNormals(m);
+  weldNormals(m);
+  // Flip winding if the surface ended up facing inward.
+  let dot = 0;
+  const nv = vcount(m);
+  for (let i = 0; i < nv; i++) {
+    const ry = m.p[i * 3 + 1] - ymid,
+      rz = m.p[i * 3 + 2];
+    const l = Math.hypot(ry, rz) || 1;
+    dot += (m.n[i * 3 + 1] * ry + m.n[i * 3 + 2] * rz) / l;
+  }
+  if (dot < 0) {
+    for (let t = 0; t < m.i.length; t += 3) {
+      const tmp = m.i[t + 1];
+      m.i[t + 1] = m.i[t + 2];
+      m.i[t + 2] = tmp;
+    }
+    computeNormals(m);
+    weldNormals(m);
+  }
+  return m;
+}
+
 /**
  * A rounded rubber tire instead of a flat disc: a torus gives the bulged
  * sidewall and a round tread that catches light, a flat tread band keeps the
@@ -1052,43 +1153,87 @@ function truck(A, box) {
 function car(A, box, color = "ac-car") {
   const K = kit(A, box.x, box.z, box.yaw);
   const trim = "ac-chrome",
-    glass = "ac-glass";
-  // Rounded body with a waistline, sloping hood and trunk, and a domed cabin.
-  K.round(color, 0, 0.66, 0, 4.7, 0.5, 1.95, 0.26, true);
-  K.round(color, 0.1, 0.96, 0, 3.1, 0.34, 1.9, 0.3, true);
-  K.round(color, 1.5, 1.0, 0, 1.5, 0.22, 1.82, 0.18, false, 0, 0, -0.07);
-  K.round(color, -1.55, 1.02, 0, 1.25, 0.2, 1.82, 0.18, false, 0, 0, 0.06);
-  K.round(color, -0.15, 1.42, 0, 2.1, 0.5, 1.64, 0.3, true);
-  K.round(color, -0.2, 1.68, 0, 1.85, 0.16, 1.5, 0.34, false);
-  // Tinted glass: windshield, backlight, side windows.
-  K.box(glass, 0.95, 1.46, 0, 0.05, 0.42, 1.46, false, 0, 0, 0.42);
-  K.box(glass, -1.18, 1.47, 0, 0.05, 0.4, 1.46, false, 0, 0, -0.38);
-  for (const s of [-1, 1]) K.box(glass, -0.15, 1.5, s * 0.8, 1.9, 0.42, 0.04, false);
-  // Fenders over each wheel.
-  for (const xx of [1.5, -1.5])
-    for (const s of [-1, 1]) K.round(color, xx, 0.62, s * 0.9, 1.35, 0.5, 0.34, 0.24, false);
-  // Chrome bumpers with overriders, grille, side spear.
-  for (const xx of [2.42, -2.42]) {
-    K.cylinder(trim, xx, 0.6, 0, 0.1, 2.0, Math.PI / 2);
-    for (const s of [-1, 1]) K.round(trim, xx, 0.64, s * 0.52, 0.16, 0.36, 0.17, 0.05, false);
-  }
-  for (let z = -0.5; z <= 0.5; z += 0.13) K.box(trim, 2.44, 0.8, z, 0.08, 0.34, 0.05, false);
-  for (const s of [-1, 1]) K.box(trim, 0, 0.84, s * 0.99, 4.0, 0.05, 0.03, false);
-  // Recessed headlights, chrome tail lights.
+    glass = "ac-glass",
+    KK = 32;
+  // ---- Sculpted lower body shell: one lofted tube with fenders and a tail ----
+  const S = [];
+  const st = (x, wb, wt, yb, yt) => S.push({ x, pts: bodyRing(wb, wt, yb, yt, KK) });
+  st(2.42, 0.6, 0.5, 0.52, 0.86);
+  st(2.18, 0.84, 0.72, 0.42, 0.93);
+  st(1.75, 0.95, 0.86, 0.38, 0.99);
+  st(1.45, 1.0, 0.9, 0.36, 1.0); // front fender bulge
+  st(1.05, 0.97, 0.9, 0.35, 1.0);
+  st(0.55, 0.97, 0.9, 0.35, 1.02); // cowl
+  st(0.0, 0.98, 0.93, 0.35, 1.02);
+  st(-0.55, 0.98, 0.92, 0.36, 1.02);
+  st(-1.05, 0.97, 0.9, 0.37, 1.01);
+  st(-1.45, 1.0, 0.9, 0.38, 1.0); // rear fender bulge
+  st(-1.9, 0.9, 0.82, 0.4, 1.02);
+  st(-2.2, 0.8, 0.7, 0.42, 0.98);
+  st(-2.45, 0.58, 0.5, 0.48, 0.9);
+  K.geo(color, meshToGeometry(buildTube(S, KK)), 0, 0, 0);
+  // ---- Greenhouse: roof, pillars, tinted glass, chrome surrounds ----
+  K.round(color, -0.3, 1.49, 0, 1.68, 0.09, 1.12, 0.09, true);
+  K.box(glass, 0.5, 1.26, 0, 0.04, 0.6, 1.5, false, 0, 0, 0.62); // raked windshield
+  K.box(glass, -1.12, 1.28, 0, 0.04, 0.52, 1.4, false, 0, 0, -0.55); // backlight
   for (const s of [-1, 1]) {
-    headlight(K, 2.42, 0.93, s * 0.66, 0.13, 1);
-    K.cylinder(trim, -2.42, 0.93, s * 0.62, 0.09, 0.05, 0, Math.PI / 2);
-    K.sphere("ac-red", -2.42, 0.93, s * 0.62, 0.075, 0.13, 0.09);
+    K.box(glass, -0.3, 1.3, s * 0.6, 1.5, 0.52, 0.04, false); // side glass
+    K.line(color, [0.62, 1.0, s * 0.56], [0.33, 1.5, s * 0.52], 0.035); // A-pillar
+    K.line(color, [-0.3, 1.02, s * 0.6], [-0.3, 1.5, s * 0.54], 0.03); // B-pillar
+    K.line(color, [-0.95, 1.02, s * 0.58], [-0.62, 1.5, s * 0.5], 0.035); // C-pillar
+    K.line(trim, [0.33, 1.5, s * 0.52], [-0.62, 1.5, s * 0.52], 0.02); // drip rail
+    K.line(trim, [0.6, 1.01, s * 0.6], [-0.95, 1.01, s * 0.6], 0.02); // beltline chrome
   }
-  // Wing mirrors on the front fenders and twin wipers on the windshield.
+  // ---- Chrome side spear, overrider bumpers, eggcrate grille ----
+  for (const s of [-1, 1]) K.box(trim, -0.1, 0.84, s * 0.995, 3.6, 0.06, 0.03, false);
+  for (const [xx, s] of [
+    [2.5, 1],
+    [-2.52, -1],
+  ]) {
+    K.cylinder(trim, xx, 0.58, 0, 0.1, 1.75, Math.PI / 2);
+    for (const z of [-0.5, 0.5])
+      K.round(trim, xx - s * 0.02, 0.62, z, 0.18, 0.34, 0.18, 0.06, false);
+  }
+  K.round(trim, 2.46, 0.74, 0, 0.1, 0.34, 1.2, 0.05, false);
+  for (let z = -0.52; z <= 0.52; z += 0.13) K.box(trim, 2.49, 0.74, z, 0.06, 0.3, 0.04, false);
+  // ---- Tailfins with chrome caps and tail lights ----
   for (const s of [-1, 1]) {
-    K.line(trim, [0.95, 1.2, s * 0.92], [1.3, 1.35, s * 1.0], 0.02);
-    K.round(trim, 1.32, 1.36, s * 1.02, 0.1, 0.14, 0.05, 0.03, false);
-    K.line("ac-dark", [1.02, 1.62, s * 0.3], [0.78, 1.5, s * 0.55], 0.012);
+    K.round(color, -2.0, 1.2, s * 0.72, 0.95, 0.42, 0.1, 0.05, false, 0, 0, 0.18);
+    K.line(trim, [-1.6, 1.08, s * 0.76], [-2.42, 1.42, s * 0.74], 0.015);
+    K.cylinder(trim, -2.46, 1.1, s * 0.66, 0.08, 0.06, 0, Math.PI / 2);
+    K.sphere("ac-red", -2.46, 1.1, s * 0.66, 0.07, 0.12, 0.09);
   }
-  // Rounded whitewall tires with domed hubcaps.
-  for (const xx of [1.5, -1.5])
-    for (const zz of [-0.96, 0.96]) tire(A, K, xx, 0.45, zz, zz > 0 ? 1 : -1, 0.42, 0.26);
+  // ---- Dual recessed headlights ----
+  for (const s of [-1, 1]) headlight(K, 2.5, 0.82, s * 0.62, 0.13, 1);
+  // ---- Wing mirrors and wipers ----
+  for (const s of [-1, 1]) {
+    K.line(trim, [0.62, 1.1, s * 0.95], [0.92, 1.28, s * 1.02], 0.018);
+    K.round(trim, 0.94, 1.29, s * 1.03, 0.09, 0.13, 0.05, 0.03, false);
+    K.line("ac-dark", [0.66, 1.42, s * 0.3], [0.44, 1.26, s * 0.5], 0.01);
+  }
+  // ---- Interior visible through the glass ----
+  K.round("ac-dark", 0.1, 0.78, 0, 2.0, 0.18, 1.7, 0.1, true);
+  K.round("ac-sofa", -0.15, 0.78, 0, 0.5, 0.28, 1.55, 0.12, false);
+  K.round("ac-sofa", -0.45, 1.05, 0, 0.16, 0.5, 1.5, 0.1, false);
+  K.round("ac-sofa", -1.05, 1.05, 0, 0.16, 0.48, 1.5, 0.1, false);
+  K.round("ac-dark", 0.62, 0.95, 0, 0.26, 0.26, 1.7, 0.06, false);
+  K.geo(
+    "ac-dark",
+    new THREE.TorusGeometry(0.15, 0.022, 10, 20),
+    0.74,
+    1.04,
+    0.42,
+    1,
+    1,
+    1,
+    0,
+    Math.PI / 2,
+    0.5,
+  );
+  K.line("ac-dark", [0.9, 0.98, 0.42], [0.74, 1.04, 0.42], 0.02);
+  // ---- Rounded whitewall tires in the fender wells ----
+  for (const xx of [1.45, -1.45])
+    for (const zz of [-0.92, 0.92]) tire(A, K, xx, 0.45, zz, zz > 0 ? 1 : -1, 0.42, 0.26);
 }
 
 function garden(A, h, rng) {
