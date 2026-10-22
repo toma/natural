@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { newTrs, rockGeometry } from "./util.js";
+import { registerProps } from "./props.js";
 import {
   HOUSES,
   FLOOR_HEIGHT,
@@ -1045,8 +1046,70 @@ function garden(A, h, rng) {
   K.sphere("ac-bulb", -2.03, 2.2, 5.22, 0.09, 0.16, 0.1);
 }
 
+/**
+ * Dense set dressing tuned for a 1950s suburb: driveway tyres and crates, side
+ * yard utilities and drums, backyard patio furniture and bins, and loading
+ * clutter and cover around the central vehicles. Placed symmetrically per house
+ * through the instanced prop library, with per-instance jitter and dust skirts.
+ */
+function dressYards(A, rng) {
+  A.jitter = { rng, yaw: 0.35, scale: 0.1 };
+  A.skirts = true;
+  const Y = 0.15;
+  const at = (h, id, lx, lz, ry = 0) => {
+    const p = housePoint(h, lx, lz);
+    A.put(id, p.x, Y, p.z, ry + h.yaw + rng.range(-0.3, 0.3));
+  };
+  for (const h of HOUSES) {
+    at(h, "tyre", -9.5, 6.3);
+    at(h, "tyre_small", -9, 6.7);
+    at(h, "crate_c", -11, 6);
+    at(h, "crate_b", -11, 6.7);
+    at(h, "barrel_rust", -7.3, 6.8);
+    at(h, "bucket", -8, 7.2);
+    at(h, "pallet", -11.6, 4.5);
+    at(h, "ac_unit", 6.6, -2);
+    at(h, "water_tank", 7.4, -7);
+    at(h, "barrel_wood", 6.8, 1);
+    at(h, "gas_bottle", 6.4, 3);
+    at(h, "box_card_a", 6.6, 5);
+    at(h, "table", -3.5, -11.5);
+    at(h, "chair", -4.8, -11.2);
+    at(h, "chair", -2.3, -12);
+    at(h, "chair", -3.2, -10.3);
+    at(h, "barrel_rust", 5.2, -13);
+    at(h, "barrel_rust", 6, -13.4);
+    at(h, "crate_b", 4, -11);
+    at(h, "box_card_b", 4.6, -11.6);
+    at(h, "mattress", 1.5, -14.3);
+    at(h, "tyre", -6.5, -13.5);
+    at(h, "tyre", -6, -14);
+    at(h, "bucket", 0, -9);
+    at(h, "jerry_can", 1.2, -9.4);
+    at(h, "crate_b", 3.5, 6.4);
+    at(h, "bucket", 2.6, 6.8);
+  }
+  const P = (id, x, z, ry = 0) => A.put(id, x, Y, z, ry + rng.range(-0.3, 0.3));
+  P("block_small", -8, 2, 0.3);
+  P("block_small", 7.5, -3.5, -0.2);
+  P("crate_c", -6, -5);
+  P("crate_b", -5.2, -5.6);
+  P("box_card_a", -6.3, -4.4);
+  P("barrel_rust", 9.5, 4.2);
+  P("barrel_wood", 10.2, 3.4);
+  P("pallet", -10.5, 5.2);
+  P("tyre", 4.2, -6);
+  P("tyre", 4.8, -6.3);
+  P("tyre_small", 5.3, -6);
+  P("crate_b", 11, -4);
+  P("bucket", -3, 6);
+  A.jitter = null;
+  A.skirts = false;
+}
+
 export function buildAtomicCuldesac(A, rng) {
   materials(A, rng);
+  registerProps(A, rng);
   const K = kit(A);
   // Sand extends to the atmospheric horizon; only the fenced map is playable.
   K.box("ac-sand", 0, -0.3, 0, 1800, 0.4, 1800, false);
@@ -1063,6 +1126,7 @@ export function buildAtomicCuldesac(A, rng) {
   }
   const infos = HOUSES.map((h) => house(A, h));
   for (const h of HOUSES) garden(A, h, rng);
+  dressYards(A, rng);
   const vehicle = (id) => VEHICLES.find((v) => v.id === id);
   bus(A, vehicle("bus"));
   truck(A, vehicle("truck"));
