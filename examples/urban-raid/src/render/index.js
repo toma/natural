@@ -456,7 +456,10 @@ export class RenderSystem {
       viewBounceRatio: 0.34,
       viewKeyGamma: 0.65,
       shadowStrength: 1.0,
-      sunSoftness: 0.024,
+      // A touch softer than a razor penumbra: real sun through suburban air at
+      // this elevation does not cast a knife edge, and the extra half-texel of
+      // blur hides cascade stair-stepping on the long eave and fence shadows.
+      sunSoftness: 0.03,
     };
     this._applySettings();
 

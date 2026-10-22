@@ -139,8 +139,10 @@ export class SkySystem {
 
     // ---- weather / atmosphere state ---------------------------------------
     this.weather = {
-      /** Aerosol multiplier. 1 clear, 2-3 hazy, 5 dust storm. */
-      turbidity: 1.35,
+      /** Aerosol multiplier. 1 clear, 2-3 hazy, 5 dust storm. A touch above
+       *  pristine reads as real suburban daylight: period reference photos
+       *  carry visible aerial perspective on anything past the near houses. */
+      turbidity: 1.7,
       /** Fewer, deeper cumulus. Below ~0.34 the deck breaks into discrete
        *  masses with clean blue between them instead of one lumpy sheet. */
       cloudCoverage: 0.18,
