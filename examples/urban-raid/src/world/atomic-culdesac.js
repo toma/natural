@@ -1232,10 +1232,11 @@ function enhancePbr(A) {
     ["ac-green", "siding", { grainOnly: true, normalScale: 0.4 }],
     ["ac-yellow", "siding", { grainOnly: true, normalScale: 0.4 }],
   ];
+  const renderer = A.render?.renderer;
   for (const [key, name, opts] of jobs) {
     const mat = A.mat(key);
     if (!mat) continue;
-    loadPbrSet(name, "/assets/pbr", opts)
+    loadPbrSet(name, "/assets/pbr", { ...opts, renderer })
       .then((set) => {
         if (!set) return;
         if (!opts.grainOnly && set.albedo) mat.map = set.albedo;

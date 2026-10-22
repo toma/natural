@@ -2,5 +2,7 @@
 # its history clean. Run `bun run assets` (see tools/fetch-assets.mjs) to
 # populate these folders. Provenance and licensing live in assets/ASSETS.md.
 assets/pbr/
+assets/ktx2/
+assets/basis/
 assets/hdri/
 assets/models/

@@ -57,6 +57,23 @@ and wrapped in a distance LOD; a missing model falls back to procedural dressing
 
 Poly Haven publishes all of its assets as CC0 1.0: https://polyhaven.com/license
 
+## KTX2 compression (optional)
+
+For less VRAM and faster GPU upload, the JPG sets can be packed into
+GPU-compressed KTX2 (Basis UASTC with Zstd supercompression):
+
+```
+bun run assets:ktx2     # writes assets/ktx2/ and assets/basis/ (transcoder)
+```
+
+This needs ffmpeg and `toktx` from KTX-Software
+(https://github.com/KhronosGroup/KTX-Software/releases); point at a specific
+binary with `TOKTX=/path/to/toktx`. The pack step bakes the same per-surface
+tuning the JPG path applies at runtime, so the result matches. When a KTX2 set
+is present the loader uses it; otherwise it falls back to the JPG set, and then
+to the procedural surface. KTX2 transcodes to a compressed GPU format
+(roughly a quarter of the VRAM of the decoded JPGs).
+
 ## How to add more
 
 Add an entry to the manifest in `tools/fetch-assets.mjs` with its id, CC0

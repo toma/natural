@@ -1,4 +1,51 @@
 import * as THREE from "three";
+import { KTX2Loader } from "three/addons/loaders/KTX2Loader.js";
+
+let ktx2Loader = null;
+function getKtx2Loader(renderer) {
+  if (!ktx2Loader) {
+    ktx2Loader = new KTX2Loader().setTranscoderPath("/assets/basis/");
+    ktx2Loader.detectSupport(renderer);
+  }
+  return ktx2Loader;
+}
+
+function finishKtx2(tex, colorSpace) {
+  if (!tex) return null;
+  tex.colorSpace = colorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 8;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function loadKtx2(loader, url, colorSpace) {
+  return new Promise((resolve) => {
+    loader.load(
+      url,
+      (tex) => resolve(finishKtx2(tex, colorSpace)),
+      undefined,
+      () => resolve(null),
+    );
+  });
+}
+
+/**
+ * Pre-packed, GPU-compressed KTX2 set (see tools/pack-ktx2.mjs). Per-surface
+ * tuning is baked in at pack time, so this path takes the maps as-is. Returns
+ * null when the set is absent so loadPbrSet falls back to the JPG path.
+ */
+async function loadKtx2Set(name, renderer) {
+  const loader = getKtx2Loader(renderer);
+  const albedo = await loadKtx2(loader, `/assets/ktx2/${name}/map.ktx2`, THREE.SRGBColorSpace);
+  if (!albedo) return null;
+  const [orm, normal] = await Promise.all([
+    loadKtx2(loader, `/assets/ktx2/${name}/orm.ktx2`, THREE.NoColorSpace),
+    loadKtx2(loader, `/assets/ktx2/${name}/normal.ktx2`, THREE.NoColorSpace),
+  ]);
+  return { albedo, orm, normal };
+}
 
 /**
  * Loader for the optional CC0 photoscanned PBR sets (see assets/ASSETS.md).
@@ -56,6 +103,12 @@ function dataTexture(data, w, h, colorSpace) {
  *   warm            multiply the albedo by this [r,g,b] to pull out a cool cast.
  */
 export async function loadPbrSet(name, base = "/assets/pbr", opts = {}) {
+  // Prefer the GPU-compressed KTX2 set when it has been packed and a renderer
+  // is available to detect transcode support; it uses far less VRAM.
+  if (opts.renderer) {
+    const ktx2 = await loadKtx2Set(name, opts.renderer);
+    if (ktx2) return ktx2;
+  }
   const albedo = await loadBitmap(`${base}/${name}/albedo.jpg`);
   if (!albedo) return null;
   const w = albedo.width;
