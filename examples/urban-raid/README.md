@@ -25,7 +25,12 @@ The WebGL2 backend is required for these GLSL passes; the default Natural backen
 
 The imported JavaScript remains JavaScript so shader and gameplay changes can be compared
 with the pinned source. The Natural scheduler bridge is typed and covered by unit tests.
-The original scene contains no downloaded image, model, or audio assets.
+The scene is procedural by default: every texture, material, and prop is generated at
+runtime, so a fresh checkout builds and runs with no downloaded image, model, or audio
+assets. The demo can optionally load CC0 (public-domain) photoscanned PBR textures to
+raise surface realism. That art is fetched, not committed, with `bun run assets`; a
+missing set falls back to the procedural surface. Provenance and licensing are in
+`assets/ASSETS.md`.
 
 Use `?capture=1&lockstep=1` for seeded captures. `window.__APPLY_SHOT__(name)` selects an
 upstream shot and `await window.__PUMP__(90)` advances exactly 90 frames.

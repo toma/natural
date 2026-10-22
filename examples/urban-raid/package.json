@@ -12,7 +12,8 @@
     "test:parity": "bun tools/parity.mjs",
     "test:render": "bun tools/render-parity.mjs",
     "test:transitions": "bun tools/verify-transitions.mjs",
-    "bench": "bun tools/bench.mjs"
+    "bench": "bun tools/bench.mjs",
+    "assets": "bun tools/fetch-assets.mjs"
   },
   "dependencies": {
     "@toma.com/natural": "workspace:*",
