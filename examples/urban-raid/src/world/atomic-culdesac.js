@@ -144,6 +144,8 @@ function materials(A, rng) {
   // Warm rocky brown for the big desert range that sits close behind the suburb.
   surface("ac-mtn", "#8a6f52", "sand");
   surface("ac-cream", "#ded3b7", "wood");
+  surface("ac-pink", "#d4a39d", "plaster");
+  surface("ac-sky", "#a9c4cc", "plaster");
   surface("ac-rust", "#914e3e", "metal", 0.53, 0.35);
   surface("ac-bus", "#e2b02e", "metal", 0.4, 0.35);
   surface("ac-red", "#a73e35", "metal", 0.4, 0.35);
@@ -2022,15 +2024,45 @@ export function buildAtomicCuldesac(A, rng) {
     K.line("ac-metal", [28 + w, y, -9], [28 - w, y + 2, -9], 0.065);
   }
   K.geo("ac-clock", new THREE.CircleGeometry(2.1, 48), 28, 17.8, -8.9, 1, 1, 1, 0, -Math.PI / 2);
-  // Neighboring houses and utility poles give the playable suburb a larger setting.
-  for (const s of [-1, 1])
-    for (const z of [-31, -5, 26]) {
-      const x = s * 34;
-      K.box(z < 0 ? "ac-green" : "ac-rust", x, 2, z, 12, 4, 9, false);
-      for (const dx of [-3.3, 3.3]) K.box("ac-glass", x + dx, 2.5, z + 4.52, 2.1, 1.5, 0.04, false);
-      for (const side of [-1, 1])
-        K.box("ac-roof", x + side * 3.2, 4.8, z, 6.7, 0.18, 10, false, 0, 0, -side * 0.26);
+  // Neighboring pastel ranch houses ring the suburb, matching the reference
+  // street: pink, pale blue, cream, and a red-and-white ranch with a red garage
+  // door. Single-storey, low gabled roofs, stone wainscot, facing inward.
+  const ring = [
+    [-34, -31, "ac-sky", false],
+    [-34, -5, "ac-pink", true],
+    [-34, 26, "ac-cream", false],
+    [34, -31, "ac-cream", false],
+    [34, -5, "ac-red", true],
+    [34, 26, "ac-sky", false],
+  ];
+  for (const [x, z, col, garage] of ring) {
+    const fx = x < 0 ? 6 : -6; // inward-facing wall X offset from the centre
+    K.box(col, x, 1.95, z, 12, 3.7, 9, false);
+    K.box("ac-stone", x + fx * 0.99, 0.55, z, 0.18, 1.05, 9, false); // stone wainscot
+    for (const side of [-1, 1])
+      K.box("ac-roof", x + side * 3.25, 4.65, z, 6.95, 0.18, 10.4, false, 0, 0, -side * 0.27);
+    K.box("ac-roof", x, 5.2, z, 0.34, 0.22, 10.4, false); // ridge
+    K.box("ac-white", x + fx, 3.78, z, 0.2, 0.14, 10.2, false); // eave trim band
+    K.box("ac-wood", x + fx, 1.2, z + 2.8, 0.1, 2.1, 1.1, false); // door
+    for (const dz of [-1.4, -3.2, 3.4])
+      K.box("ac-glass", x + fx, 2.2, z + dz, 0.05, 1.3, 1.6, false); // windows
+    if (garage) {
+      K.box("ac-red", x + fx * 1.01, 1.5, z - 0.9, 0.06, 2.4, 3.4, false); // red garage door
+      for (let i = 0; i < 4; i++)
+        K.box("ac-dark", x + fx * 1.03, 0.7 + i * 0.6, z - 0.9, 0.02, 0.05, 3.3, false);
     }
+  }
+  // Low stone gateway walls with ball-topped pillars flank each end of the lane,
+  // the reference's cul-de-sac gateposts. The road stays open between the posts.
+  for (const s of [-1, 1]) {
+    const gx = s * 18.5;
+    for (const gz of [-6.2, 6.2]) {
+      K.box("ac-stone", gx, 1.05, gz, 0.6, 1.9, 0.6, true);
+      K.box("ac-dark", gx, 2.08, gz, 0.72, 0.12, 0.72, false); // cap
+      K.sphere("ac-white", gx, 2.34, gz, 0.26, 0.26, 0.26); // ball top
+    }
+    for (const gz of [-7.5, 7.5]) K.box("ac-stone", gx, 0.6, gz, 0.4, 1.0, 2.6, true); // low wing walls
+  }
   for (const { x, z } of POLES) {
     K.cylinder("ac-wood", x, 6, z, 0.14, 12);
     K.box("ac-wood", x, 11.3, z, 3, 0.14, 0.14, false);

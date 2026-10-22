@@ -28,17 +28,22 @@ export const GRADE_PRESETS = {
   // Neutral-but-cinematic default: slightly cool shadows, warm highlights,
   // a touch of contrast, mild highlight desaturation.
   default: {
-    slope: [1.0, 0.995, 0.985],
-    offset: [-0.004, -0.002, 0.004],
-    power: [1.0, 1.005, 1.02],
-    shadowTint: [-0.001, 0.006, 0.022],
-    highlightTint: [0.03, 0.014, -0.006],
+    // Warm, dusty desert grade: the reference reads as hazy golden air, so the
+    // shadows are gently warm rather than the usual cool teal, and a mild red
+    // bias in the slope warms the whole frame (including the washed sky) without
+    // tipping into orange. This replaces the cool-shadow teal-orange look that
+    // kept the sky reading as a hard blue.
+    slope: [1.012, 1.0, 0.972],
+    offset: [-0.004, -0.002, 0.002],
+    power: [1.0, 1.004, 1.016],
+    shadowTint: [0.012, 0.005, -0.006],
+    highlightTint: [0.032, 0.015, -0.005],
     // Display-space saturation. It has to be well over unity because AgX's
     // inset/outset pair is a *desaturating* transform by construction and the
     // shoulder takes another chunk out of anything bright: measured on the
     // 16:30 frame the zenith came out of the tone map at B-R = +15 code values
     // for a sky whose scene radiance is 3:1 blue over red.
-    saturation: 1.26,
+    saturation: 1.19,
     // Global contrast, as a power about a pivot.
     //
     // The pivot is the CODE VALUE that must not move, and it has to sit at
