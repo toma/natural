@@ -448,10 +448,22 @@ function fence(K, x0, z0, x1, z1, height = 1.35, key = "ac-white", picket = true
     const t = i / steps,
       x = x0 + (x1 - x0) * t,
       z = z0 + (z1 - z0) * t;
-    K.box(key, x, height / 2 + 0.15, z, bw, height, bd, false, 0, yaw);
+    // Deterministic aging on picket runs: an occasional missing slat, a few
+    // broken-off tops, and a slight lean, so the fence reads weathered.
+    const rnd = (n) => {
+      const s = Math.sin((x * 73.13 + z * 19.74 + n * 12.31) * 43758.5453);
+      return s - Math.floor(s);
+    };
+    const lean = picket ? (rnd(5) - 0.5) * 0.12 : 0;
+    if (picket && rnd(1) < 0.05) continue; // missing slat
+    const broken = picket && rnd(9) < 0.09;
+    const ph = broken ? height * (0.5 + 0.32 * rnd(3)) : height;
+    K.box(key, x, ph / 2 + 0.15, z, bw, ph, bd, false, 0, yaw, lean);
     // Pointed cap: a thin square turned 45 degrees stays below the bevel
-    // threshold, so the point reads sharp instead of as a rounded knob.
-    if (picket) K.box(key, x, height + 0.15, z, bw, bw, bd, false, 0, yaw, Math.PI / 4);
+    // threshold, so the point reads sharp instead of as a rounded knob. Broken
+    // slats keep a jagged flat top (no cap).
+    if (picket && !broken)
+      K.box(key, x, height + 0.15, z, bw, bw, bd, false, 0, yaw, Math.PI / 4 + lean);
   }
   for (let i = 0; i <= length / 2.4; i++) {
     const t = i / Math.max(1, Math.floor(length / 2.4));
@@ -2024,6 +2036,14 @@ export function buildAtomicCuldesac(A, rng) {
     K.cylinder("ac-wood", x, 6, z, 0.14, 12);
     K.box("ac-wood", x, 11.3, z, 3, 0.14, 0.14, false);
     for (const dx of [-1, 0, 1]) K.cylinder("ac-white", x + dx, 11.5, z, 0.075, 0.25);
+    // A pole-mounted distribution transformer: a weathered metal can with its
+    // bushings and a ground lead, the period utility detail on the skyline.
+    const tz = z + 0.42;
+    K.cylinder("ac-metal", x + 0.34, 9.6, tz, 0.3, 1.3);
+    K.cylinder("ac-dark", x + 0.34, 10.32, tz, 0.26, 0.12);
+    for (const bx of [-0.12, 0.12]) K.cylinder("ac-chrome", x + 0.34 + bx, 10.5, tz, 0.03, 0.26);
+    K.box("ac-metal", x + 0.12, 9.6, tz, 0.1, 0.5, 0.1, false); // bracket to the pole
+    K.line("ac-dark", [x + 0.2, 10.95, z], [x, 11.42, z], 0.012); // service lead up to the crossarm
   }
   for (const x of [-21, 21])
     for (const dx of [-1, 0, 1])
