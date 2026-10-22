@@ -909,13 +909,48 @@ function house(A, spec, rng) {
   return { spec };
 }
 
-function wheels(K, xs, z, radius = 0.52) {
+/**
+ * A rounded rubber tire instead of a flat disc: a torus gives the bulged
+ * sidewall and a round tread that catches light, a flat tread band keeps the
+ * contact patch, and a domed chrome hubcap with a whitewall sits on the outer
+ * face. The axle runs along local Z, which is the torus hole axis, so no
+ * rotation is needed.
+ */
+function tire(A, K, x, y, z, s, R = 0.52, width = 0.3) {
+  const tube = Math.min(width * 0.6, R * 0.42);
+  const torus = A.cache(
+    `ac-tire:${R}:${width}`,
+    () => new THREE.TorusGeometry(R - tube, tube, 16, 28),
+  );
+  K.geo("ac-rubber", torus, x, y, z);
+  K.cylinder("ac-rubber", x, y, z, R - tube * 0.35, width * 0.72, Math.PI / 2);
+  const outer = z + s * width * 0.5;
+  K.cylinder("ac-white", x, y, outer - s * 0.012, R * 0.66, 0.012, Math.PI / 2);
+  K.sphere("ac-chrome", x, y, outer, R * 0.4, R * 0.4, width * 0.34);
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2;
+    K.sphere(
+      "ac-dark",
+      x + Math.cos(a) * R * 0.22,
+      y + Math.sin(a) * R * 0.22,
+      outer + s * 0.02,
+      0.028,
+      0.028,
+      0.02,
+    );
+  }
+}
+
+function wheels(A, K, xs, z, radius = 0.52, width = 0.3) {
   for (const x of xs)
-    for (const s of [-1, 1]) {
-      K.cylinder("ac-rubber", x, radius + 0.08, z + s * 1.28, radius, 0.3, Math.PI / 2);
-      K.cylinder("ac-chrome", x, radius + 0.08, z + s * 1.46, radius * 0.52, 0.035, Math.PI / 2);
-      K.cylinder("ac-dark", x, radius + 0.08, z + s * 1.485, radius * 0.25, 0.04, Math.PI / 2);
-    }
+    for (const s of [-1, 1]) tire(A, K, x, radius + 0.08, z + s * 1.37, s, radius, width);
+}
+
+/** Recessed headlight facing +/-X: a dark reflector bowl, a chrome bezel ring, and a glass lens. */
+function headlight(K, x, y, z, r = 0.14, s = 1) {
+  K.cylinder("ac-dark", x - s * 0.05, y, z, r * 0.9, 0.14, 0, Math.PI / 2);
+  K.cylinder("ac-chrome", x, y, z, r, 0.04, 0, Math.PI / 2);
+  K.sphere("ac-bulb", x + s * 0.03, y, z, r * 0.82, r * 0.82, r * 0.82);
 }
 function bus(A, box) {
   // Parked at an angle across the middle of the street, the way the central bus
@@ -948,12 +983,10 @@ function bus(A, box) {
   K.box("ac-dark", -5.57, 1.35, 0, 0.07, 0.6, 1.2, false);
   for (let z = -0.5; z <= 0.5; z += 0.1)
     K.box("ac-chrome", -5.63, 1.35, z, 0.06, 0.54, 0.035, false);
-  for (const z of [-1, 1]) {
-    K.sphere("ac-bulb", -5.61, 1.57, z, 0.055, 0.17, 0.17);
-    K.sphere("ac-red", 5.59, 1.5, z, 0.04, 0.12, 0.12);
-  }
+  for (const z of [-1, 1]) K.sphere("ac-red", 5.59, 1.5, z, 0.04, 0.12, 0.12);
   K.art("ac-bus-sign", -3.94, 2.85, 0, 2.2, 0.3, -Math.PI / 2);
-  wheels(K, [-3.7, 3.7], 0);
+  for (const z of [-1, 1]) headlight(K, -5.64, 1.57, z, 0.15, -1);
+  wheels(A, K, [-3.7, 3.7], 0);
 }
 
 function truck(A, box) {
@@ -971,7 +1004,7 @@ function truck(A, box) {
   K.box("ac-chrome", -6.7, 1.37, 0, 0.16, 1.05, 1.15, false);
   for (let z = -0.52; z < 0.58; z += 0.12) K.box("ac-dark", -6.8, 1.4, z, 0.035, 0.85, 0.05, false);
   K.box("ac-chrome", -6.91, 0.75, 0, 0.18, 0.29, 2.82, false);
-  for (const z of [-1, 1]) K.sphere("ac-bulb", -6.77, 1.57, z, 0.08, 0.19, 0.19);
+  for (const z of [-1, 1]) headlight(K, -6.8, 1.57, z, 0.17, -1);
   // Open moving trailer: the lateral gap is a playable passage.
   K.box("ac-wood", 1.9, 1.02, 0, 8.85, 0.2, 2.75, true);
   K.box("ac-white", 1.9, 3.73, 0, 9, 0.15, 2.95, true);
@@ -987,14 +1020,13 @@ function truck(A, box) {
   }
   K.box("ac-wood", -1.7, 1.75, 0, 1.3, 1.3, 1.7, true);
   K.round("ac-sofa", 1.2, 1.6, 0, 1.2, 1, 1.9, 0.1, true);
-  wheels(K, [-5.2, -2.9, 4.2, 5.6], 0, 0.58);
+  wheels(A, K, [-5.2, -2.9, 4.2, 5.6], 0, 0.58, 0.34);
 }
 
 function car(A, box, color = "ac-car") {
   const K = kit(A, box.x, box.z, box.yaw);
   const trim = "ac-chrome",
-    glass = "ac-glass",
-    tire = "ac-rubber";
+    glass = "ac-glass";
   // Rounded body with a waistline, sloping hood and trunk, and a domed cabin.
   K.round(color, 0, 0.66, 0, 4.7, 0.5, 1.95, 0.26, true);
   K.round(color, 0.1, 0.96, 0, 3.1, 0.34, 1.9, 0.3, true);
@@ -1016,20 +1048,21 @@ function car(A, box, color = "ac-car") {
   }
   for (let z = -0.5; z <= 0.5; z += 0.13) K.box(trim, 2.44, 0.8, z, 0.08, 0.34, 0.05, false);
   for (const s of [-1, 1]) K.box(trim, 0, 0.84, s * 0.99, 4.0, 0.05, 0.03, false);
-  // Headlights, tail lights.
+  // Recessed headlights, chrome tail lights.
   for (const s of [-1, 1]) {
-    K.cylinder(trim, 2.42, 0.93, s * 0.66, 0.15, 0.12, 0, Math.PI / 2);
-    K.sphere("ac-bulb", 2.48, 0.93, s * 0.66, 0.11, 0.11, 0.08);
-    K.sphere("ac-red", -2.44, 0.93, s * 0.62, 0.06, 0.15, 0.1);
+    headlight(K, 2.42, 0.93, s * 0.66, 0.13, 1);
+    K.cylinder(trim, -2.42, 0.93, s * 0.62, 0.09, 0.05, 0, Math.PI / 2);
+    K.sphere("ac-red", -2.42, 0.93, s * 0.62, 0.075, 0.13, 0.09);
   }
-  // Whitewall wheels with chrome hubcaps.
+  // Wing mirrors on the front fenders and twin wipers on the windshield.
+  for (const s of [-1, 1]) {
+    K.line(trim, [0.95, 1.2, s * 0.92], [1.3, 1.35, s * 1.0], 0.02);
+    K.round(trim, 1.32, 1.36, s * 1.02, 0.1, 0.14, 0.05, 0.03, false);
+    K.line("ac-dark", [1.02, 1.62, s * 0.3], [0.78, 1.5, s * 0.55], 0.012);
+  }
+  // Rounded whitewall tires with domed hubcaps.
   for (const xx of [1.5, -1.5])
-    for (const zz of [-0.96, 0.96]) {
-      K.cylinder(tire, xx, 0.45, zz, 0.42, 0.26, Math.PI / 2);
-      K.cylinder("ac-white", xx, 0.45, zz * 1.03, 0.31, 0.27, Math.PI / 2);
-      K.cylinder(trim, xx, 0.45, zz * 1.1, 0.2, 0.06, Math.PI / 2);
-      K.sphere("ac-dark", xx, 0.45, zz * 1.16, 0.05, 0.05, 0.05);
-    }
+    for (const zz of [-0.96, 0.96]) tire(A, K, xx, 0.45, zz, zz > 0 ? 1 : -1, 0.42, 0.26);
 }
 
 function garden(A, h, rng) {
