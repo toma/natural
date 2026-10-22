@@ -1,0 +1,10 @@
+{
+ "world_id": "94b87c5a-b646-4152-84cf-aeeb6f296d8d",
+ "display_name": "Atomic Cul-de-sac v2",
+ "model": "marble-1.1-plus",
+ "world_marble_url": "https://marble.worldlabs.ai/world/94b87c5a-b646-4152-84cf-aeeb6f296d8d",
+ "created_at": "2026-10-22T22:10:17Z",
+ "metric_scale_factor": 9.989578247070312,
+ "ground_plane_offset": 5.87542200088501,
+ "source": "Generated with the World Labs Marble API (paid account; outputs owned by the project owner)."
+}
