@@ -472,6 +472,34 @@ function fence(K, x0, z0, x1, z1, height = 1.35, key = "ac-white", picket = true
   }
 }
 
+/**
+ * A lumpy foliage clump: several overlapping, jittered, unevenly sized lobes
+ * instead of one smooth ball, so a bush reads as a mass of leaves rather than a
+ * toy topiary sphere. Deterministic in (x,z) so captures stay identical. `top`
+ * biases the lobes upward for an upright bush; leave it low for a mounded hedge.
+ */
+function shrub(K, x, y, z, r, key = "ac-hedge", top = 0.4) {
+  const h = (n) => {
+    const s = Math.sin((x * 12.9898 + z * 78.233 + n * 37.719) * 43758.5453);
+    return s - Math.floor(s);
+  };
+  const lobes = 7;
+  for (let i = 0; i < lobes; i++) {
+    const a = (i / lobes) * Math.PI * 2 + h(i) * 1.3;
+    const dr = i === 0 ? 0 : r * (0.34 + 0.46 * h(i + 23));
+    const rad = r * (0.44 + 0.32 * h(i + 11));
+    K.sphere(
+      key,
+      x + Math.cos(a) * dr,
+      y + (h(i + 31) - 0.35) * r * top * 2,
+      z + Math.sin(a) * dr,
+      rad,
+      rad * (0.82 + 0.3 * h(i + 7)),
+      rad,
+    );
+  }
+}
+
 function stairs(
   K,
   x,
@@ -736,7 +764,7 @@ function house(A, spec, rng) {
     const n = Math.round((x1b - x0b) / 0.7);
     for (let i = 0; i < n; i++) {
       const bx = x0b + 0.35 + i * 0.7;
-      K.sphere("ac-hedge", bx, 0.42, 5.55, 0.28, 0.32, 0.28);
+      shrub(K, bx, 0.42, 5.55, 0.42);
       if (i % 2)
         K.sphere(["ac-red", "ac-orange", "ac-white"][i % 3], bx, 0.58, 5.55, 0.08, 0.08, 0.08);
     }
@@ -1242,7 +1270,7 @@ function garden(A, h, rng) {
   }
   for (const x of [-17, 16])
     for (let z = -16; z < 6; z += 3.4) {
-      K.sphere("ac-hedge", x, 0.75, z, 0.75, 0.6, 0.8);
+      shrub(K, x, 0.78, z, 0.92, "ac-hedge", 0.55);
       K.box("ac-stone", x, 0.28, z, 1.7, 0.3, 1.7, true);
     }
   for (let i = 0; i < 85; i++) {
