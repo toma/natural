@@ -48,8 +48,14 @@ function dataTexture(data, w, h, colorSpace) {
 /**
  * Load and pack one surface set from `${base}/${name}/`. Returns
  * { albedo, orm, normal } or null if the albedo is missing (set not fetched).
+ *
+ * Per-surface tuning (all optional):
+ *   roughnessFloor  clamp packed roughness up to at least this (0..1), e.g. to
+ *                   stop a scan's wet patches reading as a glossy sheen.
+ *   desaturate      mix the albedo toward its own luminance (0..1).
+ *   warm            multiply the albedo by this [r,g,b] to pull out a cool cast.
  */
-export async function loadPbrSet(name, base = "/assets/pbr") {
+export async function loadPbrSet(name, base = "/assets/pbr", opts = {}) {
   const albedo = await loadBitmap(`${base}/${name}/albedo.jpg`);
   if (!albedo) return null;
   const w = albedo.width;
@@ -62,6 +68,29 @@ export async function loadPbrSet(name, base = "/assets/pbr") {
   ]);
 
   const albedoPx = pixels(albedo, w, h);
+  const desat = opts.desaturate ?? 0;
+  const warm = opts.warm ?? null;
+  if (desat > 0 || warm) {
+    for (let i = 0; i < albedoPx.length; i += 4) {
+      let r = albedoPx[i];
+      let g = albedoPx[i + 1];
+      let b = albedoPx[i + 2];
+      if (desat > 0) {
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        r += (lum - r) * desat;
+        g += (lum - g) * desat;
+        b += (lum - b) * desat;
+      }
+      if (warm) {
+        r *= warm[0];
+        g *= warm[1];
+        b *= warm[2];
+      }
+      albedoPx[i] = r;
+      albedoPx[i + 1] = g;
+      albedoPx[i + 2] = b;
+    }
+  }
   if (height) {
     const hp = pixels(height, w, h);
     for (let i = 0; i < albedoPx.length; i += 4) albedoPx[i + 3] = hp[i];
@@ -70,10 +99,11 @@ export async function loadPbrSet(name, base = "/assets/pbr") {
 
   const rp = rough ? pixels(rough, w, h) : null;
   const ap = ao ? pixels(ao, w, h) : null;
+  const floor = Math.round((opts.roughnessFloor ?? 0) * 255);
   const orm = new Uint8ClampedArray(w * h * 4);
   for (let i = 0; i < orm.length; i += 4) {
     orm[i] = ap ? ap[i] : 255;
-    orm[i + 1] = rp ? rp[i] : 205;
+    orm[i + 1] = Math.max(floor, rp ? rp[i] : 205);
     orm[i + 2] = 0;
     orm[i + 3] = 255;
   }

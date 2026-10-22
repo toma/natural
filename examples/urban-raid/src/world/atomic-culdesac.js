@@ -133,7 +133,9 @@ function materials(A, rng) {
   surface("ac-fence", "#b6a17a", "wood");
   surface("ac-roof", "#606560", "roof");
   surface("ac-stone", "#817461", "stone");
-  surface("ac-road", "#414744", "road");
+  surface("ac-road", "#514b42", "road");
+  surface("ac-line", "#cfc8b0", "concrete");
+  surface("ac-tar", "#1c1f1d", "road");
   surface("ac-concrete", "#bdb9aa", "concrete");
   surface("ac-grass", "#5f8236", "grass");
   surface("ac-hedge", "#4a6529", "grass");
@@ -1186,15 +1188,17 @@ function furnishHouse(A, rng, h) {
  */
 function enhancePbr(A) {
   const jobs = [
-    ["ac-road", "asphalt"],
-    ["ac-concrete", "concrete"],
-    ["ac-grass", "grass"],
-    ["ac-stone", "bricks"],
+    // The asphalt scan carries wet patches and a cool cast: raise the roughness
+    // floor so it reads dry, desaturate, and warm it toward sun-baked tarmac.
+    ["ac-road", "asphalt", { roughnessFloor: 0.82, desaturate: 0.5, warm: [1.08, 1.0, 0.88] }],
+    ["ac-concrete", "concrete", { roughnessFloor: 0.7 }],
+    ["ac-grass", "grass", {}],
+    ["ac-stone", "bricks", {}],
   ];
-  for (const [key, name] of jobs) {
+  for (const [key, name, opts] of jobs) {
     const mat = A.mat(key);
     if (!mat) continue;
-    loadPbrSet(name)
+    loadPbrSet(name, "/assets/pbr", opts)
       .then((set) => {
         if (!set) return;
         mat.map = set.albedo;
@@ -1214,6 +1218,12 @@ export function buildAtomicCuldesac(A, rng) {
   K.box("ac-sand", 0, -0.3, 0, 1800, 0.4, 1800, false);
   K.box("ac-grass", 0, 0.045, 0, 46, 0.15, 66, true);
   K.box("ac-road", 0, 0.05, 0, 46, 0.17, 15, true);
+  // Faded centre dashes, solid edge lines, and dark tar crack-seams. All sit a
+  // few millimetres proud of the asphalt and never collide.
+  for (let x = -21; x <= 21; x += 2.7) K.box("ac-line", x, 0.138, 0, 1.35, 0.004, 0.16, false);
+  for (const z of [-6.5, 6.5]) K.box("ac-line", 0, 0.138, z, 44, 0.004, 0.13, false);
+  for (const z of [-3.4, 3.4]) K.box("ac-tar", 0.4, 0.137, z, 44, 0.004, 0.07, false);
+  for (const x of [-13, -4, 6, 16]) K.box("ac-tar", x, 0.137, 0, 0.07, 0.004, 14.4, false);
   for (const z of [-7.6, 7.6]) {
     K.box("ac-concrete", 0, 0.17, z, 46, 0.24, 1.25, true);
     for (let x = -23; x < 23; x += 1.5) K.box("ac-dark", x, 0.298, z, 0.014, 0.004, 1.2, false);
