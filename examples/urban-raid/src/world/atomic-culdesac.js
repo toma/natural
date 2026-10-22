@@ -1310,6 +1310,110 @@ function enhancePbr(A) {
   }
 }
 
+/**
+ * Near-camera ground detail that breaks up the flat lawn and road planes:
+ * leaning grass-blade tufts on the verges, fallen leaves and twigs, kerb and
+ * road-edge chips and tar patches, and gentle dunes on the sand ring. All of
+ * it is static merged geometry; live wind sway on the blades is not modeled.
+ */
+function groundCover(A, rng) {
+  const K = kit(A);
+  const vergeZ = () => (rng.range(0, 1) < 0.5 ? 1 : -1) * rng.range(8.2, 13.5);
+  for (let i = 0; i < 680; i++) {
+    const x = rng.range(-22.5, 22.5),
+      z = vergeZ(),
+      blades = 4 + Math.floor(rng.range(0, 3)),
+      key = rng.range(0, 1) < 0.5 ? "ac-grass" : "ac-hedge";
+    for (let b = 0; b < blades; b++) {
+      const a = rng.range(0, Math.PI * 2),
+        off = rng.range(0, 0.06),
+        h = rng.range(0.13, 0.27),
+        lean = rng.range(0.12, 0.33);
+      K.box(
+        key,
+        x + Math.cos(a) * off,
+        0.12 + h / 2,
+        z + Math.sin(a) * off,
+        0.022,
+        h,
+        0.022,
+        false,
+        Math.sin(a) * lean,
+        0,
+        -Math.cos(a) * lean,
+      );
+    }
+  }
+  for (let i = 0; i < 140; i++) {
+    const x = rng.range(-22.5, 22.5),
+      z = vergeZ(),
+      t = rng.range(0, 1),
+      key = t < 0.4 ? "ac-orange" : t < 0.7 ? "ac-rust" : "ac-wood";
+    K.box(
+      key,
+      x,
+      0.126,
+      z,
+      rng.range(0.07, 0.15),
+      0.008,
+      rng.range(0.05, 0.12),
+      false,
+      0,
+      rng.range(0, Math.PI),
+      0,
+    );
+  }
+  for (let i = 0; i < 60; i++) {
+    const x = rng.range(-22, 22),
+      side = rng.range(0, 1) < 0.5 ? 1 : -1,
+      z = side * (7.6 + rng.range(-0.3, 0.2));
+    K.box(
+      "ac-tar",
+      x,
+      0.172,
+      z,
+      rng.range(0.1, 0.45),
+      0.004,
+      rng.range(0.04, 0.11),
+      false,
+      0,
+      rng.range(-0.4, 0.4),
+      0,
+    );
+  }
+  for (let i = 0; i < 22; i++) {
+    const x = rng.range(-22, 22),
+      side = rng.range(0, 1) < 0.5 ? 1 : -1;
+    K.box(
+      "ac-concrete",
+      x,
+      0.19,
+      side * (7.6 + rng.range(-0.05, 0.05)),
+      rng.range(0.12, 0.28),
+      0.1,
+      0.18,
+      false,
+      0,
+      rng.range(-0.25, 0.25),
+      0,
+    );
+  }
+  for (let i = 0; i < 24; i++) {
+    const a = rng.range(0, Math.PI * 2),
+      r = rng.range(42, 150);
+    K.geo(
+      "ac-sand",
+      rockGeometry(rng, 1, 2, 0.4),
+      Math.sin(a) * r,
+      -1.2,
+      Math.cos(a) * r,
+      rng.range(10, 26),
+      rng.range(1.2, 3.2),
+      rng.range(10, 26),
+    );
+  }
+}
+
 export function buildAtomicCuldesac(A, rng) {
   materials(A, rng);
   registerProps(A, rng);
@@ -1337,6 +1441,7 @@ export function buildAtomicCuldesac(A, rng) {
   for (const h of HOUSES) garden(A, h, rng);
   for (const h of HOUSES) furnishHouse(A, rng, h);
   dressYards(A, rng);
+  groundCover(A, rng);
   const vehicle = (id) => VEHICLES.find((v) => v.id === id);
   bus(A, vehicle("bus"));
   truck(A, vehicle("truck"));
