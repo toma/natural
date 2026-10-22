@@ -38,7 +38,7 @@ export const GRADE_PRESETS = {
     // shoulder takes another chunk out of anything bright: measured on the
     // 16:30 frame the zenith came out of the tone map at B-R = +15 code values
     // for a sky whose scene radiance is 3:1 blue over red.
-    saturation: 1.2,
+    saturation: 1.26,
     // Global contrast, as a power about a pivot.
     //
     // The pivot is the CODE VALUE that must not move, and it has to sit at
@@ -47,7 +47,7 @@ export const GRADE_PRESETS = {
     // why 18% scene grey was landing on code 153 instead of ~120 and the whole
     // frame read as a milky pastel wash with no blacks in it. AgX puts 18%
     // scene grey near 0.50 display, so that is where the pivot belongs.
-    contrast: 1.28,
+    contrast: 1.36,
     pivot: 0.5,
     // Film loses chroma in the shoulder, but 0.28 on top of AgX's own
     // desaturation is what turned the sunset into a cream void and the noon
@@ -59,7 +59,7 @@ export const GRADE_PRESETS = {
     // zero - but 0.017 (four and a half codes) added to a curve that was
     // already lifting the low mids is a grey veil over the bottom third of the
     // histogram. 0.008 is two codes: visible as "not a hole", invisible as haze.
-    toe: 0.008,
+    toe: 0.004,
     // Shoulder knee, in code values. The grade runs in display space, so the
     // contrast power routinely pushes 0.8 up past 1.0 and *something* has to
     // roll it off; an exponential approach to 1.0 from this knee keeps cloud

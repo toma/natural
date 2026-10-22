@@ -142,7 +142,7 @@ export class SkySystem {
       /** Aerosol multiplier. 1 clear, 2-3 hazy, 5 dust storm. A touch above
        *  pristine reads as real suburban daylight: period reference photos
        *  carry visible aerial perspective on anything past the near houses. */
-      turbidity: 1.7,
+      turbidity: 1.5,
       /** Fewer, deeper cumulus. Below ~0.34 the deck breaks into discrete
        *  masses with clean blue between them instead of one lumpy sheet. */
       cloudCoverage: 0.18,
