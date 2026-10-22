@@ -1403,9 +1403,41 @@ function car(A, box, color = "ac-car") {
     0.5,
   );
   K.line("ac-dark", [0.9, 0.98, 0.42], [0.74, 1.04, 0.42], 0.02);
-  // ---- Rounded whitewall tires in the fender wells ----
+  // ---- Wheel arches with seated whitewall tires ----
+  // A dark arch liner recesses each opening and a body-colour flared lip frames
+  // it, so the tyre reads as seated in a wheel well instead of a dark blob
+  // tucked under the fender bulge.
   for (const xx of [1.45, -1.45])
-    for (const zz of [-0.92, 0.92]) tire(A, K, xx, 0.45, zz, zz > 0 ? 1 : -1, 0.42, 0.26);
+    for (const s of [-1, 1]) {
+      const z = s * 1.0;
+      K.geo(
+        "ac-dark",
+        new THREE.TorusGeometry(0.52, 0.11, 10, 22, Math.PI * 1.25),
+        xx,
+        0.5,
+        z,
+        1,
+        1,
+        1,
+        0,
+        0,
+        -Math.PI * 0.125,
+      );
+      K.geo(
+        color,
+        new THREE.TorusGeometry(0.6, 0.05, 8, 22, Math.PI * 1.2),
+        xx,
+        0.5,
+        z + s * 0.015,
+        1,
+        1,
+        1,
+        0,
+        0,
+        -Math.PI * 0.1,
+      );
+      tire(A, K, xx, 0.46, s * 0.9, s, 0.44, 0.3);
+    }
 }
 
 function garden(A, h, rng) {
