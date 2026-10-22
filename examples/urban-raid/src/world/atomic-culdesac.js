@@ -5,6 +5,7 @@ import { registerProps } from "./props.js";
 import { furnishRoom } from "./interiors.js";
 import { windowUnit, doorUnit } from "./kit.js";
 import { loadPbrSet } from "../materials/textures.js";
+import { beveledBoxGeometry } from "./box-bevel.js";
 import {
   HOUSES,
   FLOOR_HEIGHT,
@@ -315,20 +316,13 @@ function kit(A, ox = 0, oz = 0, yaw = 0) {
   const matrix = (x, y, z, rx = 0, ry = 0, rz = 0) =>
     new THREE.Matrix4().multiplyMatrices(base, newTrs(x, y, z, ry, 1, 1, 1, rx, rz));
   const box = (key, x, y, z, w, h, d, collide = true, rx = 0, ry = 0, rz = 0) => {
-    const geo = A.cache(`ac-box:${w}:${h}:${d}`, () => {
-      const g = new THREE.BoxGeometry(w, h, d);
-      const uv = g.attributes.uv,
-        normals = g.attributes.normal;
-      for (let i = 0; i < uv.count; i++) {
-        const nx = Math.abs(normals.getX(i)),
-          ny = Math.abs(normals.getY(i));
-        uv.setXY(i, uv.getX(i) * (nx > 0.5 ? d : w), uv.getY(i) * (ny > 0.5 ? d : h));
-      }
-      return g;
-    });
+    const geo = A.cache(`ac-cbox:${w}:${h}:${d}`, () => beveledBoxGeometry(w, h, d));
     const m = matrix(x, y, z, rx, ry, rz);
     if (key) A.add(key, geo, m);
-    if (collide) A.collideGeo(key ? A.surfaceOf(key) : "concrete", geo, m);
+    if (collide) {
+      const col = A.cache(`ac-colbox:${w}:${h}:${d}`, () => new THREE.BoxGeometry(w, h, d));
+      A.collideGeo(key ? A.surfaceOf(key) : "concrete", col, m);
+    }
   };
   const geo = (
     key,
