@@ -1339,14 +1339,14 @@ function car(A, box, color = "ac-car") {
   const st = (x, wb, wt, yb, yt) => S.push({ x, pts: bodyRing(wb, wt, yb, yt, KK) });
   st(2.42, 0.6, 0.5, 0.52, 0.86);
   st(2.18, 0.84, 0.72, 0.42, 0.93);
-  st(1.75, 0.95, 0.86, 0.38, 0.99);
-  st(1.45, 1.0, 0.9, 0.36, 1.0); // front fender bulge
-  st(1.05, 0.97, 0.9, 0.35, 1.0);
-  st(0.55, 0.97, 0.9, 0.35, 1.02); // cowl
-  st(0.0, 0.98, 0.93, 0.35, 1.02);
-  st(-0.55, 0.98, 0.92, 0.36, 1.02);
-  st(-1.05, 0.97, 0.9, 0.37, 1.01);
-  st(-1.45, 1.0, 0.9, 0.38, 1.0); // rear fender bulge
+  st(1.75, 0.93, 0.85, 0.38, 0.99);
+  st(1.45, 0.95, 0.88, 0.36, 1.0); // front fender, only slightly proud of the body
+  st(1.05, 0.93, 0.88, 0.35, 1.0);
+  st(0.55, 0.94, 0.89, 0.35, 1.02); // cowl
+  st(0.0, 0.95, 0.9, 0.35, 1.02);
+  st(-0.55, 0.95, 0.89, 0.36, 1.02);
+  st(-1.05, 0.93, 0.88, 0.37, 1.01);
+  st(-1.45, 0.95, 0.88, 0.38, 1.0); // rear fender, only slightly proud
   st(-1.9, 0.9, 0.82, 0.4, 1.02);
   st(-2.2, 0.8, 0.7, 0.42, 0.98);
   st(-2.45, 0.58, 0.5, 0.48, 0.9);
@@ -1395,6 +1395,10 @@ function car(A, box, color = "ac-car") {
     K.round(trim, 0.94, 1.29, s * 1.03, 0.09, 0.13, 0.05, 0.03, false);
     K.line("ac-dark", [0.66, 1.42, s * 0.3], [0.44, 1.26, s * 0.5], 0.01);
   }
+  // ---- Enclosed, shadowed cabin ----
+  // A dark interior shell inset behind the glass, so the greenhouse reads as
+  // windows over a shadowed cabin instead of open sky seen straight through.
+  K.round("ac-dark", -0.3, 1.25, 0, 1.4, 0.52, 1.0, 0.06, false);
   // ---- Interior visible through the glass ----
   K.round("ac-dark", 0.1, 0.78, 0, 2.0, 0.18, 1.7, 0.1, true);
   K.round("ac-sofa", -0.15, 0.78, 0, 0.5, 0.28, 1.55, 0.12, false);
@@ -1421,26 +1425,13 @@ function car(A, box, color = "ac-car") {
   // tucked under the fender bulge.
   for (const xx of [1.45, -1.45])
     for (const s of [-1, 1]) {
-      const z = s * 1.0;
+      const z = s * 0.97;
       K.geo(
         "ac-dark",
-        new THREE.TorusGeometry(0.52, 0.11, 10, 22, Math.PI * 1.25),
+        new THREE.TorusGeometry(0.5, 0.055, 8, 22, Math.PI * 1.2),
         xx,
-        0.5,
+        0.49,
         z,
-        1,
-        1,
-        1,
-        0,
-        0,
-        -Math.PI * 0.125,
-      );
-      K.geo(
-        color,
-        new THREE.TorusGeometry(0.6, 0.05, 8, 22, Math.PI * 1.2),
-        xx,
-        0.5,
-        z + s * 0.015,
         1,
         1,
         1,
@@ -1448,7 +1439,20 @@ function car(A, box, color = "ac-car") {
         0,
         -Math.PI * 0.1,
       );
-      tire(A, K, xx, 0.46, s * 0.9, s, 0.44, 0.3);
+      K.geo(
+        color,
+        new THREE.TorusGeometry(0.55, 0.03, 8, 22, Math.PI * 1.16),
+        xx,
+        0.49,
+        z + s * 0.012,
+        1,
+        1,
+        1,
+        0,
+        0,
+        -Math.PI * 0.08,
+      );
+      tire(A, K, xx, 0.46, s * 0.88, s, 0.43, 0.27);
     }
 }
 
