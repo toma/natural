@@ -3,6 +3,7 @@ import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.j
 import { newTrs, rockGeometry } from "./util.js";
 import { registerProps } from "./props.js";
 import { furnishRoom } from "./interiors.js";
+import { windowUnit, doorUnit } from "./kit.js";
 import {
   HOUSES,
   FLOOR_HEIGHT,
@@ -690,7 +691,40 @@ function furnish(K, house) {
 }
 const A_lamp = () => new THREE.ConeGeometry(0.29, 0.16, 16, 1, true);
 
-function house(A, spec) {
+/**
+ * Glaze the street facade with kit window and door units: recessed frames,
+ * mullions, real glass, stone sills, shutters, and an ajar front door. The
+ * openings are already cut by wall(); back:false lets the furnished room show
+ * through instead of a painted interior card.
+ */
+function kitFront(A, rng, spec) {
+  const base = newTrs(spec.x, 0, spec.z, spec.yaw);
+  const pm = new THREE.Matrix4().multiplyMatrices(base, newTrs(0, 0, 5.12, Math.PI));
+  const y = FLOOR_HEIGHT;
+  const shutterKey = spec.id === "green" ? "metal_blue" : "metal_green";
+  windowUnit(A, pm, { x: -1.6, y: 1.05 + 1.65 / 2, w: 3.0, h: 1.52 }, rng, {
+    t: 0.24,
+    state: "glazed",
+    back: false,
+    frameKey: "wood_dark",
+    curtain: true,
+  });
+  windowUnit(A, pm, { x: 0, y: y + 0.85 + 1.85 / 2, w: 3.2, h: 1.7 }, rng, {
+    t: 0.24,
+    state: "glazed",
+    back: false,
+    frameKey: "wood_dark",
+    shutters: true,
+    shutterKey,
+  });
+  doorUnit(A, pm, { x: 3.1, y: 0.16 + 2.35 / 2, w: 1.5, h: 2.3 }, rng, {
+    t: 0.24,
+    open: 1.1,
+    leafKey: "wood_dark",
+  });
+}
+
+function house(A, spec, rng) {
   const K = kit(A, spec.x, spec.z, spec.yaw),
     key = `ac-${spec.id}`,
     y = FLOOR_HEIGHT;
@@ -867,6 +901,7 @@ function house(A, spec) {
   }
   const p = housePoint(spec, 0, 0);
   A.interiorLights.push({ x: p.x, y: 5.7, z: p.z });
+  kitFront(A, rng, spec);
   return { spec };
 }
 
@@ -1156,7 +1191,7 @@ export function buildAtomicCuldesac(A, rng) {
     d.box("ac-concrete", -9, 0.16, 8.1, 6, 0.17, 6.3, true);
     d.box("ac-concrete", -3, 0.16, 8, 1.8, 0.17, 6, true);
   }
-  const infos = HOUSES.map((h) => house(A, h));
+  const infos = HOUSES.map((h) => house(A, h, rng));
   for (const h of HOUSES) garden(A, h, rng);
   for (const h of HOUSES) furnishHouse(A, rng, h);
   dressYards(A, rng);
