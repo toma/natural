@@ -168,8 +168,8 @@ function materials(A, rng) {
     "ac-glass",
     A.materials.get("glass", {
       scale: 2.0,
-      roughness: [0.28, 0.05, 0.03],
-      three: { opacity: 0.22, envMapIntensity: 1.8 },
+      roughness: [0.06, 0.04, 0.03],
+      three: { opacity: 0.4, envMapIntensity: 2.6 },
     }),
     "glass",
   );
