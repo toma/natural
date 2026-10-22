@@ -14,7 +14,6 @@ import {
   VEHICLES,
   POLES,
   GARDEN_FENCES,
-  GARDEN_MANNEQUINS,
   housePoint,
   wallSpans,
 } from "./atomic-culdesac-layout.ts";
@@ -532,112 +531,6 @@ function stairs(
   }
 }
 
-function mannequin(K, x, z, y = 0.16, ry = 0, female = false) {
-  // Painted showroom mannequins: defined faces, fitted period clothes and joint seams.
-  const c = Math.cos(ry),
-    s = Math.sin(ry),
-    point = (px, py, pz) => [x + c * px + s * pz, y + py, z - s * px + c * pz];
-  const ball = (key, px, py, pz, sx, sy, sz) =>
-    K.geo(key, new THREE.SphereGeometry(1, 32, 24), ...point(px, py, pz), sx, sy, sz, 0, ry);
-  const line = (key, a, b, r) => K.line(key, point(...a), point(...b), r);
-  // Smooth, rounded limb: a 16-sided tube with a ball joint at each end so the
-  // arms and legs read as continuous flesh, not faceted flat-capped capsules.
-  const limb = (key, a, b, ra, rb = ra) => {
-    K.line(key, point(...a), point(...b), (ra + rb) / 2, 16);
-    ball(key, a[0], a[1], a[2], ra, ra, ra);
-    ball(key, b[0], b[1], b[2], rb, rb, rb);
-  };
-  const block = (key, px, py, pz, w, h, d, r = 0.02) =>
-    K.round(key, ...point(px, py, pz), w, h, d, r, false, 0, ry);
-  const shirt = female ? "ac-orange" : "ac-shirt";
-  ball("ac-skin", 0, 1.64, 0, 0.112, 0.15, 0.105);
-  ball("ac-skin", 0, 1.56, 0.038, 0.087, 0.073, 0.075);
-  ball("ac-hair", 0, 1.7, -0.032, 0.119, 0.105, 0.097);
-  if (female) {
-    ball("ac-hair", 0, 1.59, -0.075, 0.13, 0.14, 0.075);
-    for (const side of [-1, 1]) ball("ac-hair", side * 0.09, 1.62, -0.02, 0.055, 0.095, 0.071);
-  } else {
-    block("ac-hair", 0.063, 1.685, 0.07, 0.08, 0.065, 0.055, 0.02);
-    ball("ac-hair", -0.024, 1.73, 0.025, 0.107, 0.053, 0.085);
-  }
-  ball("ac-skin", 0, 1.62, 0.112, 0.022, 0.047, 0.03);
-  for (const side of [-1, 1]) {
-    ball("ac-skin", side * 0.112, 1.63, 0, 0.022, 0.034, 0.02);
-    ball("ac-enamel", side * 0.042, 1.659, 0.09, 0.026, 0.011, 0.015);
-    ball("ac-dark", side * 0.042, 1.659, 0.103, 0.01, 0.009, 0.003);
-    block("ac-hair", side * 0.044, 1.677, 0.103, 0.043, 0.008, 0.004, 0.002);
-  }
-  ball(female ? "ac-lips" : "ac-skin", 0, 1.571, 0.105, 0.035, 0.009, 0.007);
-  line("ac-dark", [-0.025, 1.565, 0.109], [0.025, 1.565, 0.109], 0.002);
-  line("ac-skin", [0, 1.42, 0], [0, 1.53, 0], 0.049);
-  ball(shirt, 0, 1.204, 0, female ? 0.185 : 0.221, 0.249, 0.128);
-  ball(shirt, 0, 1.356, 0, female ? 0.194 : 0.25, 0.101, 0.132);
-  block(shirt, 0, 1.01, 0, female ? 0.28 : 0.35, 0.18, 0.226, 0.05);
-  if (female) {
-    K.geo(
-      shirt,
-      new THREE.CylinderGeometry(0.143, 0.29, 0.55, 32, 6),
-      ...point(0, 0.765, 0),
-      1,
-      1,
-      0.85,
-      0,
-      ry,
-    );
-    for (let i = 0; i < 18; i++) {
-      const a = (i * Math.PI) / 9;
-      line(
-        "ac-rust",
-        [Math.sin(a) * 0.152, 1.02, Math.cos(a) * 0.131],
-        [Math.sin(a) * 0.285, 0.505, Math.cos(a) * 0.24],
-        0.004,
-      );
-    }
-    block("ac-dark", 0, 1.03, 0, 0.295, 0.025, 0.24, 0.015);
-  } else {
-    block("ac-trousers", 0, 0.9, 0, 0.35, 0.22, 0.235, 0.07);
-    block("ac-dark", 0, 1.02, 0.005, 0.36, 0.04, 0.25, 0.015);
-    block("ac-chrome", 0, 1.02, 0.14, 0.05, 0.038, 0.012, 0.005);
-    for (const side of [-1, 1]) {
-      limb("ac-trousers", [side * 0.097, 0.89, 0], [side * 0.12, 0.48, 0.017], 0.09, 0.072);
-      limb("ac-trousers", [side * 0.12, 0.48, 0.017], [side * 0.127, 0.13, 0.018], 0.072, 0.06);
-      line("ac-dark", [side * 0.12, 0.83, 0.084], [side * 0.13, 0.15, 0.08], 0.003);
-    }
-  }
-  for (const side of [-1, 1]) {
-    if (female) {
-      limb("ac-skin", [side * 0.105, 0.58, 0], [side * 0.11, 0.13, 0.022], 0.054, 0.046);
-      ball("ac-skin", side * 0.11, 0.48, 0.01, 0.055, 0.065, 0.052);
-    }
-    block("ac-dark", side * 0.12, 0.076, 0.065, 0.15, 0.1, 0.29, 0.045);
-    const shoulder = [side * (female ? 0.183 : 0.228), 1.34, 0],
-      elbow = [side * 0.255, 1.055, 0.007],
-      wrist = [side * 0.27, 0.86, 0.072];
-    limb(
-      shirt,
-      shoulder,
-      [side * 0.246, 1.16, 0.005],
-      female ? 0.062 : 0.075,
-      female ? 0.056 : 0.069,
-    );
-    limb("ac-skin", [side * 0.247, 1.16, 0.005], elbow, 0.053, 0.05);
-    limb("ac-skin", elbow, wrist, 0.05, 0.043);
-    ball("ac-skin", side * 0.27, 0.819, 0.072, 0.041, 0.069, 0.021);
-    for (let finger = 0; finger < 4; finger++)
-      line(
-        "ac-skin",
-        [side * 0.27 + (finger - 1.5) * 0.016, 0.806, 0.082],
-        [side * 0.27 + (finger - 1.5) * 0.016, 0.765, 0.096],
-        0.008,
-      );
-    line("ac-dark", [side * 0.22, 1.345, 0.01], [side * 0.235, 1.305, 0.05], 0.0025);
-    // Shirt collar and front placket.
-    line("ac-enamel", [side * 0.05, 1.421, 0.085], [side * 0.084, 1.363, 0.125], 0.023);
-  }
-  for (let h = 1.08; h < 1.35; h += 0.075) ball("ac-dark", 0, h, 0.128, 0.005, 0.005, 0.003);
-  K.box(null, x, y + 0.9, z, 0.38, 1.8, 0.26, true);
-}
-
 function furnish(K, house) {
   K.box("ac-tiles", 2.4, 0.18, -2.7, 6.3, 0.03, 4.15, false);
   wall(K, "ac-wallpaper", 0, -4.78, 11.5, 2.8, [
@@ -707,8 +600,6 @@ function furnish(K, house) {
     K.geo("ac-yellow", A_lamp(), 1, 2.64, z);
     K.sphere("ac-bulb", 1, 2.57, z, 0.1, 0.07, 0.1);
   }
-  mannequin(K, 4, -2, 0.2, 0, true);
-  mannequin(K, -1.9, 3.8, y + 0.17, Math.PI);
 }
 const A_lamp = () => new THREE.ConeGeometry(0.29, 0.16, 16, 1, true);
 
@@ -1350,7 +1241,6 @@ function garden(A, h, rng) {
       z = rng.range(6, 8);
     K.sphere(i % 3 ? "ac-hedge" : "ac-orange", x, 0.28, z, 0.1, 0.12, 0.1);
   }
-  for (const m of GARDEN_MANNEQUINS) mannequin(K, m.x, m.z, 0.18, 0, m.female);
   // Drainpipe, porch light and mail box.
   K.cylinder("ac-white", 5.9, 3.2, 5.25, 0.055, 6.2);
   K.box("ac-metal", 4, 0.78, 7.2, 0.06, 1.2, 0.06, true);

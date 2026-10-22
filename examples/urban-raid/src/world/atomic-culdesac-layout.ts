@@ -88,11 +88,20 @@ export const GARDEN_FENCES: ReadonlyArray<[number, number, number, number]> = [
   [0, 7, 12, 7],
 ];
 
-/** Garden mannequin positions in house-local space. */
-export const GARDEN_MANNEQUINS: ReadonlyArray<{ x: number; z: number; female: boolean }> = [
-  { x: 3, z: -13, female: true },
-  { x: -3, z: 5, female: false },
-];
+/**
+ * Walkable approaches that must stay clear of static props, in house-local
+ * space. The front-door walkway runs from the facade through the gate gap in
+ * the front picket fence (`x in [-5.2, 0]`) out to the pavement. No prop,
+ * figure, or dressing may sit in these boxes: a regression test asserts it so a
+ * decoration can never again block a doorway.
+ */
+export const ENTRANCE_ZONES: ReadonlyArray<{
+  id: string;
+  x: number;
+  z: number;
+  w: number;
+  d: number;
+}> = [{ id: "front-door", x: -2.6, z: 6.3, w: 4, d: 1.8 }];
 
 export function housePoint(house: HouseSpec, x: number, z: number) {
   const c = Math.cos(house.yaw);

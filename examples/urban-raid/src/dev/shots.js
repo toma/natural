@@ -115,6 +115,13 @@ export const SHOTS = {
     time: 16.5,
     doc: "House front corner - edge bevels, siding, trim, roof slab, silhouette.",
   },
+  buscu: {
+    pos: [9.5, 1.9, -5.2],
+    look: [0, 1.6, -0.5],
+    fov: 52,
+    time: 16.5,
+    doc: "School-bus nose and flank - panel curvature, chrome, grille, destination roll.",
+  },
 };
 
 export function installShotApi(engine, { capture, lockstep = false } = {}) {

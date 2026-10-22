@@ -4,7 +4,7 @@ import {
   POLES,
   LANDMARKS,
   GARDEN_FENCES,
-  GARDEN_MANNEQUINS,
+  ENTRANCE_ZONES,
   housePoint,
   type HouseSpec,
   type PropBox,
@@ -68,16 +68,25 @@ export function staticProps(): Obb[] {
     props.push(localBox(house, `${house.id}-house`, 0, 0, 12.4, 10.4));
     props.push(localBox(house, `${house.id}-garage`, -9, 1, 6.2, 8.2));
     GARDEN_FENCES.forEach((seg, i) => props.push(localFence(house, `${house.id}-fence-${i}`, seg)));
-    GARDEN_MANNEQUINS.forEach((m, i) => {
-      const p = housePoint(house, m.x, m.z);
-      props.push(obb(`${house.id}-mannequin-${i}`, house.id, p.x, p.z, house.yaw, 0.5, 0.4));
-    });
   }
   for (let i = 0; i < POLES.length; i++)
     props.push(obb(`pole-${i}`, "pole", POLES[i]!.x, POLES[i]!.z, 0, 0.5, 0.5));
   const sign = LANDMARKS.find((l) => l.id === "welcome-sign")!;
   props.push(obb("welcome-sign", "landmark", sign.x, sign.z, 0, sign.w, 0.4));
   return props;
+}
+
+/**
+ * Door and walkway clearance footprints in world space, one set per house. A
+ * regression test asserts no static prop overlaps any of these so no decoration
+ * can block an entrance.
+ */
+export function entranceZones(): Obb[] {
+  const zones: Obb[] = [];
+  for (const house of HOUSES)
+    for (const zone of ENTRANCE_ZONES)
+      zones.push(localBox(house, `${house.id}-${zone.id}`, zone.x, zone.z, zone.w, zone.d));
+  return zones;
 }
 
 /** Corners of an OBB in world space. */
