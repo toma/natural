@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { newTrs, rockGeometry } from "./util.js";
 import { registerProps } from "./props.js";
+import { furnishRoom } from "./interiors.js";
 import {
   HOUSES,
   FLOOR_HEIGHT,
@@ -1118,6 +1119,26 @@ function dressYards(A, rng) {
   A.skirts = false;
 }
 
+/**
+ * Furnish the open living area of a house with a real interiors.js room:
+ * seating, shelving, floor litter, and wall dressing from the shared prop
+ * library. Kept to the left half so it never fights the hand-built kitchen and
+ * bed on the right.
+ */
+function furnishHouse(A, rng, h) {
+  const c0 = housePoint(h, -5, -4);
+  const c1 = housePoint(h, 0.5, 4);
+  furnishRoom(A, rng, {
+    kind: "living",
+    x0: Math.min(c0.x, c1.x),
+    x1: Math.max(c0.x, c1.x),
+    z0: Math.min(c0.z, c1.z),
+    z1: Math.max(c0.z, c1.z),
+    y: 0.13,
+    h: 2.6,
+  });
+}
+
 export function buildAtomicCuldesac(A, rng) {
   materials(A, rng);
   registerProps(A, rng);
@@ -1137,6 +1158,7 @@ export function buildAtomicCuldesac(A, rng) {
   }
   const infos = HOUSES.map((h) => house(A, h));
   for (const h of HOUSES) garden(A, h, rng);
+  for (const h of HOUSES) furnishHouse(A, rng, h);
   dressYards(A, rng);
   const vehicle = (id) => VEHICLES.find((v) => v.id === id);
   bus(A, vehicle("bus"));
