@@ -146,7 +146,7 @@ function materials(A, rng) {
   surface("ac-rust", "#914e3e", "metal", 0.53, 0.35);
   surface("ac-bus", "#ffc21e", "metal", 0.4, 0.35);
   surface("ac-red", "#a73e35", "metal", 0.4, 0.35);
-  surface("ac-car", "#79894a", "metal", 0.35, 0.4);
+  surface("ac-car", "#79894a", "metal", 0.16, 0.45);
   surface("ac-metal", "#777e79", "metal", 0.42, 0.65);
   surface("ac-chrome", "#b5bab5", "metal", 0.22, 0.85);
   surface("ac-dark", "#242826", "concrete");
@@ -164,6 +164,10 @@ function materials(A, rng) {
   surface("ac-orange", "#b5733f", "fabric");
   surface("ac-sofa", "#809263", "fabric");
   enhancePbr(A);
+  // Glossy, reflective car paint: a near-clearcoat sheen from strong env
+  // reflection over a low-roughness olive base.
+  const carPaint = A.mat("ac-car");
+  if (carPaint) carPaint.envMapIntensity = 2.6;
   A.registerMaterial(
     "ac-glass",
     A.materials.get("glass", {
@@ -1457,7 +1461,7 @@ function enhancePbr(A) {
     // Painted vehicle panels keep their solid colour; the scan contributes only
     // panel scratches and a semi-gloss roughness, so the paint does not go camo.
     ["ac-bus", "metal", { grainOnly: true, normalScale: 0.5, roughnessFloor: 0.3 }],
-    ["ac-car", "metal", { grainOnly: true, normalScale: 0.5, roughnessFloor: 0.3 }],
+    ["ac-car", "metal", { grainOnly: true, normalScale: 0.14, roughnessFloor: 0.14 }],
     ["ac-red", "metal", { grainOnly: true, normalScale: 0.5, roughnessFloor: 0.3 }],
     // Siding keeps its pastel albedo; take only the plank grain normal and a
     // matte roughness so the colour is untouched.
