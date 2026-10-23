@@ -1,13 +1,28 @@
-# World Labs backdrop world
+# World Labs world
 
-Photoreal Gaussian-splat backdrop for the Atomic Cul-de-sac map, generated with
+Photoreal Gaussian-splat world for the Atomic Cul-de-sac map, generated with
 [World Labs Marble](https://marble.worldlabs.ai) from an original image prompt
 created for this project. Output is owned by the project author.
 
 - `culdesac_500k.spz` / `culdesac_150k.spz`: splats (high / low quality), render with Spark
-- `culdesac_collider.glb`: coarse collider mesh (not used for gameplay collision)
+- `culdesac_collider.glb`: coarse collider mesh, the physics and navigation geometry of the World Labs map
 - `culdesac_pano.jpg`: equirectangular panorama fallback
 - `world.json`: metadata (`metric_scale_factor`, `ground_plane_offset`)
+
+## The World Labs map (default)
+
+Normal play loads this world as the playable map. The splat is the visible level
+(500k on high quality, 150k with `?q=low`) and the collider mesh, with the same
+placement, is invisible static collision that the bots also navigate on. Spawns
+are raycast onto the collider within 32 m of the capture origin. Append
+`?map=procedural` for the generated map. Capture runs keep the generated map
+unless `?map=worldlabs` is given. The code is in
+`src/world/worldlabs-map-config.ts` and `src/world/worldlabs-map.js`.
+
+Limits: the capture was taken from about 6 m up, so close detail at eye height
+is soft; the splat writes no depth, so volumetric fog is off on this map and
+other depth effects see the splat as sky; the navigation grid samples only the
+top surface at each point.
 
 ## Pointing the backdrop at a world
 

@@ -18,6 +18,7 @@ import { installShotApi } from "./dev/shots.js";
 import { prewarm } from "./core/prewarm.js";
 import { runAudioSelfTest } from "./audio/selftest.js";
 import { readSettings, SETTINGS_KEY } from "./ui/settings.ts";
+import { resolveMapMode } from "./world/worldlabs-map-config.ts";
 
 const params = new URLSearchParams(location.search);
 const capture = params.get("capture") === "1";
@@ -39,7 +40,13 @@ if (!capture) {
   }
 }
 
+// The World Labs capture is the default level. `?map=procedural` brings back the
+// generated map; capture runs keep it unless `?map=worldlabs` asks otherwise, so
+// the pixel baselines stay on deterministic geometry.
+const map = resolveMapMode({ param: params.get("map"), capture });
+
 const config = createConfig({
+  map,
   quality: params.get("q") ?? "ultra",
   backdrop: capture ? "off" : (params.get("backdrop") ?? storedBackdrop),
   deterministic: capture,

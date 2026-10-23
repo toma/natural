@@ -90,6 +90,11 @@ export const DEFAULTS = {
   invertY: false,
   /** Photoreal distance backdrop: 'splat' | 'pano' | 'off'. See world/backdrop-config.ts. */
   backdrop: "off",
+  /**
+   * Level: 'worldlabs' (the captured splat with its collider) | 'procedural'.
+   * main.js resolves it from `?map=`. See world/worldlabs-map-config.ts.
+   */
+  map: "worldlabs",
   exposure: 1.0,
   /** Capture mode disables anything nondeterministic so screenshots are stable. */
   deterministic: false,

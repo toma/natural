@@ -339,6 +339,10 @@ export class SkySystem {
       steps: Math.max(8, steps),
       scale: 0.5,
     });
+    // The World Labs splat carries its own captured haze and writes no depth,
+    // so the fog pass would read every splat pixel as open sky and march its
+    // full distance through the ground fog. Off for that map.
+    if (ctx.config.map === "worldlabs") this.volumetrics.enabled = false;
     this._unregisterPass = r.registerPass(this.volumetrics);
 
     // ---- bookkeeping ------------------------------------------------------

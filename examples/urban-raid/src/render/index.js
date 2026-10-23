@@ -1231,7 +1231,22 @@ export class RenderSystem {
     if (n > 0) console.info(`[render] indirect gate: ${n} interior volumes`);
   }
 
+  /**
+   * For a level that is real but has few meshes (the World Labs map is one
+   * splat plus an invisible collider): remove the blockout probe now and never
+   * seed it again.
+   */
+  dismissProbe(ctx = this.ctx) {
+    this._probeDismissed = true;
+    if (!this.probeActive) return;
+    ctx?.scene.remove(this.probe.group);
+    this.probe.dispose();
+    this.probeActive = false;
+    this.taa?.reset();
+  }
+
   _ensureProbe(ctx) {
+    if (this._probeDismissed) return;
     // A couple of foreign meshes means another subsystem is still using its
     // own placeholder; the probe only steps aside for a real level.
     const FOREIGN_LIMIT = 6;

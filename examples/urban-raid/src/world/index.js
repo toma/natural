@@ -3,10 +3,21 @@ import { Assembler } from "./builder.js";
 import { buildAtomicCuldesac } from "./atomic-culdesac.js";
 import { assetsAvailable, placeModels, updateModelLods } from "./models.js";
 import { HOUSES, MAP_BOUNDS, MAP_SPAWNS, outdoorOpen } from "./atomic-culdesac-layout.ts";
+import { buildWorldLabsMap } from "./worldlabs-map.js";
+import { WORLDLABS_PLAY_RADIUS } from "./worldlabs-map-config.ts";
 
 /**
  * WORLD - level geometry, the modular building kit, props, set dressing and
  * static collision.
+ *
+ * MAPS (`ctx.config.map`, from `?map=`):
+ *   'worldlabs'   the default. The World Labs culdesac capture is the level: the
+ *                 full splat is what you see and its exported collider mesh is
+ *                 the invisible physics and navigation geometry. See
+ *                 worldlabs-map.js. If either half fails to load, the
+ *                 procedural map below is built instead.
+ *   'procedural'  the generated Atomic Cul-de-sac described below. Capture runs
+ *                 use it unless `?map=worldlabs` is given.
  *
  * ATOMIC CUL-DE-SAC: a small, symmetrical 1950s desert test-site suburb. One
  * short street with a central school bus and moving truck, two facing two-story
@@ -80,6 +91,16 @@ export class WorldSystem {
     // Weathering in the shared materials keys off the ground plane.
     materials.setGroundLevel?.(0);
 
+    this.mapMode = "procedural";
+    if (ctx.config.map === "worldlabs") {
+      const built = await buildWorldLabsMap(ctx, this.root, physics);
+      if (built) {
+        this._initWorldLabs(built);
+        return;
+      }
+      console.warn("[world] World Labs map unavailable; building the procedural map");
+    }
+
     const t0 = performance.now();
     const A = new Assembler({ materials, rng, render });
     this.A = A;
@@ -125,6 +146,35 @@ export class WorldSystem {
         `${(A.stats.instTris / 1000).toFixed(0)}k instanced tris in ${A.stats.instances} instances, ` +
         `${A.stats.drawCalls} draw calls, ${(A.stats.collideTris / 1000).toFixed(1)}k collision tris`,
     );
+  }
+
+  /** Adopt a built World Labs map as the level. */
+  _initWorldLabs(built) {
+    this.mapMode = "worldlabs";
+    this.worldlabs = built;
+    this.A = null;
+    this.buildings = [];
+    this.mapBounds = {
+      minX: built.bounds.min.x,
+      maxX: built.bounds.max.x,
+      minZ: built.bounds.min.z,
+      maxZ: built.bounds.max.z,
+    };
+    this.mapName = "WORLD LABS CUL-DE-SAC";
+    this.modelLods = [];
+    this.bulbs = [];
+    this.lamps = [];
+    this.lampLens = null;
+    this._lampMix = 0;
+    this._v = new THREE.Vector3();
+    this._inv = new THREE.Matrix4();
+    this.spawnPoints = built.spawnPoints;
+    this.bounds = built.bounds;
+    this.stats = built.stats;
+    this._addBallast();
+    // The level is one splat and an invisible collider, too few meshes for
+    // render to retire its blockout probe on its own.
+    this.ctx.peek("render")?.dismissProbe?.(this.ctx);
   }
 
   // ----------------------------------------------------------------- lights --
@@ -380,6 +430,7 @@ export class WorldSystem {
   }
 
   levelToWorld(x, y, z, out = new THREE.Vector3()) {
+    if (!this.A) return out.set(x, y, z);
     return out.set(x, y, z).applyMatrix4(this.A.xform);
   }
 
@@ -389,18 +440,26 @@ export class WorldSystem {
 
   /** Analytic floor height. Physics owns the exact answer; this is a hint. */
   groundHeight(x, z) {
+    if (this.mapMode === "worldlabs") {
+      const gy = this.ctx.peek("physics")?.groundHeight(x, z, 3);
+      return Number.isFinite(gy) ? gy : 0;
+    }
     const p = this.worldToLevel(x, 0, z, this._v);
     return 0.16;
   }
 
   /** True where a character can stand outdoors (street, pavement, alley). */
   isOpen(x, z, margin = 0.4) {
+    if (this.mapMode === "worldlabs") return Math.hypot(x, z) <= WORLDLABS_PLAY_RADIUS - margin;
     const p = this.worldToLevel(x, 0, z, this._v);
     return outdoorOpen(p.x, p.z, margin);
   }
 
   dispose() {
     this.A?.dispose();
+    this.worldlabs?.splat?.dispose?.();
+    this.worldlabs?.sparkRenderer?.dispose?.();
+    this.worldlabs = null;
     this.root?.parent?.remove(this.root);
     for (const l of this._ballast ?? []) l.parent?.remove(l);
     this._ballast = null;

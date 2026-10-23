@@ -313,6 +313,25 @@ visual fixture.
   seconds under SwiftShader, so a `__PUMP__(90)` fixture exceeds the spec's 180 s per-test
   timeout on a CPU-only host. Regenerate baselines with a standalone capture driver and generous
   timeouts, or on a GPU host, not through the timed test runner.
+- Urban-raid normal play defaults to the World Labs map (`?map=worldlabs`): the
+  `culdesac_*.spz` splat is the visible level and `culdesac_collider.glb` is the invisible
+  physics and navigation mesh. `?map=procedural` restores the generated map, and capture runs
+  (`capture=1`) keep the procedural map unless `?map=` is given, so pixel baselines are
+  unchanged. Config and pure math live in `src/world/worldlabs-map-config.ts` (tested by
+  `tests/worldlabs-map.test.ts`); the builder is `src/world/worldlabs-map.js`.
+- The splat and the collider share one raw Y-down frame. The same placement (scale by
+  `metric_scale_factor`, rotate PI about X, lift by `ground_plane_offset`) puts the captured
+  ground at y=0. The capture camera sat about 6 m up, so splat detail softens at eye height.
+- Spark draws the splat only in the forward pass with no depth write, so the G-buffer sees
+  splat pixels as empty sky. The sky volumetrics pass then fogged the whole lower frame into a
+  milky haze; it is disabled on the World Labs map. Other depth effects (SSAO, TAA
+  reprojection, motion blur) also see no depth there. Spark sorts itself in
+  `onBeforeRender`, so do not call `sparkRenderer.update()` every frame.
+- The render system's stone blockout probe only retires itself once six foreign meshes exist.
+  A level with fewer meshes (the World Labs map has one splat and a few collider meshes) must
+  call `render.dismissProbe()` or the probe boxes stay on screen.
+- AI `populate()` garrisons only spawn points more than 18 m from the player, so a map needs
+  spawns spread well past that radius or it starts with no enemies.
 
 ## 4. Copy rules
 

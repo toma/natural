@@ -10,24 +10,7 @@ import {
   pickSplatUrl,
   placeBackdrop,
 } from "./backdrop-config.ts";
-
-// Imported at runtime only, and only when the backdrop is set to 'splat', so the
-// package is an optional dependency: a clean checkout, CI, and the pano/off paths
-// never touch it. The specifier is held in a variable so neither the bundler nor
-// the type checker tries to resolve it at build time. Install it to enable
-// splats:  bun add @sparkjsdev/spark
-const SPARK_MODULE = "@sparkjsdev/spark";
-async function loadSpark() {
-  try {
-    return await import(/* @vite-ignore */ SPARK_MODULE);
-  } catch (err) {
-    console.warn(
-      "[backdrop] Spark is not installed; falling back to pano/sky",
-      err?.message ?? err,
-    );
-    return null;
-  }
-}
+import { loadSpark, waitForSplat } from "./spark.js";
 
 /**
  * Optional photoreal backdrop for the Atomic Cul-de-sac map.
@@ -35,8 +18,10 @@ async function loadSpark() {
  * It renders a configured World Labs (or equivalent) capture as a ring of
  * distant scenery behind the playable map. It is content-neutral plumbing: it
  * renders whatever `BACKDROP_WORLD` points at, is OFF by default, and ships no
- * world. The procedural/glTF map remains the only source of gameplay geometry
- * and collision; `culdesac_collider.glb` is never used here.
+ * world. The procedural/glTF map stays the source of gameplay geometry and
+ * collision when this backdrop is in use. It stays off on the World Labs map
+ * (`ctx.config.map === "worldlabs"`), where `worldlabs-map.js` draws the splat
+ * as the level itself and uses `culdesac_collider.glb` for collision.
  *
  * Quality (`ctx.config.backdrop`):
  *   'splat'  Gaussian splats through Spark, 500k on high / 150k on low.
@@ -60,6 +45,8 @@ export class BackdropSystem {
 
     const world = BACKDROP_WORLD;
     const mode = normalizeBackdropMode(ctx.config.backdrop, "off");
+    // The World Labs map already draws this capture as the level itself.
+    if (ctx.config.map === "worldlabs") return;
     if (mode === "off" || world === null) {
       if (mode !== "off" && world === null)
         console.info("[backdrop] enabled but no world configured (BACKDROP_WORLD is null); off");
@@ -105,21 +92,7 @@ export class BackdropSystem {
 
     const mesh = new spark.SplatMesh({ url });
     this.splatMesh = mesh;
-    // SplatMesh loads asynchronously. Support both the promise and callback APIs
-    // across Spark versions; resolve either way so a slow or silent load cannot
-    // wedge boot.
-    await new Promise((resolve) => {
-      let settled = false;
-      const done = () => {
-        if (settled) return;
-        settled = true;
-        resolve();
-      };
-      if (mesh.initialized?.then) mesh.initialized.then(done, done);
-      if (typeof mesh.addEventListener === "function") mesh.addEventListener("load", done);
-      mesh.onLoad = done;
-      setTimeout(done, 15000);
-    });
+    await waitForSplat(mesh);
 
     const placed = placeBackdrop(meta, { flipToYUp: world.flipToYUp, transform: world.transform });
     mesh.position.fromArray(placed.position);
@@ -207,8 +180,8 @@ export class BackdropSystem {
 
   update(_dt, ctx) {
     if (this.panoMesh) this.panoMesh.position.copy(ctx.camera.position);
-    if (this.sparkRenderer?.update)
-      this.sparkRenderer.update({ scene: ctx.scene, camera: ctx.camera });
+    // SparkRenderer sorts and refreshes itself in onBeforeRender; forcing
+    // update() here every frame only regenerated the splats twice.
   }
 
   dispose() {
