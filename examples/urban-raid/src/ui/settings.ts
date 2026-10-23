@@ -1,3 +1,6 @@
+import { normalizeBackdropMode } from "../world/backdrop-config.ts";
+import type { BackdropMode } from "../world/backdrop-config.ts";
+
 export const SETTINGS_KEY = "natural-fps.settings.v1";
 export const QUALITY_NAMES = ["low", "medium", "high", "ultra"] as const;
 export interface MenuSettings {
@@ -5,12 +8,15 @@ export interface MenuSettings {
   sensitivity: number;
   fov: number;
   invertY: boolean;
+  /** Photoreal distance backdrop. Off by default; takes effect on next load. */
+  backdrop: BackdropMode;
 }
 export const MENU_DEFAULTS: MenuSettings = {
   quality: "ultra",
   sensitivity: 0.0022,
   fov: 80,
   invertY: false,
+  backdrop: "off",
 };
 
 /** Stored preferences are untrusted input, including data written by older builds. */
@@ -31,6 +37,7 @@ export function readSettings(raw: string | null): MenuSettings | null {
       sensitivity: numeric("sensitivity", 0.00044, 0.0066, MENU_DEFAULTS.sensitivity),
       fov: numeric("fov", 65, 120, MENU_DEFAULTS.fov),
       invertY: obj.invertY === true,
+      backdrop: normalizeBackdropMode(obj.backdrop, MENU_DEFAULTS.backdrop),
     };
   } catch {
     return null;

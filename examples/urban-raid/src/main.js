@@ -5,6 +5,7 @@ import { RenderSystem } from "./render/index.js";
 import { MaterialSystem } from "./materials/index.js";
 import { SkySystem } from "./sky/index.js";
 import { WorldSystem } from "./world/index.js";
+import { BackdropSystem } from "./world/backdrop.js";
 import { PhysicsSystem } from "./physics/index.js";
 import { PlayerSystem } from "./player/index.js";
 import { WeaponSystem } from "./weapons/index.js";
@@ -16,6 +17,7 @@ import { AudioSystem } from "./audio/index.js";
 import { installShotApi } from "./dev/shots.js";
 import { prewarm } from "./core/prewarm.js";
 import { runAudioSelfTest } from "./audio/selftest.js";
+import { readSettings, SETTINGS_KEY } from "./ui/settings.ts";
 
 const params = new URLSearchParams(location.search);
 const capture = params.get("capture") === "1";
@@ -25,8 +27,21 @@ const capture = params.get("capture") === "1";
 // free-run. See the long comment in src/dev/shots.js.
 const lockstep = capture && params.get("lockstep") === "1";
 
+// The distance backdrop is a persisted preference, but capture/deterministic
+// runs stay on the procedural sky so parity baselines never depend on an
+// optional splat world. `?backdrop=splat|pano|off` overrides for a given load.
+let storedBackdrop = "off";
+if (!capture) {
+  try {
+    storedBackdrop = readSettings(localStorage.getItem(SETTINGS_KEY))?.backdrop ?? "off";
+  } catch {
+    storedBackdrop = "off";
+  }
+}
+
 const config = createConfig({
   quality: params.get("q") ?? "ultra",
+  backdrop: capture ? "off" : (params.get("backdrop") ?? storedBackdrop),
   deterministic: capture,
 });
 
@@ -40,6 +55,7 @@ engine
   .add(MaterialSystem)
   .add(SkySystem)
   .add(WorldSystem)
+  .add(BackdropSystem)
   .add(PhysicsSystem)
   .add(PlayerSystem)
   .add(WeaponSystem)

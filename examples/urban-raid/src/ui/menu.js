@@ -134,6 +134,17 @@ export class PauseMenu {
       });
       this.invBtns.push([b, value]);
     }
+    this.backdropBtns = [];
+    const backdrop = el("div", "ow-seg", this._row("Distance backdrop"));
+    for (const value of ["off", "pano", "splat"]) {
+      const b = this._button(backdrop, "", value.toUpperCase(), () => {
+        ctx.config.backdrop = value;
+        ctx.events.emit("ui:setting", { key: "backdrop", value });
+        this.syncFromConfig();
+        this.save();
+      });
+      this.backdropBtns.push([b, value]);
+    }
     this._button(this.options, "ow-btn nf-defaults", "RESTORE DEFAULTS", () => {
       Object.assign(ctx.config, MENU_DEFAULTS);
       this.setQuality(MENU_DEFAULTS.quality);
@@ -225,9 +236,12 @@ export class PauseMenu {
   }
 
   save() {
-    const { quality, sensitivity, fov, invertY } = this.ctx.config;
+    const { quality, sensitivity, fov, invertY, backdrop } = this.ctx.config;
     try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ quality, sensitivity, fov, invertY }));
+      localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ quality, sensitivity, fov, invertY, backdrop }),
+      );
     } catch {
       /* Preferences remain active when persistent storage is unavailable. */
     }
@@ -250,6 +264,11 @@ export class PauseMenu {
     this.invBtns.forEach(([b, value]) => {
       b.classList.toggle("on", value === cfg.invertY);
       b.setAttribute("aria-pressed", String(value === cfg.invertY));
+    });
+    this.backdropBtns.forEach(([b, value]) => {
+      const on = value === (cfg.backdrop ?? "off");
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", String(on));
     });
     this.sens.set(cfg.sensitivity / 0.0022);
     this.fov.set(cfg.fov);

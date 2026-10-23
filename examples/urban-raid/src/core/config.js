@@ -88,6 +88,8 @@ export const DEFAULTS = {
   sensitivity: 0.0022,
   adsSensScale: 0.65,
   invertY: false,
+  /** Photoreal distance backdrop: 'splat' | 'pano' | 'off'. See world/backdrop-config.ts. */
+  backdrop: "off",
   exposure: 1.0,
   /** Capture mode disables anything nondeterministic so screenshots are stable. */
   deterministic: false,
