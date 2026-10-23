@@ -327,6 +327,80 @@ void owSurface(vec2 uv, out vec3 alb, out float h, out float rough, out float me
 }
 `;
 
+export const TURF = /* glsl */ `
+void owSurface(vec2 uv, out vec3 alb, out float h, out float rough, out float metal, out float ao){
+  const vec2 P = vec2(8.0);
+  vec2 p = uv * P + uSeed * 7.3;
+
+  // ---- clumping: lush vs thin, dry vs green, and worn/bald, at lawn scale ----
+  // A real lawn is never one flat green: it zones into fuller and thinner
+  // patches a hand's width across, with drier straw-coloured areas and the odd
+  // trodden bald spot. These low-frequency fields drive blade density and hue.
+  float clump = owFbm01(owWarp(p * 1.1, P * 1.1, 0.8, 3), P * 1.1, 4, 0.6);
+  float dryField = owFbm01(p * 0.7 + 4.0, P * 0.7, 3, 0.62);
+  float wearField = owFbm01(p * 0.9 + 9.0, P * 0.9, 3, 0.6);
+
+  // ---- blades: crisp sheared streaks running up the tile, four leans ----
+  // Each owScratches band is a set of long thin streaks sheared off vertical, so
+  // layering a few leans builds a dense blade field. A sharp smoothstep on the
+  // sum keeps the blade EDGES hard, which is what stops turf reading as a soft,
+  // bubbly carpet; the blades have real silhouettes against the soil.
+  float bladeA = owScratches(p * 7.0, P * 7.0, 5.0, 1.0, 0.50);
+  float bladeB = owScratches(p * 11.0 + 3.1, P * 11.0, 6.0, -1.0, 0.54);
+  float bladeC = owScratches(p * 15.0 + 7.7, P * 15.0, 7.0, 2.0, 0.58);
+  float bladeD = owScratches(p * 21.0 + 1.3, P * 21.0, 8.0, -2.0, 0.62);
+  float bladeSum = max(max(bladeA, bladeB * 0.92), max(bladeC * 0.84, bladeD * 0.7));
+  float density = clamp(0.55 + clump * 0.6 - wearField * 0.5, 0.0, 1.0);
+  bladeSum *= density;
+  float blade = smoothstep(0.08, 0.5, bladeSum);
+
+  float bladeVar = owFbm01(owShear(p * 9.0, 1.0, 6.0), owShearPer(P * 9.0, 6.0), 3, 0.5);
+  float fine = owFbm01(p * 20.0, P * 20.0, 3, 0.5);
+
+  // ---- colours ----
+  vec3 gDeep = owSRGB(vec3(0.150, 0.330, 0.105));
+  vec3 gLush = owSRGB(vec3(0.205, 0.430, 0.140));
+  vec3 gBright = owSRGB(vec3(0.320, 0.515, 0.185));
+  vec3 gDry = owSRGB(vec3(0.470, 0.440, 0.210));
+  vec3 soilC = owSRGB(vec3(0.120, 0.090, 0.060));
+  vec3 thatchC = owSRGB(vec3(0.300, 0.230, 0.120));
+
+  vec3 green = mix(gDeep, gLush, clump);
+  green = mix(green, gBright, bladeVar * 0.55);
+  float dry = smoothstep(0.6, 0.95, dryField) * (1.0 - clump * 0.5);
+  green = mix(green, gDry, dry * 0.7);
+  green *= 0.9 + 0.2 * fine;
+
+  // Soil and dead thatch show between the blades and through bald spots.
+  float bald = smoothstep(0.55, 0.9, wearField);
+  vec3 ground = mix(soilC, thatchC, 0.4 + 0.3 * dryField);
+  vec3 c = mix(ground, green, blade);
+  c = mix(c, ground, bald * (1.0 - blade) * 0.8);
+
+  // ---- clover / broadleaf specks: small rounded leaves scattered in ----
+  vec4 wl = owWorley(p * 10.0, P * 10.0, 1.0);
+  float weed = smoothstep(0.26, 0.12, wl.x) * step(0.82, wl.z) * (0.5 + 0.5 * clump);
+  vec3 cloverC = owSRGB(vec3(0.180, 0.400, 0.150));
+  c = mix(c, cloverC, weed * 0.6);
+
+  // ---- height: blade tips proud of the soil, fuller clumps standing taller ----
+  h = 0.30 + blade * 0.42 + clump * 0.14 + (bladeVar - 0.5) * 0.10 + (fine - 0.5) * 0.04;
+  h += weed * 0.05;
+  h -= bald * 0.12;
+
+  // Grass is matte but faintly waxy; lush blades read a touch glossier than the
+  // dry straw and the soil, which the sheen term in the material completes.
+  rough = 0.86 - blade * 0.10 - clump * 0.04 + (fine - 0.5) * 0.06 + dry * 0.05;
+  metal = 0.0;
+  ao = mix(0.55, 1.0, blade) - bald * 0.12 * (1.0 - blade);
+
+  alb = clamp(c, vec3(0.02), vec3(0.6));
+  rough = clamp(rough, 0.45, 0.97);
+  ao = clamp(ao, 0.25, 1.0);
+  h = clamp(h, 0.0, 1.0);
+}
+`;
+
 export const RUBBER = /* glsl */ `
 void owSurface(vec2 uv, out vec3 alb, out float h, out float rough, out float metal, out float ao){
   const vec2 P = vec2(8.0);

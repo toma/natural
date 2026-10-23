@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { CONCRETE, BRICK, PLASTER, TILE } from "./glsl/surfaces-arch.js";
 import { ASPHALT, SAND, DIRT, GRAVEL } from "./glsl/surfaces-ground.js";
 import { METAL_RUST, METAL_PAINTED, METAL_BRUSHED, CORRUGATED } from "./glsl/surfaces-metal.js";
-import { WOOD, FABRIC, BURLAP, FOLIAGE, RUBBER, GLASS } from "./glsl/surfaces-organic.js";
+import { WOOD, FABRIC, BURLAP, FOLIAGE, TURF, RUBBER, GLASS } from "./glsl/surfaces-organic.js";
 
 /**
  * The surface library.
@@ -339,6 +339,31 @@ export const LIBRARY = {
       sheenColor: 0x9fbd6a,
     },
   },
+  turf: {
+    glsl: TURF,
+    surface: "foliage",
+    // 1.1 m tile so a mown blade sits at a believable few centimetres, and 5 cm
+    // of relief so the blade field reads as real geometry through the normal map.
+    bake: { size: 1024, worldSize: 1.1, relief: 0.05, seed: 53 },
+    mat: {
+      // Lawns lie on the ground plane and large lawns wrap corners, so triplanar
+      // mapping avoids the UV seams a planar lawn shows at bed edges.
+      uvMode: "triplanar",
+      scale: 1.1,
+      detile: 0.6,
+      // The blades carry the look, so the shared micro layer stays light: just
+      // enough soil tooth to keep the gaps from going plastic at close range.
+      detail: [6, 0.35, 0.22, 12],
+      macro: [0.06, 0.52, 0.2, 0.4],
+      macroRelief: 0.5,
+      weather: [0.12, 0.0, 0.0, 0.2],
+      normalStrength: 1.2,
+      roughness: [0.86, -0.04, 0.2],
+    },
+    // Grass has a faint waxy sheen that a plain rough dielectric misses; the
+    // sheen lobe is what gives a lush lawn its soft grazing-angle highlight.
+    three: { physical: true, sheen: 0.4, sheenRoughness: 0.75, sheenColor: 0x9fbf63 },
+  },
   rubber: {
     glsl: RUBBER,
     surface: "rubber",
@@ -398,6 +423,8 @@ export const ALIASES = {
   plank: "wood",
   leaf: "foliage",
   window: "glass",
+  lawn: "turf",
+  grass: "turf",
 };
 
 export function resolveName(name) {
