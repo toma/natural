@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { existsSync } from "node:fs";
 import {
   BACKDROP_WORLD,
   DEFAULT_CROP_MARGIN,
@@ -11,8 +12,17 @@ import {
 import type { BackdropWorld } from "../src/world/backdrop-config.ts";
 import { MAP_BOUNDS } from "../src/world/atomic-culdesac-layout.ts";
 
-test("the repo ships no backdrop world by default", () => {
-  expect(BACKDROP_WORLD).toBeNull();
+test("a configured backdrop world points at files that exist", () => {
+  if (BACKDROP_WORLD === null) return;
+  const root = new URL("..", import.meta.url).pathname;
+  for (const url of [
+    BACKDROP_WORLD.splatHigh,
+    BACKDROP_WORLD.splatLow,
+    BACKDROP_WORLD.pano,
+    BACKDROP_WORLD.meta,
+  ]) {
+    expect(existsSync(root + url.replace(/^\//, ""))).toBe(true);
+  }
 });
 
 test("backdrop mode coerces untrusted input to a valid mode", () => {

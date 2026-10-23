@@ -74,7 +74,14 @@ export interface BackdropWorld {
  *
  * See assets/worldlabs/README.md for the fetch path and alignment steps.
  */
-export const BACKDROP_WORLD: BackdropWorld | null = null;
+export const BACKDROP_WORLD: BackdropWorld | null = {
+  splatHigh: "/assets/worldlabs/culdesac_500k.spz",
+  splatLow: "/assets/worldlabs/culdesac_150k.spz",
+  pano: "/assets/worldlabs/culdesac_pano.jpg",
+  meta: "/assets/worldlabs/world.json",
+  flipToYUp: true,
+  transform: { position: [0, 0, 0], rotation: [0, 0, 0], scale: 1 },
+};
 
 /** Playable map bounds are hidden from the backdrop plus this extra metre band. */
 export const DEFAULT_CROP_MARGIN = 6;

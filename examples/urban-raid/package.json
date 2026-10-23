@@ -17,6 +17,7 @@
     "assets:ktx2": "bun tools/pack-ktx2.mjs"
   },
   "dependencies": {
+    "@sparkjsdev/spark": "2.4.0",
     "@toma.com/natural": "workspace:*",
     "three": "^0.180.0"
   },
