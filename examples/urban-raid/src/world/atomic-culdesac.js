@@ -7,6 +7,7 @@ import { windowUnit, doorUnit } from "./kit.js";
 import { loadPbrSet } from "../materials/textures.js";
 import { beveledBoxGeometry } from "./box-bevel.js";
 import { skinClean, skinFinish, skinTint } from "./worldlabs-skins.ts";
+import { vehicleModelFor, vehicleModelRequest } from "./vehicle-models.ts";
 import { emptyMesh, vcount, computeNormals, weldNormals } from "../ai/geo.js";
 import {
   HOUSES,
@@ -1308,6 +1309,18 @@ function headlight(K, x, y, z, r = 0.14, s = 1) {
   K.cylinder("ac-chrome", x, y, z, r, 0.04, 0, Math.PI / 2);
   K.sphere("ac-bulb", x + s * 0.03, y, z, r * 0.82, r * 0.82, r * 0.82);
 }
+/**
+ * A view of the assembler that keeps every collider and drops every visual,
+ * so a procedural builder can register exactly its usual collision while a
+ * glTF model stands in for its looks.
+ */
+function colliderOnly(A) {
+  const ghost = Object.create(A);
+  ghost.add = () => ghost;
+  ghost.addBox = () => ghost;
+  return ghost;
+}
+
 function bus(A, box) {
   // Parked at an angle across the middle of the street, the way the central bus
   // blocks sightlines and gives cover in the cul-de-sac.
@@ -1320,7 +1333,29 @@ function bus(A, box) {
   // Cream rounded roof over the window line: the white-roofed 1940s coach.
   K.round("ac-cream", 0.7, 2.86, 0, 9.7, 0.34, 2.72, 0.12, true);
   K.round("ac-cream", 0.7, 2.66, 0, 9.75, 0.22, 2.7, 0.06, false);
-  K.round("ac-bus", -4.8, 1.64, 0, 1.4, 0.46, 2.55, 0.06, true);
+  // Conventional nose: a crowned hood between pontoon fenders, lofted so the
+  // front reads as pressed sheet metal. The collider is the old nose block.
+  K.box(null, -4.8, 1.64, 0, 1.4, 0.46, 2.55, true);
+  loft(K, "ac-bus", [
+    [-5.56, 0.5, 0.42, 1.0, 1.66],
+    [-5.42, 0.6, 0.52, 0.96, 1.8],
+    [-5.0, 0.64, 0.56, 0.96, 1.88],
+    [-4.4, 0.68, 0.6, 0.96, 1.94],
+    [-4.0, 0.72, 0.64, 0.96, 1.98],
+  ]);
+  for (const s of [-1, 1])
+    loft(
+      K,
+      "ac-bus",
+      [
+        [-5.52, 0.2, 0.17, 1.02, 1.26],
+        [-5.36, 0.3, 0.26, 0.92, 1.44],
+        [-4.9, 0.34, 0.3, 1.0, 1.52],
+        [-4.4, 0.34, 0.3, 1.1, 1.52],
+        [-4.05, 0.3, 0.26, 1.0, 1.42],
+      ],
+      s * 1.0,
+    );
   // Wheel arches over each wheel keep their curve.
   for (const x of [-3.7, 3.7])
     for (const s of [-1, 1]) K.round("ac-dark", x, 0.78, s * 1.25, 1.3, 0.6, 0.2, 0.1, false);
@@ -1341,12 +1376,12 @@ function bus(A, box) {
       K.sphere("ac-metal", x, 1.47, side * 1.352, 0.018, 0.018, 0.013);
   }
   K.box("ac-chrome", -5.67, 0.88, 0, 0.15, 0.25, 2.9, false);
-  K.box("ac-dark", -5.57, 1.35, 0, 0.07, 0.6, 1.2, false);
-  for (let z = -0.5; z <= 0.5; z += 0.1)
-    K.box("ac-chrome", -5.63, 1.35, z, 0.06, 0.54, 0.035, false);
+  K.box("ac-dark", -5.57, 1.32, 0, 0.07, 0.56, 0.86, false);
+  for (let z = -0.36; z <= 0.37; z += 0.09)
+    K.box("ac-chrome", -5.61, 1.32, z, 0.05, 0.5, 0.03, false);
   for (const z of [-1, 1]) K.sphere("ac-red", 5.59, 1.5, z, 0.04, 0.12, 0.12);
   K.art("ac-bus-sign", -3.94, 2.85, 0, 2.2, 0.3, -Math.PI / 2);
-  for (const z of [-1, 1]) headlight(K, -5.64, 1.57, z, 0.15, -1);
+  for (const z of [-1, 1]) headlight(K, -5.56, 1.38, z, 0.13, -1);
   // Road grime and rust weeps down the lower panels and around the wheel arches.
   for (const side of [-1, 1]) {
     for (let x = -4.6; x < 5.3; x += 0.78)
@@ -1356,22 +1391,120 @@ function bus(A, box) {
   wheels(A, K, [-3.7, 3.7], 0);
 }
 
+/**
+ * Loft [x, wBot, wTop, yBot, yTop] body sections (see bodyRing) into one
+ * smooth panel along X, offset sideways by `off`.
+ */
+function loft(K, key, stations, off = 0, KK = 28) {
+  K.geo(
+    key,
+    meshToGeometry(
+      buildTube(
+        stations.map(([x, wb, wt, yb, yt]) => ({
+          x,
+          pts: bodyRing(wb, wt, yb, yt, KK).map(([z, y]) => [z + off, y]),
+        })),
+        KK,
+      ),
+    ),
+    0,
+    0,
+    0,
+  );
+}
+
+/**
+ * A 1950s conventional cab for the moving truck, facing -X: a lofted hood
+ * between free-standing pontoon fenders, a rounded three-window cab with a
+ * raked split windshield, running boards, round headlamp pods and a chrome
+ * grille. Visual only; truck() owns the colliders.
+ */
+function truckCab(A, K) {
+  const red = "ac-red",
+    trim = "ac-chrome",
+    glass = "ac-glass";
+  const tube = (stations, off = 0) => loft(K, red, stations, off);
+  // Hood: narrow at the grille, crowning back to the cowl.
+  tube([
+    [-6.86, 0.56, 0.46, 0.98, 1.5],
+    [-6.74, 0.64, 0.55, 0.92, 1.64],
+    [-6.4, 0.68, 0.6, 0.9, 1.72],
+    [-5.8, 0.7, 0.63, 0.9, 1.77],
+    [-5.2, 0.74, 0.68, 0.9, 1.83],
+    [-4.98, 0.76, 0.7, 0.9, 1.86],
+  ]);
+  // Cab: full width, a crowned roof, and a raked windshield line.
+  tube([
+    [-5.02, 1.12, 0.78, 0.92, 1.9],
+    [-4.96, 1.17, 0.96, 0.9, 2.28],
+    [-4.8, 1.2, 1.02, 0.9, 2.78],
+    [-4.62, 1.2, 1.05, 0.9, 2.94],
+    [-4.2, 1.2, 1.05, 0.9, 2.96],
+    [-3.98, 1.19, 1.03, 0.9, 2.9],
+    [-3.92, 1.1, 0.95, 0.92, 2.8],
+  ]);
+  for (const s of [-1, 1]) {
+    // Pontoon fender over the front wheel, dropping to the running board.
+    tube(
+      [
+        [-6.84, 0.22, 0.18, 1.0, 1.24],
+        [-6.7, 0.32, 0.28, 0.88, 1.4],
+        [-6.3, 0.36, 0.32, 0.9, 1.48],
+        [-5.7, 0.37, 0.33, 1.08, 1.52],
+        [-5.2, 0.37, 0.33, 1.28, 1.52],
+        [-4.75, 0.36, 0.32, 1.12, 1.44],
+        [-4.45, 0.3, 0.27, 0.98, 1.2],
+        [-4.3, 0.2, 0.18, 0.96, 1.04],
+      ],
+      s * 1.2,
+    );
+    // Running board and rear step.
+    K.round("ac-dark", -4.15, 0.98, s * 1.3, 0.5, 0.06, 0.34, 0.02, false);
+    // Headlamp pod on the fender crown.
+    K.sphere(red, -6.62, 1.42, s * 1.2, 0.2, 0.2, 0.2);
+    headlight(K, -6.8, 1.42, s * 1.2, 0.15, -1);
+    // Side glass: door window and a quarter light, with chrome surrounds.
+    K.box(glass, -4.42, 2.38, s * 1.13, 0.62, 0.62, 0.02, false, 0, 0, 0);
+    K.line(trim, [-4.76, 2.7, s * 1.14], [-4.1, 2.7, s * 1.14], 0.015);
+    K.line(trim, [-4.76, 2.06, s * 1.17], [-4.1, 2.06, s * 1.17], 0.015);
+    // Door shut-lines and a chrome handle.
+    K.line("ac-dark", [-4.8, 1.0, s * 1.2], [-4.8, 2.05, s * 1.2], 0.007);
+    K.line("ac-dark", [-4.02, 1.0, s * 1.19], [-4.02, 2.05, s * 1.19], 0.007);
+    K.box(trim, -4.2, 1.85, s * 1.215, 0.16, 0.035, 0.03, false);
+    // West-coast mirror on an arm.
+    K.line(trim, [-4.85, 2.2, s * 1.18], [-4.95, 2.35, s * 1.5], 0.015);
+    K.round("ac-dark", -4.95, 2.45, s * 1.52, 0.06, 0.32, 0.18, 0.02, false);
+    // Hood side vents and a chrome spear.
+    for (let i = 0; i < 3; i++)
+      K.box(trim, -5.9 + i * 0.16, 1.45, s * 0.705, 0.1, 0.03, 0.01, false);
+    // Exhaust stacks behind the cab.
+    K.cylinder(trim, -3.8, 2.15, s * 1.0, 0.07, 2.9);
+  }
+  // Split windshield: two raked panes with a centre post.
+  for (const s of [-1, 1]) K.box(glass, -4.88, 2.52, s * 0.5, 0.02, 0.58, 0.9, false, 0, 0, -0.42);
+  K.box(red, -4.88, 2.52, 0, 0.05, 0.6, 0.07, false, 0, 0, -0.42);
+  // Rear window.
+  K.box(glass, -3.95, 2.45, 0, 0.02, 0.42, 1.2, false);
+  // Chrome grille: a surround and horizontal bars across the hood mouth.
+  K.round(trim, -6.86, 1.23, 0, 0.06, 0.52, 1.02, 0.03, false);
+  for (let y = 1.04; y <= 1.43; y += 0.065) K.box("ac-dark", -6.89, y, 0, 0.02, 0.025, 0.9, false);
+  K.box(trim, -6.88, 1.6, 0, 0.04, 0.05, 0.6, false);
+  // Hood ornament and crease.
+  K.sphere(trim, -6.6, 1.69, 0, 0.12, 0.035, 0.03);
+  // Bumper with overriders and a dark lower valance.
+  K.round(trim, -6.98, 0.78, 0, 0.16, 0.24, 2.7, 0.07, false);
+  for (const z of [-0.45, 0.45]) K.round(trim, -7.04, 0.86, z, 0.12, 0.34, 0.14, 0.05, false);
+  K.box("ac-dark", -6.82, 0.95, 0, 0.12, 0.12, 1.3, false);
+}
+
 function truck(A, box) {
   const K = kit(A, box.x, box.z, box.yaw);
   K.box("ac-dark", 0, 0.85, 0, 13.5, 0.35, 2.4, true);
-  K.round("ac-red", -5.5, 1.43, 0, 2.3, 1.2, 2.55, 0.06, true);
-  K.round("ac-red", -5.1, 2.49, 0, 2.2, 0.95, 2.5, 0.07, true);
-  K.round("ac-red", -5.1, 3.03, 0, 2.4, 0.18, 2.65, 0.05, false);
-  K.box("ac-glass", -6.23, 2.58, 0, 0.025, 0.65, 2.24, false);
-  for (const z of [-1.28, 1.28]) {
-    K.box("ac-glass", -5.45, 2.56, z, 1.22, 0.65, 0.025, false);
-    K.box("ac-chrome", -5.1, 1.89, z * 1.04, 0.24, 0.045, 0.05, false);
-    K.cylinder("ac-chrome", -3.95, 2.15, z, 0.09, 2.9);
-  }
-  K.box("ac-chrome", -6.7, 1.37, 0, 0.16, 1.05, 1.15, false);
-  for (let z = -0.52; z < 0.58; z += 0.12) K.box("ac-dark", -6.8, 1.4, z, 0.035, 0.85, 0.05, false);
-  K.box("ac-chrome", -6.91, 0.75, 0, 0.18, 0.29, 2.82, false);
-  for (const z of [-1, 1]) headlight(K, -6.8, 1.57, z, 0.17, -1);
+  // Cab and engine colliders: the same two blocks the boxy cab used, so cover
+  // and movement are unchanged; the visible cab below is sculpted.
+  K.box(null, -5.5, 1.43, 0, 2.3, 1.2, 2.55, true);
+  K.box(null, -5.1, 2.49, 0, 2.2, 0.95, 2.5, true);
+  truckCab(A, K);
   // Open moving trailer: a ribbed silver aluminum box, the lateral gap a passage.
   K.box("ac-wood", 1.9, 1.02, 0, 8.85, 0.2, 2.75, true);
   K.box("ac-chrome", 1.9, 3.73, 0, 9, 0.15, 2.95, true);
@@ -2039,17 +2172,30 @@ export function buildAtomicCuldesac(A, rng) {
   ])
     tree(A, tx, tz, rng, ts);
   const vehicle = (id) => VEHICLES.find((v) => v.id === id);
-  bus(A, vehicle("bus"));
-  truck(A, vehicle("truck"));
-  // Parked cars: a realistic CC0 covered car (Poly Haven) when the model set is
-  // installed, else the procedural sedan as a fallback. The model's length runs
-  // along its local Z, so it is turned a quarter-turn to lie along the bay. A
-  // collision box matches the silhouette; the layout OBB is unchanged, so the
-  // prop-overlap and entrance-clearance tests still hold.
   A.models = A.models ?? [];
+  // Model-backed vehicles (vehicle-models.ts): with the CC0 vehicle set
+  // installed the bus and the parked cars render as glTF models and their
+  // procedural builders run collider-only, so cover, colliders and the layout
+  // OBBs are identical either way. The truck has no period model in the set
+  // and stays procedural.
+  const build = (id, procedural) => {
+    const v = vehicle(id);
+    const spec = A.vehicleModels ? vehicleModelFor(id) : null;
+    if (spec) {
+      A.models.push(vehicleModelRequest(spec, v, A.skin ?? null));
+      procedural(colliderOnly(A), v);
+    } else procedural(A, v);
+  };
+  build("bus", bus);
+  build("truck", truck);
+  // Parked cars: without the vehicle set, a realistic CC0 covered car (Poly
+  // Haven) when the prop set is installed, else the procedural sedan. The
+  // covered car's length runs along its local Z, so it is turned a quarter-turn
+  // to lie along the bay, with a collision box matching its silhouette.
   for (const id of ["car-green", "car-yellow"]) {
     const v = vehicle(id);
-    if (A.useModels) {
+    const paint = id === "car-yellow" ? "ac-rust" : "ac-car";
+    if (!A.vehicleModels && A.useModels) {
       A.models.push({
         id: "covered_car",
         x: v.x,
@@ -2060,9 +2206,7 @@ export function buildAtomicCuldesac(A, rng) {
         far: 140,
       });
       kit(A, v.x, v.z, v.yaw).box(null, 0, 0.6, 0, 4.5, 1.5, 1.9, true);
-    } else {
-      car(A, v, id === "car-yellow" ? "ac-rust" : "ac-car");
-    }
+    } else build(id, (AA, box) => car(AA, box, paint));
   }
   // Welcome sign and test clock terminate the street vista.
   K.box("ac-white", 14.5, 1.7, -9, 3.65, 2.65, 0.22, true);

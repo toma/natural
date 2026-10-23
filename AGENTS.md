@@ -354,6 +354,17 @@ visual fixture.
   (any channel at 253 or more) on the yellow pose after any grade change. Measure frame time with
   paired runs against a worktree of the previous commit on the same machine; one-off numbers from
   different sessions disagree by several ms.
+- Vehicle model learnings (urban-raid): a model-backed vehicle runs its procedural builder on
+  `colliderOnly(A)` (an `Object.create(A)` with `add` and `addBox` stubbed), so colliders, prop
+  OBBs and nav blockers stay byte-identical while only the visuals are swapped. The model path is
+  gated by a separate sentinel probe (`VEHICLE_SENTINEL_MODEL_ID`); the Poly Haven `useModels`
+  flag is independent. Grab3D glbs face +Z with tyres at y=0 and their material names drive the
+  finish (`_body_pbr`, `_paint_`, `_rim_`, `_chrome_`, `_hubcap_`, `glass`, `_tire_`); on the bus
+  `_roof_white_` is the wheel discs. Raise the per-spec `minSat` when a cream or white panel shares
+  the paint hue, or it gets repainted. High clearcoat env intensity washes pale paint toward the sky
+  colour; 1.0 is the ceiling on the bus. Some Grab3D URLs answer with an HTML page instead of a glb,
+  so the fetcher checks the `glTF` magic bytes. Wood collider counts near z = -18 differ between
+  runs in every mode (4.4k vs 4.5k collision tris in the build log); that predates the vehicle work.
 - Deterministic captures and e2e pin `&skin=classic` (e2e/natural-fps.spec.ts, tools/browser.mjs,
   tools/parity.mjs) so goldens and parity numbers do not move with palette recalibration.
 - The splat and the collider share one raw Y-down frame. The same placement (scale by

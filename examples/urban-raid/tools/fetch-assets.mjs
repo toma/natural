@@ -7,6 +7,7 @@
 // Usage (from examples/urban-raid):
 //   bun run assets            full 2K maps
 //   bun run assets --size=1k  downscale to 1K with ffmpeg if it is installed
+//   bun run assets --only=vehicles  just the Grab3D vehicle models
 //
 // The demo treats the result as a progressive enhancement: a missing set falls
 // back to the procedural material for that surface, so no network is required
@@ -18,6 +19,7 @@ import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { MODELS as MANIFEST } from "../src/world/model-manifest.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const pbrDir = join(root, "assets", "pbr");
@@ -37,6 +39,16 @@ const MODELS = [
   "modular_electricity_poles", // utility poles
   "power_box_01", // pole transformer / distribution box
 ];
+
+// CC0 1.0, Grab3D (https://grab3d.com/license). Single-file .glb binaries
+// listed in the model manifest with their download URLs. sha256 pins the
+// current upload; a mismatch warns, like the texture pins.
+const VEHICLES = MANIFEST.filter((m) => m.format === "glb");
+const VEHICLE_SHA256 = {
+  grab3d_school_bus: "fc29fa32ad61cb7fe1b7edce479f8dc5d80ce6eafc3558b657291b3ce9fb29a2",
+  grab3d_1950s_sedan: "41c83367e34271d8f5a7d4567d756079303cd8513226c8029fab6a18d73e35f9",
+  grab3d_1950s_pickup: "16dfcb7588d8e33f87dfb0848eae11b61a14afea14de192d70ee8a646536b024",
+};
 
 // The ambientCG map suffixes mapped to the engine's channel names. Color is the
 // albedo, NormalGL is the OpenGL-convention tangent normal, and Displacement is
@@ -96,6 +108,7 @@ const TEXTURES = [
 ];
 
 const sizeArg = process.argv.find((a) => a.startsWith("--size="));
+const onlyArg = process.argv.find((a) => a.startsWith("--only="))?.slice(7) ?? "";
 const targetWidth = sizeArg === "--size=1k" ? 1024 : 0;
 const hasFfmpeg = spawnSync("ffmpeg", ["-version"], { stdio: "ignore" }).status === 0;
 
@@ -181,7 +194,42 @@ async function fetchModel(id) {
   process.stdout.write("done\n");
 }
 
+async function fetchGlb(m) {
+  const dir = join(modelsDir, m.id);
+  await mkdir(dir, { recursive: true });
+  process.stdout.write(`${m.id}: downloading... `);
+  const res = await fetch(m.download);
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${m.download}`);
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.subarray(0, 4).toString("latin1") !== "glTF") throw new Error("not a .glb");
+  const want = VEHICLE_SHA256[m.id];
+  const got = sha256(buf);
+  if (want && got !== want) {
+    process.stdout.write(
+      `checksum changed (expected ${want.slice(0, 12)}, got ${got.slice(0, 12)}) `,
+    );
+  }
+  await writeFile(join(dir, `${m.id}.glb`), buf);
+  process.stdout.write("done\n");
+}
+
+async function fetchVehicles() {
+  await mkdir(modelsDir, { recursive: true });
+  for (const m of VEHICLES) {
+    try {
+      await fetchGlb(m);
+    } catch (err) {
+      console.error(`${m.id}: ${err.message}`);
+    }
+  }
+}
+
 async function main() {
+  if (onlyArg === "vehicles") {
+    await fetchVehicles();
+    console.info("Vehicle models ready under assets/models. See assets/ASSETS.md for credits.");
+    return;
+  }
   if (targetWidth && !hasFfmpeg) {
     console.warn("ffmpeg not found; keeping full 2K maps.");
   }
@@ -201,6 +249,7 @@ async function main() {
       console.error(`${id}: ${err.message}`);
     }
   }
+  await fetchVehicles();
   console.info("Assets ready under assets/. See assets/ASSETS.md for credits.");
 }
 

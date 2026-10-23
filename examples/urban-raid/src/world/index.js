@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { Assembler } from "./builder.js";
 import { buildAtomicCuldesac } from "./atomic-culdesac.js";
 import { assetsAvailable, placeModels, updateModelLods } from "./models.js";
+import { VEHICLE_SENTINEL_MODEL_ID } from "./model-manifest.ts";
 import { HOUSES, MAP_BOUNDS, MAP_SPAWNS, outdoorOpen } from "./atomic-culdesac-layout.ts";
 import { buildWorldLabsMap } from "./worldlabs-map.js";
 import { WORLDLABS_PLAY_RADIUS } from "./worldlabs-map-config.ts";
@@ -112,6 +113,9 @@ export class WorldSystem {
     // otherwise fall back to their procedural geometry. Probed once, awaited
     // before the build so the choice is made synchronously inside it.
     A.useModels = await assetsAvailable();
+    // The vehicle set has its own sentinel: `bun run assets --only=vehicles`
+    // installs it without the PBR maps and props.
+    A.vehicleModels = await assetsAvailable(VEHICLE_SENTINEL_MODEL_ID);
 
     this.buildings = buildAtomicCuldesac(A, rng);
     this.mapBounds = MAP_BOUNDS;

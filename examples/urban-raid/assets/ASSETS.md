@@ -62,6 +62,24 @@ and wrapped in a distance LOD; a missing model falls back to procedural dressing
 
 Poly Haven publishes all of its assets as CC0 1.0: https://polyhaven.com/license
 
+## Vehicles (Grab3D, CC0 1.0)
+
+Single-file .glb models fetched by `bun run assets` (or only these with
+`bun run assets --only=vehicles`) and checked against pinned SHA-256 hashes.
+They replace the procedural school bus and the two parked cars. The procedural
+builders still run in collider-only mode, so collision and navigation do not
+change. Body paint is repainted to the active skin colour and finished as a
+clearcoat lacquer. Without the files the improved procedural vehicles render.
+The moving truck stays procedural because no period model of that size exists.
+
+| Use                    | Asset               | Source                                               |
+| ---------------------- | ------------------- | ---------------------------------------------------- |
+| School bus             | grab3d_school_bus   | https://grab3d.com/models/vehicles/school-bus/       |
+| Parked sedan (green)   | grab3d_1950s_sedan  | https://grab3d.com/models/vehicles/1950s-sedan/      |
+| Parked pickup (yellow) | grab3d_1950s_pickup | https://grab3d.com/models/vehicles/1950s-pickup-truck/ |
+
+Grab3D publishes its models as CC0 1.0: https://grab3d.com/license
+
 ## Photoreal backdrop (World Labs Marble)
 
 The optional distance backdrop in `assets/worldlabs/` (Gaussian splats, a

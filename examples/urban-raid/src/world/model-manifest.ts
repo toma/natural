@@ -23,9 +23,21 @@ export interface ModelDef {
   far: number;
   /** Default uniform scale when placed without an override. */
   scale: number;
+  /**
+   * File layout: "gltf" (default) is Poly Haven's .gltf plus .bin and 1K
+   * textures, fetched through its API; "glb" is a single binary from `download`.
+   */
+  format?: "gltf" | "glb";
+  /** Direct download URL of the .glb, required when format is "glb". */
+  download?: string;
+  /** Fetch group, so `bun run assets --only=vehicles` can pull just that set. */
+  group?: "vehicles";
 }
 
-/** The CC0 model set, all Poly Haven, all CC0 1.0 (https://polyhaven.com/license). */
+/**
+ * The CC0 model set: Poly Haven props (https://polyhaven.com/license) and
+ * Grab3D vehicles (https://grab3d.com/license), all CC0 1.0.
+ */
 export const MODELS: readonly ModelDef[] = [
   {
     id: "GreenChair_01",
@@ -99,6 +111,42 @@ export const MODELS: readonly ModelDef[] = [
     far: 60,
     scale: 1,
   },
+  // Period vehicles for the cul-de-sac (see vehicle-models.ts). Grab3D's
+  // "lightweight" tier, full 2K PBR binaries; the stock pastel paint is
+  // repainted to the skin colour at load time.
+  {
+    id: "grab3d_school_bus",
+    source: "https://grab3d.com/models/vehicles/school-bus/",
+    author: "Grab3D",
+    license: "CC0-1.0",
+    far: 160,
+    scale: 1,
+    format: "glb",
+    download: "https://grab3d.com/dl/school-bus/school-bus.glb",
+    group: "vehicles",
+  },
+  {
+    id: "grab3d_1950s_sedan",
+    source: "https://grab3d.com/models/vehicles/1950s-sedan/",
+    author: "Grab3D",
+    license: "CC0-1.0",
+    far: 160,
+    scale: 1,
+    format: "glb",
+    download: "https://grab3d.com/dl/1950s-sedan/1950s-sedan.glb",
+    group: "vehicles",
+  },
+  {
+    id: "grab3d_1950s_pickup",
+    source: "https://grab3d.com/models/vehicles/1950s-pickup-truck/",
+    author: "Grab3D",
+    license: "CC0-1.0",
+    far: 160,
+    scale: 1,
+    format: "glb",
+    download: "https://grab3d.com/dl/1950s-pickup-truck/1950s-pickup-truck.glb",
+    group: "vehicles",
+  },
 ];
 
 export const MODELS_BY_ID: Record<string, ModelDef> = Object.fromEntries(
@@ -108,12 +156,19 @@ export const MODELS_BY_ID: Record<string, ModelDef> = Object.fromEntries(
 /** Sentinel model: it ships only with the fetched set, so its presence means `bun run assets` has run. */
 export const SENTINEL_MODEL_ID = "covered_car";
 
+/** Sentinel for the vehicle set, which `--only=vehicles` can fetch on its own. */
+export const VEHICLE_SENTINEL_MODEL_ID = "grab3d_school_bus";
+
 export const MODELS_BASE = "/assets/models";
 
-/** URL of a model's glTF for a given map size, e.g. /assets/models/shrub_01/shrub_01_1k.gltf */
+/**
+ * URL of a model for a given map size, e.g. /assets/models/shrub_01/shrub_01_1k.gltf.
+ * Single-file glb models ignore the size: /assets/models/<id>/<id>.glb.
+ */
 export function modelUrl(id: string, opts: { size?: ModelSize; base?: string } = {}): string {
   const size = opts.size ?? "1k";
   const base = opts.base ?? MODELS_BASE;
+  if (MODELS_BY_ID[id]?.format === "glb") return `${base}/${id}/${id}.glb`;
   return `${base}/${id}/${id}_${size}.gltf`;
 }
 
@@ -147,6 +202,8 @@ export function validateManifest(defs: readonly ModelDef[] = MODELS): string[] {
     if (!/^https?:\/\//.test(m.source)) problems.push(`${m.id}: source is not a URL`);
     if (!(m.far > 0)) problems.push(`${m.id}: far must be positive`);
     if (!(m.scale > 0)) problems.push(`${m.id}: scale must be positive`);
+    if (m.format === "glb" && !/^https:\/\/.+\.glb$/.test(m.download ?? ""))
+      problems.push(`${m.id}: glb model needs an https .glb download URL`);
   }
   return problems;
 }

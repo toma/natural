@@ -3,6 +3,7 @@ import {
   MODELS,
   MODELS_BY_ID,
   SENTINEL_MODEL_ID,
+  VEHICLE_SENTINEL_MODEL_ID,
   isAllCC0,
   modelLodFar,
   modelScale,
@@ -16,6 +17,7 @@ test("the committed model manifest is sound and entirely CC0", () => {
   expect(isAllCC0()).toBe(true);
   expect(MODELS.length).toBeGreaterThan(0);
   expect(MODELS_BY_ID[SENTINEL_MODEL_ID]).toBeDefined();
+  expect(MODELS_BY_ID[VEHICLE_SENTINEL_MODEL_ID]?.format).toBe("glb");
 });
 
 test("modelUrl builds the glTF path for each size and base", () => {
@@ -43,4 +45,24 @@ test("validateManifest reports duplicate ids, bad licence, and bad numbers", () 
   expect(problems.some((p) => p.includes("source is not a URL"))).toBe(true);
   expect(problems.some((p) => p.includes("far must be positive"))).toBe(true);
   expect(problems.some((p) => p.includes("scale must be positive"))).toBe(true);
+});
+
+test("glb vehicle models resolve to a single .glb and need an https download", () => {
+  expect(modelUrl("grab3d_school_bus")).toBe(
+    "/assets/models/grab3d_school_bus/grab3d_school_bus.glb",
+  );
+  const base = {
+    source: "https://x/a",
+    author: "Grab3D",
+    license: "CC0-1.0" as const,
+    far: 10,
+    scale: 1,
+  };
+  const problems = validateManifest([
+    { ...base, id: "nodl", format: "glb" },
+    { ...base, id: "http", format: "glb", download: "http://x/a.glb" },
+    { ...base, id: "ok", format: "glb", download: "https://x/a.glb" },
+  ]);
+  expect(problems.filter((p) => p.includes("needs an https .glb download URL")).length).toBe(2);
+  expect(problems.some((p) => p.includes("ok"))).toBe(false);
 });
