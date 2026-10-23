@@ -342,6 +342,18 @@ visual fixture.
   because the worldlabs grade pulls blue down. Height fog inscatter covers a far sky ring, so the
   mesa ring is drawn in the dome and fog density comes from the preset. The dev server does not
   always pick up preset edits; restart it and read `uSkyVeil` back before trusting a capture.
+- Realism pass learnings (skinned map only; every new uniform defaults off): the dome draws the
+  mesa ring after the veil, or the veil washes the ring out. `horizonLift` stretches the ring
+  taller and `horizonHaze` fades its base into the veil so there is no hard horizon line. The
+  volumetrics composite adds a dust band (`dust`: near, far, amount, top height) that thickens
+  toward the horizon for aerial perspective. CPU ambient is fed by the unveiled sky, so shade read
+  blue until `skyFillChroma` (render hint, default 1.18) greyed the hue push. Clean painted keys use
+  the `paint` surface and the bus panels use `car_paint` (clearcoat lacquer): both keep the mean
+  albedo of the base they replace (`plaster`, `metal_painted`) because palette tints are calibrated
+  against that mean. Pale walls clipped in red under the old grade shoulder; check clip percent
+  (any channel at 253 or more) on the yellow pose after any grade change. Measure frame time with
+  paired runs against a worktree of the previous commit on the same machine; one-off numbers from
+  different sessions disagree by several ms.
 - Deterministic captures and e2e pin `&skin=classic` (e2e/natural-fps.spec.ts, tools/browser.mjs,
   tools/parity.mjs) so goldens and parity numbers do not move with palette recalibration.
 - The splat and the collider share one raw Y-down frame. The same placement (scale by

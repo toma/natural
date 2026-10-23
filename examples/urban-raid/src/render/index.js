@@ -423,6 +423,10 @@ export class RenderSystem {
       // side of it. Both up hard, because this is the "warm kick where a shadow
       // faces a sunlit surface" that was missing entirely.
       bounceFill: 0.008,
+      // Chroma push on the skylight band's hue (1 keeps the sky's own average).
+      // A dusty look whose dome is veiled cream lowers it, because the CPU
+      // ambient colour is the unveiled Rayleigh sky and would paint shade blue.
+      skyFillChroma: 1.18,
       // The PMREM sky cubemap is the single biggest indirect term in the frame
       // (materials ship envMapIntensity 1.6). Scaling its *diffuse* here is the
       // only place the total indirect budget can actually be controlled from.
@@ -1141,7 +1145,7 @@ export class RenderSystem {
     // into something that reads as skylight.
     {
       const l = 0.2126 * hue.x + 0.7152 * hue.y + 0.0722 * hue.z;
-      const k = 1.18;
+      const k = s.skyFillChroma ?? 1.18;
       hue.set(
         Math.max(0, l + (hue.x - l) * k),
         Math.max(0, l + (hue.y - l) * k),

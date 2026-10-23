@@ -84,3 +84,37 @@ test("the worldlabs look is a hazy low-sun desert afternoon with a pale veiled s
   for (const [name, p] of Object.entries(LIGHTING_PRESETS))
     if (name !== "worldlabs") expect(p.sky.skyVeil).toBeUndefined();
 });
+
+test("the worldlabs look adds aerial perspective that every other look leaves off", () => {
+  const wl = resolveLightingPreset("worldlabs");
+  const [near, far, amount, top] = wl.sky.dust!;
+  expect(near).toBeGreaterThan(0);
+  expect(far).toBeGreaterThan(near);
+  expect(amount).toBeGreaterThan(0);
+  expect(amount).toBeLessThanOrEqual(1);
+  expect(top).toBeGreaterThan(0);
+  expect(wl.sky.dustColor).toHaveLength(3);
+  // The mesas stand taller than the panorama's own angular height, and their
+  // base hazes more than their crest.
+  expect(wl.sky.horizonLift).toBeGreaterThan(1);
+  const [haze, baseHaze] = wl.sky.horizonHaze!;
+  expect(baseHaze).toBeGreaterThan(haze);
+  // Shade takes the veiled sky's cream, so the skylight hue is greyed.
+  expect(wl.render?.skyFillChroma).toBeLessThan(1);
+  for (const [name, p] of Object.entries(LIGHTING_PRESETS)) {
+    if (name === "worldlabs") continue;
+    expect(p.sky.dust, `${name} has no dust band`).toBeUndefined();
+    expect(p.sky.horizonHaze, `${name} has no ring haze`).toBeUndefined();
+    expect(p.render?.skyFillChroma, `${name} keeps the default chroma`).toBeUndefined();
+  }
+});
+
+test("the worldlabs grade keeps a sunlit pale yellow wall under display clip", () => {
+  const g = GRADE_PRESETS.worldlabs!;
+  const sh = shoulderParams(g);
+  // A near-white warm input, as AgX hands over a sun-facing cream wall.
+  const out = applyGrade([0.9, 0.83, 0.57], g, sh);
+  // At least a few code values of headroom left in red, the channel that clips.
+  expect(out[0]).toBeLessThan(0.97);
+  expect(out[0]).toBeGreaterThan(out[2]);
+});

@@ -89,18 +89,18 @@ export const GRADE_PRESETS: Record<string, GradePreset> = {
   // lift the mids and blacks; slope and highlight tint push the top end toward
   // cream; highlight desaturation stops the bright sky going yellow.
   worldlabs: {
-    slope: [1.04, 1.0, 0.92],
+    slope: [1.02, 1.0, 0.92],
     offset: [0.01, 0.005, -0.002],
     power: [0.94, 0.95, 0.99],
     shadowTint: [0.018, 0.009, -0.004],
-    highlightTint: [0.035, 0.022, -0.012],
-    saturation: 1.06,
+    highlightTint: [0.012, 0.012, -0.012],
+    saturation: 1.1,
     contrast: 1.16,
     pivot: 0.45,
     highlightDesat: 0.16,
     toe: 0.022,
-    shoulder: 0.64,
-    shoulderSoft: 1.1,
+    shoulder: 0.58,
+    shoulderSoft: 1.3,
   },
   // Flat, cool, low-contrast overcast: a grey-sky day with soft shadows and
   // muted chroma.
@@ -205,6 +205,19 @@ export interface SkyHints {
    * leans blue because the worldlabs grade pulls blue down afterwards.
    */
   skyVeil?: [number, number, number, number];
+  /** Horizon ring brightness over the sky behind it (1 = the panorama's contrast). */
+  horizonGain?: number;
+  /** Horizon ring vertical scale over the panorama's angular height. */
+  horizonLift?: number;
+  /** Ring aerial perspective: [haze over the whole ring, extra haze at its base], 0 to 1. */
+  horizonHaze?: [number, number];
+  /**
+   * Horizon dust band laid over far geometry and the base of the sky:
+   * [near metres, far metres, amount 0 to 1, top elevation as a sine].
+   */
+  dust?: [number, number, number, number];
+  /** Dust band colour, in units of the sky roll-off knee like skyVeil. */
+  dustColor?: [number, number, number];
 }
 
 /** Renderer setting overrides that belong to a look (see render/index.js settings). */
@@ -217,6 +230,8 @@ export interface RenderHints {
   groundFill?: number;
   /** Warm anti-sun wrap, fraction of the key. */
   bounceFill?: number;
+  /** Chroma push on the skylight fill hue: 1 keeps the sky average, under 1 greys it. */
+  skyFillChroma?: number;
   /** Display-space vignette amplitude. */
   vignette?: number;
   /** Sun shadow penumbra softness. */
@@ -256,13 +271,19 @@ export const LIGHTING_PRESETS: Record<string, LightingPreset> = {
       cloudCoverage: 0,
       fogDensity: 0.45,
       cirrusCoverage: 0.06,
-      skyVeil: [2.85, 3.5, 5.2, 0.86],
+      skyVeil: [5.9, 6.0, 7.0, 0.9],
+      horizonGain: 1.0,
+      horizonLift: 2.2,
+      horizonHaze: [0.05, 0.3],
+      dust: [80, 450, 0.9, 0.06],
+      dustColor: [5.0, 5.1, 5.5],
     },
     render: {
       exposureKey: 1.22,
-      skyFill: 0.46,
-      groundFill: 0.03,
-      bounceFill: 0.016,
+      skyFill: 0.62,
+      skyFillChroma: 0.55,
+      groundFill: 0.07,
+      bounceFill: 0.04,
       vignette: 0.16,
       sunSoftness: 0.06,
     },
