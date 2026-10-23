@@ -201,7 +201,9 @@ export class SkySystem {
     this.skyVeil = look?.sky.skyVeil ?? null;
     this.horizon = look ? WORLDLABS_HORIZON : null;
     /** Brightness of the horizon ring against the sky's horizon band. */
-    this.horizonGain = 1.0;
+    this.horizonGain = look?.sky.horizonGain ?? 1.0;
+    /** Vertical scale of the ring over the panorama's angular height. */
+    this.horizonLift = look?.sky.horizonLift ?? 1.0;
 
     /**
      * Ground fog. `scatter` and `extinction` are intentionally independent -
@@ -296,6 +298,12 @@ export class SkySystem {
       uHorizon: { value: new THREE.Vector4(0, 0, 0, 0.25) },
       // Dust veil from the lighting preset (off unless the preset sets one).
       uSkyVeil: { value: new THREE.Vector4(...(this.skyVeil ?? [1, 1, 1, 0])) },
+      // Ring aerial perspective [overall, extra at the base]; see dome.js.
+      uHorizonHaze: { value: new THREE.Vector2(...(look?.sky.horizonHaze ?? [0, 0])) },
+      // Horizon dust band [near m, far m, amount, top elevation] and its colour
+      // in knee units; off (z = 0) unless the preset sets it. See volumetrics.js.
+      uDust: { value: new THREE.Vector4(...(look?.sky.dust ?? [0, 1, 0, 0])) },
+      uDustColor: { value: new THREE.Vector3(...(look?.sky.dustColor ?? [1, 1, 1])) },
 
       uStarParams: { value: new THREE.Vector4(0, 0.5, 0, 0) },
       uCelestial: { value: new THREE.Matrix3() },
@@ -607,7 +615,9 @@ export class SkySystem {
     const h = this.shared.uHorizon.value;
     h.x = horizonScale(meta, this.horizonGain);
     h.z = meta.elevation[0];
-    h.w = meta.elevation[1];
+    // A lighting preset can stand the range taller than the panorama's own
+    // angular scale; the base stays on the horizon.
+    h.w = meta.elevation[0] + (meta.elevation[1] - meta.elevation[0]) * this.horizonLift;
   }
 
   /** Sun/moon geometry, colours and intensities for the current hour. */

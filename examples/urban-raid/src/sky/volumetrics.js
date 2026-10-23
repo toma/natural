@@ -316,6 +316,13 @@ uniform sampler2D tColor;
 uniform sampler2D tVolume;
 uniform sampler2D tDepth;
 uniform vec2 uTexelHalf;
+// Horizon dust (lighting preset): x near and y far distance of the ramp in
+// metres, z amount at the far end, w elevation (sine) above which it is gone.
+uniform vec4 uDust;
+// rgb dust colour in units of the sky roll-off knee, so it lands on the same
+// code value as the dome's own horizon band at any exposure.
+uniform vec3 uDustColor;
+uniform vec2 uSkyRolloff;
 in vec2 vUv;
 layout(location = 0) out vec4 fragColor;
 
@@ -385,7 +392,25 @@ void main() {
     vec3 inscatter = skUpsample( vUv, depth );
   #endif
 
-  fragColor = vec4( color * trans + inscatter, 1.0 );
+  vec3 outc = color * trans + inscatter;
+
+  // Horizon dust. The exponential-height fog above is tuned so a 200 m street
+  // stays crisp, and at that density the desert floor at 900 m still ends on a
+  // hard line under the mesa ring. Real desert air does not: the last few
+  // hundred metres of floor and the foot of the range dissolve into one band
+  // of lit dust. Geometry ramps into it with distance and sky pixels by
+  // elevation alone (an open-sky ray is infinitely long), so the floor's far
+  // edge and the ring's base meet the same colour from both sides and the
+  // horizon line disappears. Both fade out with elevation, which keeps the
+  // near street, the roofs and the open sky untouched.
+  if ( uDust.z > 0.0 ) {
+    float lift = 1.0 - smoothstep( -0.02, uDust.w, dir.y );
+    float reach = sky ? 1.0 : smoothstep( uDust.x, uDust.y, depth * rayLen );
+    vec3 dust = uDustColor * max( uSkyRolloff.x, 1.0e-4 );
+    outc = mix( outc, dust, uDust.z * reach * lift );
+  }
+
+  fragColor = vec4( outc, 1.0 );
 }
 `;
 
@@ -455,6 +480,9 @@ export class Volumetrics {
         tVolume: { value: null },
         tDepth: { value: null },
         uTexelHalf: { value: new THREE.Vector2() },
+        uDust: shared.uDust,
+        uDustColor: shared.uDustColor,
+        uSkyRolloff: shared.uSkyRolloff,
       },
       this.marchEnabled ? {} : { VOL_ANALYTIC: 1 },
     );
