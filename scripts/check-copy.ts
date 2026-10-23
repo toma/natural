@@ -6,7 +6,16 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dir, "..");
 const tracked = (await Bun.$`git ls-files -z`.cwd(root).text()).split("\0").filter(Boolean);
 const binary =
-  /\.(png|jpe?g|gif|ico|icns|webp|woff2?|ttf|otf|tgz|zip|pdf|lock|lockb|glb|gltf|bin|wasm|mp3|ogg|wav)$/i;
+  /\.(png|jpe?g|gif|ico|icns|webp|woff2?|ttf|otf|tgz|zip|pdf|lock|lockb|glb|gltf|bin|wasm|mp3|ogg|wav|spz)$/i;
+
+// A file with a NUL byte near its start is binary, whatever its extension. This
+// backs up the extension list so a new binary art format (a splat, a capture)
+// never trips the text rules the way `.spz` splats did before being listed.
+function looksBinary(bytes: Buffer): boolean {
+  const n = Math.min(bytes.length, 8192);
+  for (let i = 0; i < n; i += 1) if (bytes[i] === 0) return true;
+  return false;
+}
 // These two files state the word rule, so they are the only ones allowed to contain the word.
 const statesTheRule = new Set(["AGENTS.md", "scripts/check-copy.ts"]);
 // The patterns use Unicode escapes so this definition file does not itself
@@ -22,8 +31,10 @@ const problems: string[] = [];
 let checked = 0;
 for (const name of tracked) {
   if (binary.test(name)) continue;
+  const bytes = await readFile(resolve(root, name));
+  if (looksBinary(bytes)) continue;
   checked += 1;
-  const lines = (await readFile(resolve(root, name), "utf8")).split("\n");
+  const lines = bytes.toString("utf8").split("\n");
   lines.forEach((line, index) => {
     for (const [pattern, label] of forbiddenCharacters)
       if (pattern.test(line)) problems.push(`${name}:${index + 1}: ${label}`);
