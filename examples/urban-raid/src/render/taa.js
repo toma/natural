@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { COMMON } from "./glsl.js";
 import { Pass, hdrTarget } from "./pass.js";
+import { createJitterSequence } from "./jitter.ts";
 
 /**
  * Temporal antialiasing.
@@ -31,21 +32,10 @@ import { Pass, hdrTarget } from "./pass.js";
  * bright sample cannot bleed a firefly across eight frames.
  */
 
-const HALTON = (() => {
-  const h = (i, b) => {
-    let f = 1;
-    let r = 0;
-    while (i > 0) {
-      f /= b;
-      r += f * (i % b);
-      i = Math.floor(i / b);
-    }
-    return r;
-  };
-  const out = [];
-  for (let i = 1; i <= 16; i++) out.push([h(i, 2) - 0.5, h(i, 3) - 0.5]);
-  return out;
-})();
+// Zero-mean Halton(2,3) over 16 frames: an even sub-pixel cover whose net offset
+// is exactly zero, so the converged frame is not biased off centre (which reads
+// as soft). See render/jitter.ts.
+const HALTON = createJitterSequence(16);
 
 const RESOLVE = /* glsl */ `
 precision highp float;
