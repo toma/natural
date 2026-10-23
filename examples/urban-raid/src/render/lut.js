@@ -33,17 +33,20 @@ export const GRADE_PRESETS = {
     // bias in the slope warms the whole frame (including the washed sky) without
     // tipping into orange. This replaces the cool-shadow teal-orange look that
     // kept the sky reading as a hard blue.
-    slope: [1.012, 1.0, 0.972],
+    slope: [1.018, 1.0, 0.953],
     offset: [-0.004, -0.002, 0.002],
     power: [1.0, 1.004, 1.016],
-    shadowTint: [0.012, 0.005, -0.006],
-    highlightTint: [0.032, 0.015, -0.005],
+    shadowTint: [0.013, 0.005, -0.008],
+    // Warm the HIGHLIGHTS hard: the bright sky and sunlit surfaces are the
+    // highlights, so this is what turns the hard blue zenith into the reference's
+    // pale warm dust haze without muddying the shadows.
+    highlightTint: [0.05, 0.023, -0.02],
     // Display-space saturation. It has to be well over unity because AgX's
     // inset/outset pair is a *desaturating* transform by construction and the
     // shoulder takes another chunk out of anything bright: measured on the
     // 16:30 frame the zenith came out of the tone map at B-R = +15 code values
     // for a sky whose scene radiance is 3:1 blue over red.
-    saturation: 1.19,
+    saturation: 1.07,
     // Global contrast, as a power about a pivot.
     //
     // The pivot is the CODE VALUE that must not move, and it has to sit at

@@ -47,6 +47,13 @@ export const SHOTS = {
   },
 
   // ---- reference-comparison framings ----
+  greenfront: {
+    pos: [8.5, 3.0, 1],
+    look: [-3, 3.3, -11],
+    fov: 74,
+    time: 16.5,
+    doc: "Green house front three-quarter: two-tone siding, porch, attached garage.",
+  },
   yellow: {
     pos: [-9.5, 3.6, 3.5],
     look: [0.5, 4.0, 14],
