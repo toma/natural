@@ -62,19 +62,16 @@ function materials(A, rng) {
           // Weathered painted clapboard: a muted base with real value
           // variation, grime and fading so the siding reads as decades-old
           // paint rather than a flat, uniform poster colour.
-          name = "plaster";
           surf = "wood";
+          name = skinClean(skin, key) ? "paint" : "plaster";
           opts = skinClean(skin, key)
             ? {
-                // Fresh paint (the World Labs siding and pickets): a trace of
-                // dust and cavity grime, no fading blotches or repair patches.
+                // Fresh paint (the World Labs siding and pickets): the even
+                // paint base with a trace of dust, cavity grime and a low
+                // splash band grounding each wall where it meets the soil.
                 tint,
                 scale: 1.7,
-                normalStrength: 0.7,
-                weather: [0.07, 0.04, 0.1, 0.3],
-                macro: [0.14, 0.07, 0.06, 0.12],
-                macroBig: [1.2, 0.04, 0.06, 0],
-                patch: [0, 2.0, 0, 0],
+                normalStrength: 0.35,
               }
             : {
                 tint,
@@ -150,6 +147,11 @@ function materials(A, rng) {
     // Fresh concrete and kerbs under the skin: lighter dust and grime.
     if (name === "concrete" && skinClean(skin, key)) opts.weather = [0.12, 0.08, 0.2, 0.25];
     const finish = skinFinish(skin, key);
+    // Skinned vehicle paint is factory enamel under a lacquer: the painted
+    // metal bake's chips, rust bloom and sun bleaching read as camouflage
+    // under a saturated tint, so the skin swaps to the clean car paint (same
+    // base albedo, so the calibrated tint holds) with its clearcoat lobe.
+    if (finish && name === "metal_painted") name = "car_paint";
     if (finish?.roughness) opts.roughness = finish.roughness;
     if (finish?.metalness !== undefined)
       opts.three = { ...(opts.three ?? {}), metalness: finish.metalness };
@@ -198,6 +200,9 @@ function materials(A, rng) {
   surface("ac-soil", "#635944", "sand");
   surface("ac-grime", "#4b4336", "concrete", 0.92);
   surface("ac-curtain", "#397887", "fabric");
+  // Flower petals: matte and soft, never the vehicle paint the red key wears.
+  // Decoration only (the blooms never collide), so the tag is moot.
+  surface("ac-bloom", "#b3271f", "fabric");
   surface("ac-plaster", "#d7d1bc", "plaster");
   surface("ac-enamel", "#ebe7d4", "metal", 0.28, 0.05);
   surface("ac-orange", "#b5733f", "fabric");
@@ -931,7 +936,7 @@ function house(A, spec, rng) {
           [0.0, 0.98, 0.0],
           [-0.04, 0.86, 0.26],
         ])
-          K.sphere("ac-red", bx + dx, dy, 5.55 + dz, 0.075, 0.065, 0.075);
+          K.sphere("ac-bloom", bx + dx, dy, 5.55 + dz, 0.075, 0.065, 0.075);
       } else if (i % 2)
         K.sphere(["ac-red", "ac-orange", "ac-white"][i % 3], bx, 0.58, 5.55, 0.08, 0.08, 0.08);
     }
@@ -1739,9 +1744,12 @@ function enhancePbr(A) {
         if (!grainOnly && set.albedo) mat.map = set.albedo;
         if (set.normal) {
           mat.normalMap = set.normal;
-          if (opts.normalScale && mat.normalScale) {
-            mat.normalScale.set(opts.normalScale, opts.normalScale);
-          }
+          // Skinned vehicle paint is lacquered: keep only a whisper of the
+          // scan's panel relief under the clearcoat.
+          const ns = skinFinish(A.skin ?? null, key)
+            ? Math.min(opts.normalScale ?? 1, 0.14)
+            : opts.normalScale;
+          if (ns && mat.normalScale) mat.normalScale.set(ns, ns);
         }
         if (set.orm) mat.roughnessMap = set.orm;
         mat.needsUpdate = true;

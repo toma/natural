@@ -1,7 +1,13 @@
 import * as THREE from "three";
-import { CONCRETE, BRICK, PLASTER, TILE } from "./glsl/surfaces-arch.js";
+import { CONCRETE, BRICK, PLASTER, TILE, PAINT } from "./glsl/surfaces-arch.js";
 import { ASPHALT, SAND, DIRT, GRAVEL } from "./glsl/surfaces-ground.js";
-import { METAL_RUST, METAL_PAINTED, METAL_BRUSHED, CORRUGATED } from "./glsl/surfaces-metal.js";
+import {
+  METAL_RUST,
+  METAL_PAINTED,
+  METAL_BRUSHED,
+  CORRUGATED,
+  CAR_PAINT,
+} from "./glsl/surfaces-metal.js";
 import { WOOD, FABRIC, BURLAP, FOLIAGE, TURF, RUBBER, GLASS } from "./glsl/surfaces-organic.js";
 
 /**
@@ -437,6 +443,45 @@ export const LIBRARY = {
       roughness: [0.34, -0.06, 0.12],
     },
     three: { physical: true, clearcoat: 0.5, clearcoatRoughness: 0.18 },
+  },
+  paint: {
+    glsl: PAINT,
+    surface: "plaster",
+    // Fresh exterior paint on siding, trim and pickets: even colour, a faint
+    // brush direction, and only light dust and a low splash band from the
+    // weathering layer.
+    bake: { size: 1024, worldSize: 1.7, relief: 0.01, seed: 9 },
+    mat: {
+      scale: 1.7,
+      detail: [10, 0.3, 0.12, 16],
+      macro: [0.12, 0.06, 0.05, 0.1],
+      macroBig: [1.2, 0.04, 0.06, 0],
+      patch: [0, 2.0, 0, 0],
+      weather: [0.07, 0.04, 0.32, 0.3],
+      wearColor: 0xb0a692,
+      dustColor: 0x9c8a6c,
+      grimeColor: 0x2a251d,
+      roughness: [0.8, -0.02, 0.12],
+    },
+  },
+  car_paint: {
+    glsl: CAR_PAINT,
+    surface: "metal",
+    // Solid factory enamel under a lacquer for vehicle bodies. The bake's base
+    // colour matches painted metal's mean so a tint calibrated on one lands
+    // on the other; only the weathering is gone.
+    bake: { size: 1024, worldSize: 1.5, relief: 0.006, seed: 62, tintA: 0x3d4535 },
+    mat: {
+      scale: 1.5,
+      parallax: 0.001,
+      detail: [10, 0.25, 0.06, 16],
+      macro: [0.1, 0.05, 0.03, 0.06],
+      weather: [0.08, 0.06, 0.12, 0.2],
+      wearColor: 0x8f9296,
+      wearMaterial: [0.3, 1.0, 0, 0.9],
+      roughness: [0.4, -0.02, 0.12],
+    },
+    three: { physical: true, clearcoat: 0.7, clearcoatRoughness: 0.1 },
   },
   chrome: {
     glsl: METAL_BRUSHED,

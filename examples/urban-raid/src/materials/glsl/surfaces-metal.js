@@ -321,3 +321,25 @@ void owSurface(vec2 uv, out vec3 alb, out float h, out float rough, out float me
   h = clamp(h, 0.0, 1.0);
 }
 `;
+
+/**
+ * Factory vehicle paint: one solid colour under a lacquer. Orange peel and a
+ * trace of fine wash scratches only; no chips, rust, bleaching or rain
+ * streaks, because a saturated tint multiplied over those reads as camouflage
+ * rather than as a painted panel. The clearcoat lobe lives on the material.
+ */
+export const CAR_PAINT = /* glsl */ `
+void owSurface(vec2 uv, out vec3 alb, out float h, out float rough, out float metal, out float ao){
+  const vec2 P = vec2(8.0);
+  vec2 p = uv * P + uSeed * 11.3;
+  float peel = owFbm01(p * 26.0, P * 26.0, 4, 0.5);
+  float scr = owScratches(p * 3.0, P * 3.0, 14.0, 1.0, 0.8);
+  vec3 c = uTintA * (0.98 + 0.04 * peel);
+  c = mix(c, c * 1.12 + 0.015, scr * 0.2);
+  h = 0.75 + (peel - 0.5) * 0.008;
+  alb = clamp(c, vec3(0.02), vec3(0.85));
+  rough = clamp(0.3 + (peel - 0.5) * 0.05 + scr * 0.06, 0.14, 0.99);
+  metal = 0.0;
+  ao = 1.0;
+}
+`;

@@ -5,8 +5,9 @@ import * as Library from "../src/materials/library.js";
 interface SurfaceDef {
   glsl: string;
   bake: { size: number; worldSize: number; relief: number };
+  surface?: string;
   mat: Record<string, unknown>;
-  three?: { sheen?: number };
+  three?: { sheen?: number; clearcoat?: number };
 }
 const LIBRARY = Library.LIBRARY as Record<string, SurfaceDef>;
 const ALIASES = Library.ALIASES as Record<string, string>;
@@ -48,7 +49,7 @@ test("the turf lawn material is present and wired for grass/lawn", () => {
 });
 
 test("the mid-century set adds glossy period finishes reusing proven shaders", () => {
-  for (const name of ["enamel", "chrome", "lacquer", "ceramic"]) {
+  for (const name of ["enamel", "car_paint", "chrome", "lacquer", "ceramic"]) {
     const def = LIBRARY[name]!;
     expect(def, name).toBeDefined();
     expect(def.three, `${name} is physical`).toBeDefined();
@@ -56,4 +57,18 @@ test("the mid-century set adds glossy period finishes reusing proven shaders", (
     const baseRough = (def.mat.roughness as number[] | undefined)?.[0];
     expect(baseRough, `${name} base roughness`).toBeLessThan(0.5);
   }
+});
+
+test("car paint is a clean lacquered panel with no weathering in its bake", () => {
+  const def = LIBRARY.car_paint!;
+  expect(def.surface).toBe("metal");
+  expect(def.three?.clearcoat).toBeGreaterThan(0.5);
+  for (const layer of ["owRust", "chip", "bleach", "streak"]) expect(def.glsl).not.toContain(layer);
+});
+
+test("fresh paint is an even coat with none of the plaster's blotch bands", () => {
+  const def = LIBRARY.paint!;
+  expect(def.surface).toBe("plaster");
+  for (const band of ["dampB", "soil2", "trowel"]) expect(def.glsl).not.toContain(band);
+  expect(LIBRARY.plaster!.glsl).toContain("dampB");
 });

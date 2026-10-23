@@ -561,3 +561,27 @@ void owSurface(vec2 uv, out vec3 alb, out float h, out float rough, out float me
   h = clamp(h, 0.0, 1.0);
 }
 `;
+
+/**
+ * Fresh exterior paint over smooth boards or trim: one even colour with a
+ * faint brush direction and a fine tooth. None of the plaster's damp bloom,
+ * soiling or trowel laps, which read as blotches once a light tint lifts
+ * them. Mean albedo matches PLASTER's so a tint calibrated on one carries.
+ */
+export const PAINT = /* glsl */ `
+void owSurface(vec2 uv, out vec3 alb, out float h, out float rough, out float metal, out float ao){
+  const vec2 P = vec2(8.0);
+  vec2 p = uv * P + uSeed * 7.1;
+  float brush = owFbm01(vec2(p.x * 1.5, p.y * 18.0), vec2(P.x * 1.5, P.y * 18.0), 4, 0.5);
+  float tooth = owFbm01(p * 20.0, P * 20.0, 3, 0.5);
+  float broad = owFbm01(p * 0.8, P * 0.8, 3, 0.55);
+  vec3 c = owSRGB(vec3(0.575, 0.556, 0.52));
+  c *= 0.97 + 0.06 * broad;
+  c *= 0.985 + 0.03 * brush;
+  h = 0.7 + (brush - 0.5) * 0.02 + (tooth - 0.5) * 0.01;
+  rough = 0.66 + (tooth - 0.5) * 0.06 + (brush - 0.5) * 0.04;
+  alb = c;
+  metal = 0.0;
+  ao = 1.0;
+}
+`;
