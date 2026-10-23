@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { modelUrl, modelLodFar, modelScale, SENTINEL_MODEL_ID } from "./model-manifest.ts";
 
 /**
  * Loader for the optional CC0 glTF models (see assets/ASSETS.md). Like the PBR
@@ -23,7 +24,7 @@ const sceneCache = new Map();
 let availability = null;
 export function assetsAvailable() {
   if (!availability) {
-    availability = fetch("/assets/models/covered_car/covered_car_1k.gltf")
+    availability = fetch(modelUrl(SENTINEL_MODEL_ID))
       .then((r) => r.ok)
       .catch(() => false);
   }
@@ -58,7 +59,7 @@ export async function placeModels(root, xform, requests, outLods) {
   // captures). Each resolved scene is attached as it arrives.
   await Promise.all(
     requests.map(async (r) => {
-      const scene = await loadScene(`/assets/models/${r.id}/${r.id}_1k.gltf`);
+      const scene = await loadScene(modelUrl(r.id));
       if (!scene) return;
       const obj = scene.clone(true);
       obj.traverse((o) => {
@@ -67,7 +68,7 @@ export async function placeModels(root, xform, requests, outLods) {
           o.receiveShadow = true;
         }
       });
-      const sc = r.scale ?? 1;
+      const sc = r.scale ?? modelScale(r.id);
       const local = new THREE.Matrix4().compose(
         new THREE.Vector3(r.x, r.y ?? 0, r.z),
         new THREE.Quaternion().setFromEuler(new THREE.Euler(0, r.yaw ?? 0, 0)),
@@ -76,7 +77,7 @@ export async function placeModels(root, xform, requests, outLods) {
       const world = new THREE.Matrix4().multiplyMatrices(xform, local);
       const lod = new THREE.LOD();
       lod.addLevel(obj, 0);
-      lod.addLevel(new THREE.Group(), r.far ?? 55);
+      lod.addLevel(new THREE.Group(), r.far ?? modelLodFar(r.id));
       world.decompose(lod.position, lod.quaternion, lod.scale);
       lod.updateMatrix();
       root.add(lod);
