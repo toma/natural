@@ -6,6 +6,7 @@ import { furnishRoom } from "./interiors.js";
 import { windowUnit, doorUnit } from "./kit.js";
 import { loadPbrSet } from "../materials/textures.js";
 import { beveledBoxGeometry } from "./box-bevel.js";
+import { skinTint } from "./worldlabs-skins.ts";
 import { emptyMesh, vcount, computeNormals, weldNormals } from "../ai/geo.js";
 import {
   HOUSES,
@@ -38,15 +39,25 @@ function materials(A, rng) {
   // engine's full PBR quality: baked albedo/height/ORM/normal with parallax,
   // detail, macro variation, and weathering. The colour becomes a linear tint
   // on the baked albedo; the kind and key pick the base surface.
+  //
+  // `A.skin` (world/worldlabs-skins.ts) swaps the hex for a linear tint
+  // calibrated against the World Labs panorama. Only the colour moves: the
+  // base surface and the surface tag stay, so impacts, footsteps and physics
+  // read exactly as they do with the classic palette.
+  const skin = A.skin ?? null;
   const surface = (key, color, kind, roughness = 0.8, metalness = 0) => {
-    const tint = new THREE.Color(color).getHex();
+    const skinned = skinTint(skin, key);
+    const tint = skinned ? new THREE.Color(...skinned) : new THREE.Color(color).getHex();
     let name, surf, opts;
     switch (kind) {
       case "wood": {
         // Painted clapboard reads as vivid pastel only over a light base, so
         // the house colours tint plaster (the lap grooves are modelled
         // geometry); bare timber keeps the wood grain. Weathering stays light.
-        const painted = ["ac-green", "ac-yellow", "ac-white", "ac-blue", "ac-cream"].includes(key);
+        // The skin can paint more keys (the World Labs pickets are white).
+        const painted =
+          ["ac-green", "ac-yellow", "ac-white", "ac-blue", "ac-cream"].includes(key) ||
+          (skin?.painted.includes(key) ?? false);
         if (painted) {
           // Weathered painted clapboard: a muted base with real value
           // variation, grime and fading so the siding reads as decades-old
@@ -124,6 +135,9 @@ function materials(A, rng) {
         surf = "concrete";
         opts = { tint, scale: 2.4 };
     }
+    // A THREE.Color tint serialises to a clamped hex in the material cache
+    // key, so name the skinned key to keep every calibrated tint distinct.
+    if (skinned) opts.skin = key;
     return A.registerMaterial(key, A.materials.get(name, opts), surf);
   };
   surface("ac-green", "#5fb48d", "wood");
@@ -1691,7 +1705,10 @@ function enhancePbr(A) {
     loadPbrSet(name, "/assets/pbr", { ...opts, renderer })
       .then((set) => {
         if (!set) return;
-        if (!opts.grainOnly && set.albedo) mat.map = set.albedo;
+        // A skinned key owns its colour: the scan contributes relief only, so
+        // the calibrated World Labs tint is what reaches the screen.
+        const grainOnly = opts.grainOnly || skinTint(A.skin ?? null, key) !== null;
+        if (!grainOnly && set.albedo) mat.map = set.albedo;
         if (set.normal) {
           mat.normalMap = set.normal;
           if (opts.normalScale && mat.normalScale) {

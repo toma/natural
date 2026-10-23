@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { renderMaterialMask } from "./material-mask.js";
 
 /**
  * Named camera setups the screenshot harness can request. Each shot freezes
@@ -156,6 +157,8 @@ export const SHOTS = {
 
 export function installShotApi(engine, { capture, lockstep = false } = {}) {
   window.__SHOTS__ = SHOTS;
+  // Material id pass for tools/worldlabs-skins.mjs (see material-mask.js).
+  window.__MATERIAL_MASK__ = (keys) => renderMaterialMask(engine, keys);
 
   /**
    * `opts.grabFrame` is how many frames the harness will pump before it presses

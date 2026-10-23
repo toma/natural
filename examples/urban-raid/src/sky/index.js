@@ -13,6 +13,7 @@ import { SkyDome } from "./dome.js";
 import { Volumetrics } from "./volumetrics.js";
 import { Celestial } from "./celestial.js";
 import { cloudSunOcclusion } from "./clouds.js";
+import { normalizeSkinMode, paletteFor } from "../world/worldlabs-skins.ts";
 
 /**
  * Floor on the beam's *luminous* transmittance, as a fraction of unity - see
@@ -173,6 +174,14 @@ export class SkySystem {
       // toward pale tan near the horizon and the distant ranges fade into it.
       horizonMurk: 0.46,
     };
+    // The World Labs skin carries the haze measured against the panorama sky
+    // (tools/worldlabs-skins.mjs). The splat map draws its own sky and skips it.
+    const skinSky =
+      ctx.config.map === "worldlabs" ? null : paletteFor(normalizeSkinMode(ctx.config.skin))?.sky;
+    if (skinSky) {
+      this.weather.turbidity = skinSky.turbidity;
+      this.weather.horizonMurk = skinSky.horizonMurk;
+    }
 
     /**
      * Ground fog. `scatter` and `extinction` are intentionally independent -

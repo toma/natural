@@ -5,19 +5,20 @@ import { assetsAvailable, placeModels, updateModelLods } from "./models.js";
 import { HOUSES, MAP_BOUNDS, MAP_SPAWNS, outdoorOpen } from "./atomic-culdesac-layout.ts";
 import { buildWorldLabsMap } from "./worldlabs-map.js";
 import { WORLDLABS_PLAY_RADIUS } from "./worldlabs-map-config.ts";
+import { normalizeSkinMode, paletteFor } from "./worldlabs-skins.ts";
 
 /**
  * WORLD - level geometry, the modular building kit, props, set dressing and
  * static collision.
  *
  * MAPS (`ctx.config.map`, from `?map=`):
- *   'worldlabs'   the default. The World Labs culdesac capture is the level: the
- *                 full splat is what you see and its exported collider mesh is
- *                 the invisible physics and navigation geometry. See
- *                 worldlabs-map.js. If either half fails to load, the
- *                 procedural map below is built instead.
- *   'procedural'  the generated Atomic Cul-de-sac described below. Capture runs
- *                 use it unless `?map=worldlabs` is given.
+ *   'procedural'  the default: the generated Atomic Cul-de-sac described
+ *                 below, used for play and capture.
+ *   'worldlabs'   opt-in with `?map=worldlabs`. The World Labs culdesac capture
+ *                 is the level: the full splat is what you see and its exported
+ *                 collider mesh is the invisible physics and navigation
+ *                 geometry. See worldlabs-map.js. If either half fails to load,
+ *                 the procedural map is built instead.
  *
  * ATOMIC CUL-DE-SAC: a small, symmetrical 1950s desert test-site suburb. One
  * short street with a central school bus and moving truck, two facing two-story
@@ -104,6 +105,7 @@ export class WorldSystem {
     const t0 = performance.now();
     const A = new Assembler({ materials, rng, render });
     this.A = A;
+    A.skin = paletteFor(normalizeSkinMode(ctx.config.skin));
     A.setTransform(LEVEL_YAW, LEVEL_TX, LEVEL_TZ);
 
     // When the CC0 model set is installed, build model-backed props as glTF;

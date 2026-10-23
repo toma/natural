@@ -9,14 +9,13 @@ created for this project. Output is owned by the project author.
 - `culdesac_pano.jpg`: equirectangular panorama fallback
 - `world.json`: metadata (`metric_scale_factor`, `ground_plane_offset`)
 
-## The World Labs map (default)
+## The World Labs map (opt-in)
 
-Normal play loads this world as the playable map. The splat is the visible level
+Append `?map=worldlabs` to load this world as the playable map. The splat is the visible level
 (500k on high quality, 150k with `?q=low`) and the collider mesh, with the same
 placement, is invisible static collision that the bots also navigate on. Spawns
-are raycast onto the collider within 32 m of the capture origin. Append
-`?map=procedural` for the generated map. Capture runs keep the generated map
-unless `?map=worldlabs` is given. The code is in
+are raycast onto the collider within 32 m of the capture origin. Without the
+parameter, play and capture use the procedural map. The code is in
 `src/world/worldlabs-map-config.ts` and `src/world/worldlabs-map.js`.
 
 Limits: the capture was taken from about 6 m up, so close detail at eye height

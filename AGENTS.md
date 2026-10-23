@@ -313,12 +313,26 @@ visual fixture.
   seconds under SwiftShader, so a `__PUMP__(90)` fixture exceeds the spec's 180 s per-test
   timeout on a CPU-only host. Regenerate baselines with a standalone capture driver and generous
   timeouts, or on a GPU host, not through the timed test runner.
-- Urban-raid normal play defaults to the World Labs map (`?map=worldlabs`): the
-  `culdesac_*.spz` splat is the visible level and `culdesac_collider.glb` is the invisible
-  physics and navigation mesh. `?map=procedural` restores the generated map, and capture runs
-  (`capture=1`) keep the procedural map unless `?map=` is given, so pixel baselines are
-  unchanged. Config and pure math live in `src/world/worldlabs-map-config.ts` (tested by
+- Urban-raid defaults to the procedural Atomic Cul-de-sac for play and capture. The World
+  Labs map is opt-in with `?map=worldlabs`: the `culdesac_*.spz` splat is the visible level and
+  `culdesac_collider.glb` is the invisible physics and navigation mesh. Its coarse single-surface
+  collider made gameplay feel wrong as the default, so it stays an experiment. Config and pure math live in `src/world/worldlabs-map-config.ts` (tested by
   `tests/worldlabs-map.test.ts`); the builder is `src/world/worldlabs-map.js`.
+- The procedural map wears a World Labs skin by default (`?skin=classic` restores the original
+  hex colours). `assets/worldlabs/skins/palette.json` holds a linear tint per `ac-*` material key,
+  calibrated by `bun tools/worldlabs-skins.mjs` against labelled rectangles of
+  `culdesac_pano.jpg`; `src/world/worldlabs-skins.ts` loads and tests it. Only the tint (and the
+  plaster base for keys listed in `painted`) changes; the surface tags that footsteps, impacts and
+  physics read are untouched. Skinned keys skip the scan albedo in `enhancePbr` so the tint is
+  what reaches the screen.
+- Calibration learnings: the panorama is graded dark (white siding near 110/255) and its sample
+  rectangles often sit in shade or backlight. Matching its brightness outright gave black lawns
+  and chalky paint, so goals take the panorama hue and saturation at a brightness half way (log
+  space) between the classic render and the exposure-normalised panorama (`blendGoal`). The
+  mountains are haze-limited and the metal keys (truck red, car) carry grey reflections, so
+  they stop short of their goals; the per-key error is in `swatches.png` and the tool log. The
+  tool measures rendered colour per material with the `__MATERIAL_MASK__` id pass
+  (`src/dev/material-mask.js`). Writing `palette.json` reloads the dev page, so write it last.
 - The splat and the collider share one raw Y-down frame. The same placement (scale by
   `metric_scale_factor`, rotate PI about X, lift by `ground_plane_offset`) puts the captured
   ground at y=0. The capture camera sat about 6 m up, so splat detail softens at eye height.

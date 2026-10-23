@@ -44,17 +44,19 @@ test("the collider is a binary glTF 2 file with at least one mesh", () => {
   expect(json.meshes?.length ?? 0).toBeGreaterThan(0);
 });
 
-test("map mode coerces untrusted input and defaults to the World Labs map", () => {
-  expect(DEFAULT_MAP_MODE).toBe("worldlabs");
+test("map mode coerces untrusted input and defaults to the procedural map", () => {
+  expect(DEFAULT_MAP_MODE).toBe("procedural");
   expect(normalizeMapMode("procedural")).toBe("procedural");
   expect(normalizeMapMode("worldlabs")).toBe("worldlabs");
-  expect(normalizeMapMode("nope")).toBe("worldlabs");
+  expect(normalizeMapMode("nope")).toBe("procedural");
+  expect(normalizeMapMode("nope", "worldlabs")).toBe("worldlabs");
   expect(normalizeMapMode(undefined, "procedural")).toBe("procedural");
 });
 
-test("normal play gets the World Labs map and capture keeps the procedural one", () => {
-  expect(resolveMapMode({})).toBe("worldlabs");
-  expect(resolveMapMode({ param: null, capture: false })).toBe("worldlabs");
+test("every run gets the procedural map unless ?map=worldlabs opts in", () => {
+  expect(resolveMapMode({})).toBe("procedural");
+  expect(resolveMapMode({ param: null, capture: false })).toBe("procedural");
+  expect(resolveMapMode({ param: "worldlabs" })).toBe("worldlabs");
   expect(resolveMapMode({ param: "procedural" })).toBe("procedural");
   expect(resolveMapMode({ capture: true })).toBe("procedural");
   expect(resolveMapMode({ param: "worldlabs", capture: true })).toBe("worldlabs");

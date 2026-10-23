@@ -44,6 +44,8 @@ export class Assembler {
     this.materials = materials;
     this.rng = rng;
     this.render = render;
+    /** World Labs skin palette (world/worldlabs-skins.ts) or null for classic colours. */
+    this.skin = null;
     this._mats = new Map(); // palette key -> THREE.Material
     this._ownedMaterials = new Set();
     this._static = new Map(); // palette key -> Accum

@@ -19,6 +19,7 @@ import { prewarm } from "./core/prewarm.js";
 import { runAudioSelfTest } from "./audio/selftest.js";
 import { readSettings, SETTINGS_KEY } from "./ui/settings.ts";
 import { resolveMapMode } from "./world/worldlabs-map-config.ts";
+import { normalizeSkinMode } from "./world/worldlabs-skins.ts";
 
 const params = new URLSearchParams(location.search);
 const capture = params.get("capture") === "1";
@@ -40,13 +41,15 @@ if (!capture) {
   }
 }
 
-// The World Labs capture is the default level. `?map=procedural` brings back the
-// generated map; capture runs keep it unless `?map=worldlabs` asks otherwise, so
-// the pixel baselines stay on deterministic geometry.
+// The procedural Atomic Cul-de-sac is the default level for play and capture.
+// `?map=worldlabs` opts into the captured splat with its collider.
 const map = resolveMapMode({ param: params.get("map"), capture });
 
 const config = createConfig({
   map,
+  // The procedural map wears the World Labs skin; `?skin=classic` restores the
+  // hand-picked palette.
+  skin: normalizeSkinMode(params.get("skin")),
   quality: params.get("q") ?? "ultra",
   backdrop: capture ? "off" : (params.get("backdrop") ?? storedBackdrop),
   deterministic: capture,

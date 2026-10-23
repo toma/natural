@@ -1,0 +1,459 @@
+{
+  "version": 1,
+  "source": "tools/worldlabs-skins.mjs: labelled rectangles on assets/worldlabs/culdesac_pano.jpg, tints calibrated against the rendered procedural map",
+  "targets": {
+    "ac-yellow": {
+      "srgb": [
+        196,
+        161,
+        104
+      ],
+      "samples": 27689,
+      "from": [
+        "yellow house, south siding",
+        "yellow house, west gable",
+        "yellow house, west lower",
+        "two-tone house, upper storey"
+      ]
+    },
+    "ac-green": {
+      "srgb": [
+        2,
+        58,
+        43
+      ],
+      "samples": 6126,
+      "from": [
+        "teal band, west house",
+        "teal band, north house"
+      ]
+    },
+    "ac-white": {
+      "srgb": [
+        110,
+        106,
+        103
+      ],
+      "samples": 6480,
+      "from": [
+        "white siding, north house",
+        "white siding, west house"
+      ]
+    },
+    "ac-cream": {
+      "srgb": [
+        84,
+        74,
+        63
+      ],
+      "samples": 4868,
+      "from": [
+        "beige garage house, beside the door",
+        "beige garage house, right of the door"
+      ]
+    },
+    "ac-blue": {
+      "srgb": [
+        144,
+        151,
+        124
+      ],
+      "samples": 3366,
+      "from": [
+        "mint house"
+      ]
+    },
+    "ac-sky": {
+      "srgb": [
+        121,
+        119,
+        122
+      ],
+      "samples": 5130,
+      "from": [
+        "pale blue house"
+      ]
+    },
+    "ac-pink": {
+      "srgb": [
+        183,
+        88,
+        42
+      ],
+      "samples": 6241,
+      "from": [
+        "two-tone house, orange storey"
+      ]
+    },
+    "ac-roof": {
+      "srgb": [
+        113,
+        99,
+        84
+      ],
+      "samples": 36521,
+      "from": [
+        "shingle roof, west garage",
+        "shingle roof, north garage",
+        "shingle roof, south",
+        "shingle roof, east"
+      ]
+    },
+    "ac-red": {
+      "srgb": [
+        60,
+        12,
+        5
+      ],
+      "samples": 12060,
+      "from": [
+        "red truck cab",
+        "red garage door"
+      ]
+    },
+    "ac-bus": {
+      "srgb": [
+        208,
+        132,
+        39
+      ],
+      "samples": 4050,
+      "from": [
+        "school bus flank"
+      ]
+    },
+    "ac-road": {
+      "srgb": [
+        94,
+        78,
+        65
+      ],
+      "samples": 35460,
+      "from": [
+        "road, east",
+        "road, west"
+      ]
+    },
+    "ac-concrete": {
+      "srgb": [
+        145,
+        125,
+        110
+      ],
+      "samples": 16279,
+      "from": [
+        "driveway",
+        "sidewalk, east"
+      ]
+    },
+    "ac-grass": {
+      "srgb": [
+        24,
+        26,
+        12
+      ],
+      "samples": 22525,
+      "from": [
+        "front lawn, west house",
+        "sunlit lawn, west house",
+        "lawn, south"
+      ]
+    },
+    "ac-hedge": {
+      "srgb": [
+        47,
+        42,
+        17
+      ],
+      "samples": 10665,
+      "from": [
+        "lawn in shade, north"
+      ]
+    },
+    "ac-fence": {
+      "srgb": [
+        98,
+        101,
+        101
+      ],
+      "samples": 55645,
+      "from": [
+        "picket fence, north",
+        "picket fence, east"
+      ]
+    },
+    "ac-sand": {
+      "srgb": [
+        160,
+        115,
+        84
+      ],
+      "samples": 51930,
+      "from": [
+        "desert floor, south",
+        "desert floor, north"
+      ]
+    },
+    "ac-mtn": {
+      "srgb": [
+        107,
+        83,
+        67
+      ],
+      "samples": 159373,
+      "from": [
+        "mesa, south",
+        "mesa, west",
+        "mesa, east"
+      ]
+    },
+    "ac-metal": {
+      "srgb": [
+        87,
+        75,
+        67
+      ],
+      "samples": 13009,
+      "from": [
+        "truck box",
+        "water tower tank"
+      ]
+    },
+    "ac-wood": {
+      "srgb": [
+        34,
+        19,
+        8
+      ],
+      "samples": 5083,
+      "from": [
+        "utility pole, north",
+        "utility pole, east"
+      ]
+    },
+    "ac-car": {
+      "srgb": [
+        71,
+        75,
+        68
+      ],
+      "samples": 1734,
+      "from": [
+        "parked car"
+      ]
+    }
+  },
+  "tints": {
+    "ac-yellow": [
+      1.6281,
+      1.1642,
+      0.4103
+    ],
+    "ac-green": [
+      0.005,
+      0.4455,
+      0.1856
+    ],
+    "ac-white": [
+      1.3747,
+      0.9909,
+      0.8126
+    ],
+    "ac-cream": [
+      0.7014,
+      0.4672,
+      0.2936
+    ],
+    "ac-blue": [
+      0.6725,
+      0.539,
+      0.2872
+    ],
+    "ac-sky": [
+      0.9207,
+      0.6508,
+      0.6222
+    ],
+    "ac-pink": [
+      1.494,
+      0.2114,
+      0.0061
+    ],
+    "ac-roof": [
+      1.7919,
+      1.4932,
+      1.6981
+    ],
+    "ac-red": [
+      0.3475,
+      0.005,
+      0.005
+    ],
+    "ac-bus": [
+      6.312,
+      1.5259,
+      0.005
+    ],
+    "ac-road": [
+      0.1187,
+      0.1,
+      0.1095
+    ],
+    "ac-concrete": [
+      0.3941,
+      0.3743,
+      0.4577
+    ],
+    "ac-grass": [
+      0.0186,
+      0.0797,
+      0.005
+    ],
+    "ac-hedge": [
+      0.1228,
+      0.1304,
+      0.005
+    ],
+    "ac-fence": [
+      0.2332,
+      0.3113,
+      0.3754
+    ],
+    "ac-sand": [
+      0.2261,
+      0.1254,
+      0.1279
+    ],
+    "ac-mtn": [
+      0.0227,
+      0.0076,
+      0.0064
+    ],
+    "ac-metal": [
+      0.143,
+      0.112,
+      0.2278
+    ],
+    "ac-wood": [
+      0.203,
+      0.0109,
+      0.005
+    ],
+    "ac-car": [
+      0.0211,
+      0.0403,
+      0.0171
+    ]
+  },
+  "painted": [
+    "ac-fence"
+  ],
+  "sky": {
+    "turbidity": 5.3,
+    "horizonMurk": 0.46
+  },
+  "exposure": 0.6847,
+  "lumaWeight": 0.5,
+  "achieved": {
+    "ac-yellow": [
+      115,
+      95,
+      59
+    ],
+    "ac-green": [
+      20,
+      53,
+      39
+    ],
+    "ac-white": [
+      86,
+      83,
+      80
+    ],
+    "ac-cream": [
+      75,
+      66,
+      56
+    ],
+    "ac-blue": [
+      78,
+      82,
+      66
+    ],
+    "ac-sky": [
+      83,
+      81,
+      84
+    ],
+    "ac-pink": [
+      132,
+      64,
+      42
+    ],
+    "ac-roof": [
+      61,
+      54,
+      44
+    ],
+    "ac-red": [
+      71,
+      45,
+      42
+    ],
+    "ac-bus": [
+      115,
+      70,
+      31
+    ],
+    "ac-road": [
+      72,
+      59,
+      49
+    ],
+    "ac-concrete": [
+      128,
+      110,
+      97
+    ],
+    "ac-grass": [
+      30,
+      30,
+      21
+    ],
+    "ac-hedge": [
+      36,
+      33,
+      24
+    ],
+    "ac-fence": [
+      67,
+      70,
+      70
+    ],
+    "ac-sand": [
+      168,
+      121,
+      88
+    ],
+    "ac-mtn": [
+      155,
+      132,
+      107
+    ],
+    "ac-metal": [
+      76,
+      66,
+      58
+    ],
+    "ac-wood": [
+      38,
+      29,
+      25
+    ],
+    "ac-car": [
+      90,
+      94,
+      82
+    ]
+  }
+}

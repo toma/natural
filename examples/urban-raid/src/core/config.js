@@ -91,10 +91,17 @@ export const DEFAULTS = {
   /** Photoreal distance backdrop: 'splat' | 'pano' | 'off'. See world/backdrop-config.ts. */
   backdrop: "off",
   /**
-   * Level: 'worldlabs' (the captured splat with its collider) | 'procedural'.
-   * main.js resolves it from `?map=`. See world/worldlabs-map-config.ts.
+   * Level: 'procedural' (the default Atomic Cul-de-sac) | 'worldlabs' (the
+   * captured splat with its collider, opt-in). main.js resolves it from `?map=`.
+   * See world/worldlabs-map-config.ts.
    */
-  map: "worldlabs",
+  map: "procedural",
+  /**
+   * Colours the procedural map wears: 'worldlabs' (sampled from the World Labs
+   * panorama, the default) | 'classic' (the hand-picked palette). main.js
+   * resolves it from `?skin=`. See world/worldlabs-skins.ts.
+   */
+  skin: "worldlabs",
   exposure: 1.0,
   /** Capture mode disables anything nondeterministic so screenshots are stable. */
   deterministic: false,

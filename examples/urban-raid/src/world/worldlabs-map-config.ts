@@ -16,8 +16,8 @@ export type MapMode = "worldlabs" | "procedural";
 
 export const MAP_MODES: readonly MapMode[] = ["worldlabs", "procedural"];
 
-/** Normal play uses the World Labs map. */
-export const DEFAULT_MAP_MODE: MapMode = "worldlabs";
+/** Normal play uses the procedural map; the World Labs map is opt-in with `?map=worldlabs`. */
+export const DEFAULT_MAP_MODE: MapMode = "procedural";
 
 /** Coerce an unknown value (URL param, stored setting) to a map mode. */
 export function normalizeMapMode(value: unknown, fallback: MapMode = DEFAULT_MAP_MODE): MapMode {
@@ -25,13 +25,11 @@ export function normalizeMapMode(value: unknown, fallback: MapMode = DEFAULT_MAP
 }
 
 /**
- * The map for this load. An explicit `?map=` always wins. Without one, capture
- * runs keep the procedural map so the deterministic pixel baselines stay
- * comparable, and everything else gets the World Labs map.
+ * The map for this load. An explicit `?map=` always wins; otherwise every run,
+ * capture included, gets the procedural map.
  */
 export function resolveMapMode(opts: { param?: string | null; capture?: boolean }): MapMode {
-  const fallback: MapMode = opts.capture ? "procedural" : DEFAULT_MAP_MODE;
-  return normalizeMapMode(opts.param ?? undefined, fallback);
+  return normalizeMapMode(opts.param ?? undefined, DEFAULT_MAP_MODE);
 }
 
 export interface WorldLabsMap extends BackdropWorld {
