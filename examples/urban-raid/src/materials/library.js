@@ -407,6 +407,90 @@ export const LIBRARY = {
       depthWrite: false,
     },
   },
+
+  // --------------------------------------------------- mid-century set ----
+  // Period finishes for a 1950s-1960s scene, built by reusing the proven
+  // surface shaders above with glossier, cleaner tunings and a clearcoat or
+  // anisotropy lobe. No new GLSL: these are data-only looks any scene can use.
+  enamel: {
+    glsl: METAL_PAINTED,
+    surface: "metal",
+    // Cream enamel over pressed steel: the glossy appliance / enamelled-sign
+    // finish of the era. Reuses the painted-metal shader with a cream tint.
+    bake: {
+      size: 1024,
+      worldSize: 1.6,
+      relief: 0.012,
+      seed: 64,
+      tintA: 0xede4cf,
+      tintB: 0xd7c7a4,
+    },
+    mat: {
+      scale: 1.6,
+      parallax: 0.002,
+      detail: [10, 0.4, 0.22, 14],
+      macro: [0.09, 0.2, 0.1, 0.3],
+      weather: [0.18, 0.3, 0.25, 0.3],
+      wearColor: 0x9a9ca0,
+      wearMaterial: [0.2, 1.0, 0, 0.9],
+      // Glossy but not a mirror: a tight bright roughness with little variation.
+      roughness: [0.34, -0.06, 0.12],
+    },
+    three: { physical: true, clearcoat: 0.5, clearcoatRoughness: 0.18 },
+  },
+  chrome: {
+    glsl: METAL_BRUSHED,
+    surface: "metal",
+    // Polished chrome trim: near-mirror, with the faint brushing holding a
+    // grazing highlight so it is not a flat specular.
+    bake: { size: 512, worldSize: 0.9, relief: 0.0025, seed: 85 },
+    mat: {
+      scale: 0.9,
+      detail: [8, 0.15, 0.1, 8],
+      macro: [0.08, 0.1, 0.08, 0.18],
+      weather: [0.1, 0.1, 0.12, 0.18],
+      wearColor: 0xc8ccd0,
+      wearMaterial: [0.1, 1.0, 0, 0.95],
+      roughness: [0.14, -0.03, 0.08],
+    },
+    three: { physical: true, anisotropy: 0.5, anisotropyRotation: 0, envMapIntensity: 1.4 },
+  },
+  lacquer: {
+    glsl: WOOD,
+    surface: "wood",
+    // Lacquered mid-century wood: the WOOD grain under a clearcoat sheen, for
+    // furniture, panelling, and trim.
+    bake: { size: 1024, worldSize: 1.6, relief: 0.03, seed: 20 },
+    mat: {
+      scale: 1.6,
+      parallax: 0.006,
+      detail: [10, 0.7, 0.4, 18],
+      macro: [0.08, 0.3, 0.12, 0.5],
+      weather: [0.15, 0.2, 0.3, 0.4],
+      wearColor: 0xa88b62,
+      wearMaterial: [0.4, 0.0, 0, 0.7],
+      roughness: [0.42, -0.05, 0.14],
+    },
+    three: { physical: true, clearcoat: 0.85, clearcoatRoughness: 0.08 },
+  },
+  ceramic: {
+    glsl: TILE,
+    surface: "concrete",
+    // Glazed ceramic wall tile: the TILE layout under a bright glaze, for
+    // kitchens and bathrooms of the period.
+    bake: { size: 1024, worldSize: 1.3, relief: 0.022, seed: 32 },
+    mat: {
+      scale: 1.3,
+      parallax: 0.024,
+      parallaxLayers: 20,
+      detail: [8, 0.4, 0.24, 16],
+      macro: [0.08, 0.3, 0.12, 0.25],
+      patch: [0.1, 1.7, 0.08, -0.04],
+      weather: [0.2, 0.15, 0.2, 0.4],
+      roughness: [0.22, -0.03, 0.06],
+    },
+    three: { physical: true, clearcoat: 0.6, clearcoatRoughness: 0.12 },
+  },
 };
 
 /** Alias -> library key, so callers can ask for the physics surface name. */

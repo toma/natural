@@ -46,3 +46,14 @@ test("the turf lawn material is present and wired for grass/lawn", () => {
   expect(resolveName("grass")).toBe("turf");
   expect(resolveName("lawn")).toBe("turf");
 });
+
+test("the mid-century set adds glossy period finishes reusing proven shaders", () => {
+  for (const name of ["enamel", "chrome", "lacquer", "ceramic"]) {
+    const def = LIBRARY[name]!;
+    expect(def, name).toBeDefined();
+    expect(def.three, `${name} is physical`).toBeDefined();
+    // Period finishes read as glossy: the base roughness is well under matte.
+    const baseRough = (def.mat.roughness as number[] | undefined)?.[0];
+    expect(baseRough, `${name} base roughness`).toBeLessThan(0.5);
+  }
+});
