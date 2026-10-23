@@ -62,7 +62,7 @@ try {
         if (m.type() === "error") errors.push(`${label}: ${m.text()}`);
       });
       try {
-        await page.goto(`${url}/?capture=1&lockstep=1&q=ultra`);
+        await page.goto(`${url}/?capture=1&lockstep=1&q=ultra&skin=classic`);
         await page.waitForFunction("window.__READY__ === true", null, { timeout: 180000 });
         const applied = await page.evaluate(
           (name) => window.__APPLY_SHOT__(name, { grabFrame: 90 }),

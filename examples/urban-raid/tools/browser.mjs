@@ -93,7 +93,7 @@ export function launchBrowser(channel = "chrome", headed = false) {
 }
 
 export async function ready(page, url, shot) {
-  await page.goto(`${url}/?capture=1&lockstep=1&q=ultra`);
+  await page.goto(`${url}/?capture=1&lockstep=1&q=ultra&skin=classic`);
   await page.waitForFunction("window.__READY__ === true && !!window.__ENGINE__", null, {
     timeout: 180000,
   });

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "url": "/assets/worldlabs/skins/horizon.png",
+  "size": [
+    4608,
+    182
+  ],
+  "elevation": [
+    -0.008727,
+    0.239437
+  ],
+  "sunU": 0.20182,
+  "skyLuminance": 0.4865
+}

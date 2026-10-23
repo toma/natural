@@ -54,7 +54,7 @@ test("NaturalFPS retains all subsystems and its deterministic first-person scene
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await ready(page, "?capture=1&lockstep=1");
+  await ready(page, "?capture=1&lockstep=1&skin=classic");
   await expect(page).toHaveTitle("NaturalFPS");
   expect(
     await page.evaluate<string[]>("window.__ENGINE__.registry.ordered.map(s=>s.constructor.id)"),
@@ -115,7 +115,7 @@ test("NaturalFPS anatomical support arm stays connected during idle, aiming, and
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await ready(page, "?capture=1&lockstep=1");
+  await ready(page, "?capture=1&lockstep=1&skin=classic");
   await page.evaluate("window.__APPLY_SHOT__('hero', {grabFrame:90})");
   await page.evaluate("window.__PUMP__(90)");
   for (const pose of ["idle", "ads", "reload"] as const) {
@@ -314,7 +314,7 @@ for (const shot of [
   test(`NaturalFPS optimized ${shot} rendering retains its deterministic fixture`, async ({
     page,
   }) => {
-    await ready(page, "?capture=1&lockstep=1&q=ultra");
+    await ready(page, "?capture=1&lockstep=1&q=ultra&skin=classic");
     await page.evaluate((name) => {
       // The shot API is installed by the example after initialization.
       Reflect.get(window, "__APPLY_SHOT__")(name, { grabFrame: 90 });
@@ -335,7 +335,7 @@ test("NaturalFPS optimized passes preserve depth, recover after failures and rel
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await ready(page, "?capture=1&lockstep=1&q=ultra");
+  await ready(page, "?capture=1&lockstep=1&q=ultra&skin=classic");
   await page.evaluate("window.__APPLY_SHOT__('combat', {grabFrame:90})");
   await page.evaluate("window.__PUMP__(90)");
   const result = await page.evaluate<{
@@ -443,7 +443,7 @@ test("NaturalFPS prewarms culled world variants at the active light count", asyn
   page.on("pageerror", (error) => errors.push(error.message));
   // The wider 1280x720 fixture already sees this prop in its initial view.
   await page.setViewportSize({ width: 1512, height: 982 });
-  await ready(page, "?capture=1&lockstep=1&q=ultra");
+  await ready(page, "?capture=1&lockstep=1&q=ultra&skin=classic");
   await page.evaluate("window.__APPLY_SHOT__('combat')");
   await page.evaluate("window.__PUMP__(3)");
   const prepared = await page.evaluate<{ compiled: number; reflected: number }>(`(async () => {

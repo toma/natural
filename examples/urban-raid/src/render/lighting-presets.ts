@@ -82,6 +82,26 @@ export const GRADE_PRESETS: Record<string, GradePreset> = {
     shoulder: 0.62,
     shoulderSoft: 1.1,
   },
+  // The World Labs Atomic Cul-de-sac look: a hazy low-sun desert afternoon.
+  // Read off the World Labs panorama and the splat as the game renders it:
+  // creamy highlights, lifted warm midtones and shadows that open up instead of
+  // crushing, gentle contrast, a warm horizon. Power below one and a raised toe
+  // lift the mids and blacks; slope and highlight tint push the top end toward
+  // cream; highlight desaturation stops the bright sky going yellow.
+  worldlabs: {
+    slope: [1.04, 1.0, 0.92],
+    offset: [0.01, 0.005, -0.002],
+    power: [0.94, 0.95, 0.99],
+    shadowTint: [0.018, 0.009, -0.004],
+    highlightTint: [0.035, 0.022, -0.012],
+    saturation: 1.06,
+    contrast: 1.16,
+    pivot: 0.45,
+    highlightDesat: 0.16,
+    toe: 0.022,
+    shoulder: 0.64,
+    shoulderSoft: 1.1,
+  },
   // Flat, cool, low-contrast overcast: a grey-sky day with soft shadows and
   // muted chroma.
   overcast: {
@@ -176,12 +196,39 @@ export interface SkyHints {
   cloudCoverage: number;
   /** Ground fog density multiplier. */
   fogDensity: number;
+  /** High cirrus coverage, 0..1. Omitted keeps the sky's own. */
+  cirrusCoverage?: number;
+  /**
+   * Dust veil over the open sky: [r, g, b, amount]. After the sky roll-off the
+   * dome mixes toward the rgb colour, given in units of the roll-off knee, by
+   * `amount` (0 to 1), warmer near the horizon and cooler overhead. The rgb
+   * leans blue because the worldlabs grade pulls blue down afterwards.
+   */
+  skyVeil?: [number, number, number, number];
+}
+
+/** Renderer setting overrides that belong to a look (see render/index.js settings). */
+export interface RenderHints {
+  /** Auto-exposure key: above 1 meters the frame brighter. */
+  exposureKey?: number;
+  /** Hemispheric sky fill, fraction of the key. */
+  skyFill?: number;
+  /** Warm street bounce, fraction of the key. */
+  groundFill?: number;
+  /** Warm anti-sun wrap, fraction of the key. */
+  bounceFill?: number;
+  /** Display-space vignette amplitude. */
+  vignette?: number;
+  /** Sun shadow penumbra softness. */
+  sunSoftness?: number;
 }
 
 export interface LightingPreset {
   /** Key into GRADE_PRESETS. */
   grade: string;
   sky: SkyHints;
+  /** Optional renderer overrides; omitted keeps the renderer's defaults. */
+  render?: RenderHints;
 }
 
 export const LIGHTING_PRESETS: Record<string, LightingPreset> = {
@@ -195,6 +242,30 @@ export const LIGHTING_PRESETS: Record<string, LightingPreset> = {
   "neutral-noon": {
     grade: "neutral",
     sky: { hour: 12.0, turbidity: 2.2, horizonMurk: 0.2, cloudCoverage: 0.12, fogDensity: 0.6 },
+  },
+  // The World Labs world's look, worn by the skinned procedural map: a lower
+  // mid-afternoon sun than the golden hour (the panorama's sun stands about 38
+  // degrees up), dust-heavy air with a creamy horizon, no cumulus, a trace of
+  // cirrus, and more fill so shadows read soft and warm.
+  worldlabs: {
+    grade: "worldlabs",
+    sky: {
+      hour: 16.0,
+      turbidity: 7.5,
+      horizonMurk: 0.62,
+      cloudCoverage: 0,
+      fogDensity: 0.45,
+      cirrusCoverage: 0.06,
+      skyVeil: [2.85, 3.5, 5.2, 0.86],
+    },
+    render: {
+      exposureKey: 1.22,
+      skyFill: 0.46,
+      groundFill: 0.03,
+      bounceFill: 0.016,
+      vignette: 0.16,
+      sunSoftness: 0.06,
+    },
   },
   // Flat overcast: soft, cool, low contrast under a grey sky.
   overcast: {

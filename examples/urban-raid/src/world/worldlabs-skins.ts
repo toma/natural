@@ -70,6 +70,20 @@ export interface SkinPalette {
   exposure: number;
   /** Rendered colour per key after calibration, 0..255 sRGB, for the report. */
   achieved: Record<string, Rgb>;
+  /**
+   * Keys repainted fresh: the painted siding, pickets and kerbs in the World
+   * Labs world read crisp, so their weathering, grime and repair patches drop.
+   */
+  clean: string[];
+  /** Per-key finish overrides; the World Labs vehicles read as painted, not chrome. */
+  finish: Record<string, SkinFinish>;
+}
+
+export interface SkinFinish {
+  /** Multiplier on the material's metalness (its ORM map), 0..1. */
+  metalness?: number;
+  /** Roughness remap [scale, offset, minimum], as the material library takes it. */
+  roughness?: Rgb;
 }
 
 /** Upper bound on a tint channel: dark bases (painted metal) need a large gain. */
@@ -83,7 +97,7 @@ const isObj = (v: unknown): v is Record<string, unknown> =>
 /** Validate parsed palette JSON. Throws on anything the runtime cannot use. */
 export function parsePalette(json: unknown): SkinPalette {
   if (!isObj(json) || json.version !== 1) throw new Error("skin palette: expected version 1");
-  const { targets, tints, painted, sky, achieved, source, exposure } = json;
+  const { targets, tints, painted, sky, achieved, source, exposure, clean, finish } = json;
   if (exposure !== undefined && !(isNum(exposure) && exposure > 0))
     throw new Error("skin palette: bad exposure");
   if (!isObj(tints)) throw new Error("skin palette: tints must be an object");
@@ -100,6 +114,17 @@ export function parsePalette(json: unknown): SkinPalette {
     throw new Error("skin palette: painted must be a list of keys");
   if (sky !== null && !(isObj(sky) && isNum(sky.turbidity) && isNum(sky.horizonMurk)))
     throw new Error("skin palette: bad sky");
+  if (clean !== undefined && !(Array.isArray(clean) && clean.every((k) => typeof k === "string")))
+    throw new Error("skin palette: clean must be a list of keys");
+  const fin = finish === undefined ? {} : finish;
+  if (!isObj(fin)) throw new Error("skin palette: finish must be an object");
+  for (const [key, f] of Object.entries(fin)) {
+    const ok =
+      isObj(f) &&
+      (f.metalness === undefined || (isNum(f.metalness) && f.metalness >= 0 && f.metalness <= 1)) &&
+      (f.roughness === undefined || isRgb(f.roughness));
+    if (!ok) throw new Error(`skin palette: bad finish for ${key}`);
+  }
   const ach = isObj(achieved) ? achieved : {};
   for (const [key, c] of Object.entries(ach))
     if (!isRgb(c)) throw new Error(`skin palette: bad achieved colour for ${key}`);
@@ -112,7 +137,19 @@ export function parsePalette(json: unknown): SkinPalette {
     sky: (sky as SkinSky | null) ?? null,
     exposure: (exposure as number | undefined) ?? 1,
     achieved: ach as Record<string, Rgb>,
+    clean: (clean as string[] | undefined) ?? [],
+    finish: fin as Record<string, SkinFinish>,
   };
+}
+
+/** The finish override for `key`, or null. */
+export function skinFinish(palette: SkinPalette | null, key: string): SkinFinish | null {
+  return palette?.finish[key] ?? null;
+}
+
+/** Whether the skin repaints `key` fresh (see SkinPalette.clean). */
+export function skinClean(palette: SkinPalette | null, key: string): boolean {
+  return palette?.clean.includes(key) ?? false;
 }
 
 /** The calibrated linear tint for `key`, or null when the palette leaves it alone. */
@@ -302,4 +339,15 @@ export const WORLDLABS_SKIN: SkinPalette = parsePalette(paletteJson);
 /** The palette for a load: the World Labs skin, or null for the classic colours. */
 export function paletteFor(mode: SkinMode): SkinPalette | null {
   return mode === "worldlabs" ? WORLDLABS_SKIN : null;
+}
+
+/**
+ * Lighting preset (render/lighting-presets.ts) for a load. The skinned
+ * procedural map wears the World Labs look; the classic skin and the splat map
+ * keep the shipped golden hour.
+ */
+export function lightingPresetFor(map: unknown, skin: unknown): string {
+  return map !== "worldlabs" && normalizeSkinMode(skin) === "worldlabs"
+    ? "worldlabs"
+    : "desert-golden-hour";
 }

@@ -6,7 +6,7 @@ import { furnishRoom } from "./interiors.js";
 import { windowUnit, doorUnit } from "./kit.js";
 import { loadPbrSet } from "../materials/textures.js";
 import { beveledBoxGeometry } from "./box-bevel.js";
-import { skinTint } from "./worldlabs-skins.ts";
+import { skinClean, skinFinish, skinTint } from "./worldlabs-skins.ts";
 import { emptyMesh, vcount, computeNormals, weldNormals } from "../ai/geo.js";
 import {
   HOUSES,
@@ -64,15 +64,27 @@ function materials(A, rng) {
           // paint rather than a flat, uniform poster colour.
           name = "plaster";
           surf = "wood";
-          opts = {
-            tint,
-            scale: 1.7,
-            normalStrength: 0.7,
-            weather: [0.22, 0.16, 0.2, 0.42],
-            macro: [0.14, 0.22, 0.13, 0.42],
-            macroBig: [1.6, 0.14, 0.06, 0],
-            patch: [0.16, 2.0, 0.13, -0.09],
-          };
+          opts = skinClean(skin, key)
+            ? {
+                // Fresh paint (the World Labs siding and pickets): a trace of
+                // dust and cavity grime, no fading blotches or repair patches.
+                tint,
+                scale: 1.7,
+                normalStrength: 0.7,
+                weather: [0.07, 0.04, 0.1, 0.3],
+                macro: [0.14, 0.07, 0.06, 0.12],
+                macroBig: [1.2, 0.04, 0.06, 0],
+                patch: [0, 2.0, 0, 0],
+              }
+            : {
+                tint,
+                scale: 1.7,
+                normalStrength: 0.7,
+                weather: [0.22, 0.16, 0.2, 0.42],
+                macro: [0.14, 0.22, 0.13, 0.42],
+                macroBig: [1.6, 0.14, 0.06, 0],
+                patch: [0.16, 2.0, 0.13, -0.09],
+              };
         } else {
           name = "wood";
           surf = "wood";
@@ -135,6 +147,12 @@ function materials(A, rng) {
         surf = "concrete";
         opts = { tint, scale: 2.4 };
     }
+    // Fresh concrete and kerbs under the skin: lighter dust and grime.
+    if (name === "concrete" && skinClean(skin, key)) opts.weather = [0.12, 0.08, 0.2, 0.25];
+    const finish = skinFinish(skin, key);
+    if (finish?.roughness) opts.roughness = finish.roughness;
+    if (finish?.metalness !== undefined)
+      opts.three = { ...(opts.three ?? {}), metalness: finish.metalness };
     // A THREE.Color tint serialises to a clamped hex in the material cache
     // key, so name the skinned key to keep every calibrated tint distinct.
     if (skinned) opts.skin = key;
@@ -904,7 +922,17 @@ function house(A, spec, rng) {
     for (let i = 0; i < n; i++) {
       const bx = x0b + 0.35 + i * 0.7;
       shrub(K, bx, 0.42, 5.55, 0.42);
-      if (i % 2)
+      if (A.skin) {
+        // The World Labs yards edge their lawns in red flower beds: a cluster of
+        // red blooms on every shrub. Decoration only, spheres never collide.
+        for (const [dx, dy, dz] of [
+          [-0.2, 0.88, -0.08],
+          [0.18, 0.9, 0.1],
+          [0.0, 0.98, 0.0],
+          [-0.04, 0.86, 0.26],
+        ])
+          K.sphere("ac-red", bx + dx, dy, 5.55 + dz, 0.075, 0.065, 0.075);
+      } else if (i % 2)
         K.sphere(["ac-red", "ac-orange", "ac-white"][i % 3], bx, 0.58, 5.55, 0.08, 0.08, 0.08);
     }
   }
@@ -2116,11 +2144,16 @@ export function buildAtomicCuldesac(A, rng) {
   // mid range, and a far haze range that aerial perspective washes to pale tan.
   // The ranges wrap the full circle so every street and backyard angle looks out
   // onto mountains rather than a flat horizon.
+  // With the World Labs skin the panorama's own mesas ring the sky instead
+  // (sky dome, world/worldlabs-horizon.ts), so these meshes are skipped. The
+  // arguments are still evaluated so the rng stream, and every draw after it,
+  // stays the same as the classic build. They are dressing only: no collider.
+  const mtn = A.skin ? () => {} : (...args) => K.geo(...args);
   // Far hazed range: broad, tall, washed out by the dusty air.
   for (let i = 0; i < 34; i++) {
     const a = (i * Math.PI) / 17,
       r = 240 + rng.range(0, 140);
-    K.geo(
+    mtn(
       "ac-mtn",
       mesaGeometry(rng),
       Math.sin(a) * r,
@@ -2138,7 +2171,7 @@ export function buildAtomicCuldesac(A, rng) {
     const a = (i * Math.PI) / 22 + 0.07,
       r = 104 + rng.range(0, 48),
       mesa = rng.range(0, 1) < 0.3;
-    K.geo(
+    mtn(
       "ac-mtn",
       mesa ? mesaGeometry(rng) : rockGeometry(rng, 1, 4, 0.55),
       Math.sin(a) * r,
@@ -2153,7 +2186,7 @@ export function buildAtomicCuldesac(A, rng) {
   for (let i = 0; i < 24; i++) {
     const a = (i * Math.PI) / 12 + 0.18,
       r = 92 + rng.range(0, 30);
-    K.geo(
+    mtn(
       "ac-mtn",
       rockGeometry(rng, 1, 3, 0.5),
       Math.sin(a) * r,

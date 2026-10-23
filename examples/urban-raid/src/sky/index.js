@@ -13,7 +13,9 @@ import { SkyDome } from "./dome.js";
 import { Volumetrics } from "./volumetrics.js";
 import { Celestial } from "./celestial.js";
 import { cloudSunOcclusion } from "./clouds.js";
-import { normalizeSkinMode, paletteFor } from "../world/worldlabs-skins.ts";
+import { lightingPresetFor, normalizeSkinMode, paletteFor } from "../world/worldlabs-skins.ts";
+import { resolveLightingPreset } from "../render/lighting-presets.ts";
+import { WORLDLABS_HORIZON, horizonScale, horizonYaw } from "../world/worldlabs-horizon.ts";
 
 /**
  * Floor on the beam's *luminous* transmittance, as a fraction of unity - see
@@ -182,6 +184,24 @@ export class SkySystem {
       this.weather.turbidity = skinSky.turbidity;
       this.weather.horizonMurk = skinSky.horizonMurk;
     }
+    // The skinned procedural map wears the World Labs look: its preset's sun
+    // hour, dust, cloud and fog hints win over the defaults above, and the
+    // panorama's mesas ring the horizon (worldlabs-horizon.ts).
+    this.lightingPreset = lightingPresetFor(ctx.config.map, ctx.config.skin);
+    const look = this.lightingPreset === "worldlabs" ? resolveLightingPreset("worldlabs") : null;
+    if (look) {
+      this.hour = look.sky.hour;
+      this.weather.turbidity = look.sky.turbidity;
+      this.weather.horizonMurk = look.sky.horizonMurk;
+      this.weather.cloudCoverage = look.sky.cloudCoverage;
+      if (look.sky.cirrusCoverage !== undefined)
+        this.weather.cirrusCoverage = look.sky.cirrusCoverage;
+    }
+    /** Lighting preset dust veil [r, g, b, amount], or null for none. */
+    this.skyVeil = look?.sky.skyVeil ?? null;
+    this.horizon = look ? WORLDLABS_HORIZON : null;
+    /** Brightness of the horizon ring against the sky's horizon band. */
+    this.horizonGain = 1.0;
 
     /**
      * Ground fog. `scatter` and `extinction` are intentionally independent -
@@ -271,6 +291,11 @@ export class SkySystem {
       // Sky highlight roll-off: knee in scene radiance, overshoot room above it.
       // Driven off the beam luminance every time the sun moves - see skRolloff.
       uSkyRolloff: { value: new THREE.Vector2(0.3, 1.5) },
+      // Horizon ring: off (x = 0) until the strip has loaded.
+      uHorizonTex: { value: blankTexture() },
+      uHorizon: { value: new THREE.Vector4(0, 0, 0, 0.25) },
+      // Dust veil from the lighting preset (off unless the preset sets one).
+      uSkyVeil: { value: new THREE.Vector4(...(this.skyVeil ?? [1, 1, 1, 0])) },
 
       uStarParams: { value: new THREE.Vector4(0, 0.5, 0, 0) },
       uCelestial: { value: new THREE.Matrix3() },
@@ -377,7 +402,13 @@ export class SkySystem {
     this._occParams = { coverage: 0, density: 0, windX: 0, windZ: 0, time: 0 };
 
     this._applyWeather();
+    if (look) {
+      // Same conversion setWeather applies to a fogDensity patch.
+      this._fog.scatter = 3.6e-3 * look.sky.fogDensity;
+      this._fog.extinction = 1.45e-3 * look.sky.fogDensity;
+    }
     this._applyFog();
+    if (this.horizon) await this._loadHorizon(this.horizon);
     this.setTimeOfDay(this.hour);
 
     console.info(
@@ -550,6 +581,35 @@ export class SkySystem {
     this.shared.uPhase.value.set(f.phaseForward, f.phaseBackward, f.phaseBackWeight, f.noiseScale);
   }
 
+  /**
+   * Load the horizon strip. A failed load leaves the ring off rather than
+   * failing the level: the sky is still complete without it.
+   */
+  async _loadHorizon(meta) {
+    const tex = await new Promise((resolve) => {
+      new THREE.TextureLoader().load(meta.url, resolve, undefined, () => resolve(null));
+    });
+    if (!tex) {
+      console.warn("[sky] horizon strip failed to load; ring off");
+      return;
+    }
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    // Sampled at lod 0 (the strip is magnified at any sane field of view), so
+    // there is no mip seam where u wraps.
+    tex.generateMipmaps = false;
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
+    this.shared.uHorizonTex.value = tex;
+    this._horizonTex = tex;
+    const h = this.shared.uHorizon.value;
+    h.x = horizonScale(meta, this.horizonGain);
+    h.z = meta.elevation[0];
+    h.w = meta.elevation[1];
+  }
+
   /** Sun/moon geometry, colours and intensities for the current hour. */
   _updateCelestial() {
     const c = this.celestial.setHour(this.hour);
@@ -557,6 +617,8 @@ export class SkySystem {
 
     s.uSunDir.value.copy(c.sun);
     s.uMoonDir.value.copy(c.moon);
+    // Keep the panorama's sun column on the game sun.
+    if (this.horizon) s.uHorizon.value.y = horizonYaw(c.sun, this.horizon.sunU);
     s.uSunAltitude.value = c.sunAlt;
     s.uMoonAltitude.value = c.moonAlt;
     // The sky-view LUT is baked with the sun at azimuth 0, so the moon only
@@ -876,5 +938,14 @@ export class SkySystem {
     this.render.removeLight?.(this.moonLight);
     this.sunLight.dispose();
     this.moonLight.dispose();
+    this._horizonTex?.dispose();
+    this.shared.uHorizonTex.value.dispose?.();
   }
+}
+
+/** 1x1 transparent texture bound while the horizon ring is off. */
+function blankTexture() {
+  const t = new THREE.DataTexture(new Uint8Array(4), 1, 1);
+  t.needsUpdate = true;
+  return t;
 }

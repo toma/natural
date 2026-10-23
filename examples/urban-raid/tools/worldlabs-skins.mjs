@@ -27,7 +27,9 @@
  *    rendered result).
  *
  * Roughness and metalness stay with the procedural material library: a splat
- * carries baked colour only, so there is nothing to sample them from.
+ * carries baked colour only, so there is nothing to sample them from. The
+ * style pass (STYLE, CLEAN, FINISH below) is authored on top: it brightens the
+ * painted keys past the panorama and takes the chrome off the vehicles.
  */
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
@@ -171,6 +173,50 @@ const MURK = [0.46, 0.6, 0.75, 0.9];
 
 /** How far toward the panorama's brightness each key moves (worldlabs-skins.ts blendGoal). */
 const LUMA_WEIGHT = 0.5;
+
+/**
+ * Style goals, 0..255 sRGB as rendered, that replace the blended goal for the
+ * keys that carry the World Labs look. The panorama bakes its own shadows and
+ * dust into these surfaces, so a pure match leaves them dingy; here the paint
+ * is fresher than the panorama: crisp white pickets, bright pastel siding, a
+ * light warm-grey road with pale concrete, olive lawns, a school-bus yellow
+ * and a red truck. Rendered medians include shade, so these sit a little
+ * under the sunlit colour.
+ */
+const STYLE = {
+  "ac-white": [222, 216, 200],
+  "ac-fence": [226, 220, 204],
+  "ac-yellow": [222, 192, 112],
+  "ac-cream": [222, 204, 160],
+  "ac-green": [150, 196, 162],
+  "ac-blue": [170, 204, 178],
+  "ac-sky": [176, 196, 200],
+  "ac-road": [124, 110, 94],
+  "ac-concrete": [192, 184, 168],
+  "ac-grass": [100, 104, 48],
+  "ac-hedge": [74, 82, 38],
+  // The bus flank sits in shade in the calibration shot and red clips at the tint cap, so the goal keeps the hue at a reachable level.
+  "ac-bus": [178, 122, 22],
+  "ac-red": [160, 34, 28],
+};
+/** Keys repainted fresh under the skin (SkinPalette.clean). */
+const CLEAN = [
+  "ac-white",
+  "ac-fence",
+  "ac-yellow",
+  "ac-cream",
+  "ac-green",
+  "ac-blue",
+  "ac-sky",
+  "ac-concrete",
+  "ac-line",
+];
+/** Painted vehicles: far less metal and a satin coat (SkinPalette.finish). */
+const FINISH = {
+  "ac-bus": { metalness: 0.15, roughness: [1, 0.1, 0.34] },
+  "ac-red": { metalness: 0.15, roughness: [1, 0.1, 0.34] },
+  "ac-car": { metalness: 0.35, roughness: [1, 0.06, 0.26] },
+};
 
 const KEYS = Object.keys(LABELS);
 const fmt = (c) => `[${c.map((v) => Math.round(v)).join(", ")}]`;
@@ -374,7 +420,10 @@ try {
     Object.fromEntries(KEYS.map((k) => [k, targets[k].srgb])),
   );
   const goal = Object.fromEntries(
-    KEYS.map((k) => [k, blendGoal(targets[k].srgb, classicSeen[k], exposure, LUMA_WEIGHT)]),
+    KEYS.map((k) => [
+      k,
+      STYLE[k] ?? blendGoal(targets[k].srgb, classicSeen[k], exposure, LUMA_WEIGHT),
+    ]),
   );
   console.info("sky target", fmt(skyTarget), "exposure", exposure.toFixed(3));
   for (const key of KEYS)
@@ -390,8 +439,15 @@ try {
 
   const page = await open("worldlabs");
   const previous = parsePalette(JSON.parse(await readFile(palettePath, "utf8")));
-  if (PAINTED.some((k) => !previous.painted.includes(k)))
-    console.warn("palette.json lacks the painted list; rerun once more after this pass");
+  // The page builds its materials from the committed palette, so a change to
+  // the painted, clean or finish lists only shows on the next pass.
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  if (
+    !same(PAINTED, previous.painted) ||
+    !same(CLEAN, previous.clean) ||
+    !same(FINISH, previous.finish)
+  )
+    console.warn("palette.json lists differ from this tool; rerun once more after this pass");
 
   // Sky first: the haze also tints the ambient light that the albedo sees.
   let sky = previous.sky;
@@ -475,6 +531,9 @@ try {
       KEYS.filter((k) => tints[k] && achieved[k]).map((k) => [k, round(tints[k])]),
     ),
     painted: PAINTED,
+    clean: CLEAN,
+    finish: FINISH,
+    goals: Object.fromEntries(KEYS.map((k) => [k, goal[k].map(Math.round)])),
     sky,
     exposure: Math.round(exposure * 1e4) / 1e4,
     lumaWeight: LUMA_WEIGHT,

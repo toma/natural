@@ -67,3 +67,20 @@ test("lighting presets reference real grades and sane sky hints", () => {
   }
   expect(resolveLightingPreset("nope")).toBe(LIGHTING_PRESETS["desert-golden-hour"]!);
 });
+
+test("the worldlabs look is a hazy low-sun desert afternoon with a pale veiled sky", () => {
+  const wl = resolveLightingPreset("worldlabs");
+  expect(wl.grade).toBe("worldlabs");
+  expect(wl.sky.hour).toBeGreaterThan(14);
+  expect(wl.sky.hour).toBeLessThan(18);
+  expect(wl.sky.cloudCoverage).toBe(0);
+  expect(wl.sky.turbidity).toBeGreaterThan(LIGHTING_PRESETS["neutral-noon"]!.sky.turbidity);
+  const veil = wl.sky.skyVeil!;
+  expect(veil).toHaveLength(4);
+  for (const c of veil.slice(0, 3)) expect(c).toBeGreaterThan(0);
+  expect(veil[3]).toBeGreaterThan(0);
+  expect(veil[3]).toBeLessThanOrEqual(1);
+  // Only the worldlabs look veils the sky.
+  for (const [name, p] of Object.entries(LIGHTING_PRESETS))
+    if (name !== "worldlabs") expect(p.sky.skyVeil).toBeUndefined();
+});

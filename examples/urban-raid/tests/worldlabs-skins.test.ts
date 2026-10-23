@@ -12,12 +12,15 @@ import {
   linearToSrgb,
   luminance,
   normalizeSkinMode,
+  lightingPresetFor,
   paletteFor,
   parsePalette,
   pixelsById,
   rectPixels,
   rgb8ToLinear,
   robustColor,
+  skinClean,
+  skinFinish,
   skinTint,
   srgbToLinear,
   stepTint,
@@ -82,6 +85,50 @@ test("parsePalette fills defaults and rejects malformed palettes", () => {
       sky: { turbidity: 2, horizonMurk: 0.4 },
     }),
   ).toMatchObject({ exposure: 0.5, source: "x", sky: { turbidity: 2, horizonMurk: 0.4 } });
+});
+
+test("clean and finish lists parse, default empty, and reject bad entries", () => {
+  const p = parsePalette(minimal);
+  expect(p.clean).toEqual([]);
+  expect(p.finish).toEqual({});
+  expect(skinClean(p, "ac-bus")).toBe(false);
+  expect(skinFinish(p, "ac-bus")).toBeNull();
+  expect(skinClean(null, "ac-bus")).toBe(false);
+  expect(skinFinish(null, "ac-bus")).toBeNull();
+  const q = parsePalette({
+    ...minimal,
+    clean: ["ac-white"],
+    finish: { "ac-bus": { metalness: 0.2, roughness: [1, 0.1, 0.3] }, "ac-car": {} },
+  });
+  expect(skinClean(q, "ac-white")).toBe(true);
+  expect(skinFinish(q, "ac-bus")).toEqual({ metalness: 0.2, roughness: [1, 0.1, 0.3] });
+  const bad: unknown[] = [
+    { ...minimal, clean: "ac-white" },
+    { ...minimal, clean: [3] },
+    { ...minimal, finish: [] },
+    { ...minimal, finish: { "ac-bus": 1 } },
+    { ...minimal, finish: { "ac-bus": { metalness: 2 } } },
+    { ...minimal, finish: { "ac-bus": { roughness: [1, 2] } } },
+  ];
+  for (const b of bad) expect(() => parsePalette(b)).toThrow();
+});
+
+test("the committed palette repaints the siding and pickets and calms the vehicles", () => {
+  for (const k of ["ac-white", "ac-fence", "ac-yellow", "ac-concrete"])
+    expect(skinClean(WORLDLABS_SKIN, k)).toBe(true);
+  expect(skinClean(WORLDLABS_SKIN, "ac-road")).toBe(false);
+  for (const k of ["ac-bus", "ac-red"])
+    expect(skinFinish(WORLDLABS_SKIN, k)?.metalness ?? 1).toBeLessThan(0.5);
+  // Repainting only touches keys the map really has.
+  for (const k of [...WORLDLABS_SKIN.clean, ...Object.keys(WORLDLABS_SKIN.finish)])
+    expect(surfaces.has(k)).toBe(true);
+});
+
+test("the skinned procedural map wears the worldlabs lighting preset", () => {
+  expect(lightingPresetFor("procedural", "worldlabs")).toBe("worldlabs");
+  expect(lightingPresetFor("procedural", undefined)).toBe("worldlabs");
+  expect(lightingPresetFor("procedural", "classic")).toBe("desert-golden-hour");
+  expect(lightingPresetFor("worldlabs", "worldlabs")).toBe("desert-golden-hour");
 });
 
 test("the committed palette only recolours existing map surfaces and keeps their surface tags", () => {

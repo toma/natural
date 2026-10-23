@@ -333,6 +333,17 @@ visual fixture.
   they stop short of their goals; the per-key error is in `swatches.png` and the tool log. The
   tool measures rendered colour per material with the `__MATERIAL_MASK__` id pass
   (`src/dev/material-mask.js`). Writing `palette.json` reloads the dev page, so write it last.
+- World Labs style learnings: the skinned map uses the `worldlabs` lighting preset
+  (`lightingPresetFor`). Materials are built from the committed `palette.json` at load, so a
+  calibration run changes the game the moment it writes the file. Tints multiply the baked
+  albedo and are capped (`MAX_TINT`), so whites top out near 185/255 and the `clean` list (fresh-paint
+  weathering) does the rest. The sky `skyVeil` mix must run after the dome's roll-off: before it
+  the roll-off darkens the veil to olive. Its rgb is in units of the roll-off knee and leans blue
+  because the worldlabs grade pulls blue down. Height fog inscatter covers a far sky ring, so the
+  mesa ring is drawn in the dome and fog density comes from the preset. The dev server does not
+  always pick up preset edits; restart it and read `uSkyVeil` back before trusting a capture.
+- Deterministic captures and e2e pin `&skin=classic` (e2e/natural-fps.spec.ts, tools/browser.mjs,
+  tools/parity.mjs) so goldens and parity numbers do not move with palette recalibration.
 - The splat and the collider share one raw Y-down frame. The same placement (scale by
   `metric_scale_factor`, rotate PI about X, lift by `ground_plane_offset`) puts the captured
   ground at y=0. The capture camera sat about 6 m up, so splat detail softens at eye height.

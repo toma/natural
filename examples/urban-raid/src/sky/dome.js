@@ -50,6 +50,13 @@ uniform vec4 uDisc;               // x sun ang. radius, y moon ang. radius,
 uniform vec3 uGroundAlbedo;
 uniform float uHorizonMurk;       // city haze piled up at eye level
 uniform vec2 uSkyRolloff;         // x knee (scene radiance), y overshoot room
+// Horizon ring (World Labs skin, see world/worldlabs-horizon.ts): an RGBA strip
+// of distant mesas. x brightness scale (0 = off), y azimuth offset in u, z/w
+// elevation of the strip's bottom and top edge in radians.
+uniform sampler2D uHorizonTex;
+uniform vec4 uHorizon;
+// Dust veil (lighting preset skyVeil): rgb in units of the roll-off knee, a amount.
+uniform vec4 uSkyVeil;
 
 float owSkLum( vec3 c ) { return dot( c, vec3( 0.2126, 0.7152, 0.0722 ) ); }
 
@@ -243,6 +250,23 @@ vec3 skSample( vec3 rayDir, int quality ) {
     col = mix( col, mix( cl.rgb, col, bleed * 0.82 ), cl.a );
   }
 
+  // ---- horizon ring -------------------------------------------------------
+  // Mesas cut from the World Labs panorama, at the panorama's angular scale.
+  // Lit as the panorama was: the strip's own sky luminance maps onto the
+  // luminance of this sky right behind each texel (uHorizon.x is gain over the
+  // strip's sky luminance), so the ridges keep the panorama's contrast against
+  // the sky and follow the time of day. Drawn before the ground and the murk
+  // so both still apply.
+  float ringA = 0.0;
+  if ( uHorizon.x > 0.0 && rayDir.y < sin( uHorizon.w ) && rayDir.y > -0.25 ) {
+    float el = asin( clamp( rayDir.y, -1.0, 1.0 ) );
+    float v = clamp( ( el - uHorizon.z ) / ( uHorizon.w - uHorizon.z ), 0.0, 1.0 );
+    float u = fract( atan( rayDir.z, rayDir.x ) * ( 0.5 / SK_PI ) + 0.5 + uHorizon.y );
+    vec4 ring = textureLod( uHorizonTex, vec2( u, v ), 0.0 );
+    col = mix( col, ring.rgb * ( uHorizon.x * owSkLum( col ) ), ring.a );
+    ringA = ring.a;
+  }
+
   // ---- ground / below the horizon ----------------------------------------
   if ( rayDir.y < 0.0 ) {
     // First bounce off the street: this is what fills the lower hemisphere of
@@ -260,6 +284,24 @@ vec3 skSample( vec3 rayDir, int quality ) {
 
   // ---- horizon roll-off ---------------------------------------------------
   col = skRolloff( col );
+
+  // ---- dust veil ----------------------------------------------------------
+  // A dust-laden desert sky is pale from the horizon nearly to the zenith. The
+  // scattering model alone keeps a deep blue overhead, so a lighting preset can
+  // pull the open sky toward a flat pale colour. The target is the tint times
+  // the roll-off knee: the knee follows the beam, so the veil lands on the same
+  // code value at any exposure. It goes after the roll-off so the compressor
+  // does not flatten it, and only partly over the mesas so they stay readable
+  // through the haze. The discs still go on top.
+  if ( uSkyVeil.a > 0.0 ) {
+    // Warmer and a touch brighter at the horizon, cooler toward the zenith, as
+    // in the panorama: a cream band under a pale grey-blue.
+    float up = smoothstep( 0.0, 0.6, rayDir.y );
+    vec3 grad = mix( vec3( 1.1, 1.02, 0.9 ), vec3( 0.9, 0.98, 1.08 ), up );
+    vec3 veil = uSkyVeil.rgb * grad * max( uSkyRolloff.x, 1.0e-4 );
+    float va = uSkyVeil.a * smoothstep( -0.05, 0.05, rayDir.y ) * ( 1.0 - 0.75 * ringA );
+    col = mix( col, veil, va );
+  }
 
   // The discs go in AFTER the roll-off: they are supposed to clip and bloom,
   // and they are the only thing in the sky that is.

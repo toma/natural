@@ -13,6 +13,8 @@ import { DepthOfField } from "./dof.js";
 import { Bloom } from "./bloom.js";
 import { AutoExposure } from "./exposure.js";
 import { createGradeLut } from "./lut.js";
+import { resolveLightingPreset } from "./lighting-presets.ts";
+import { lightingPresetFor } from "../world/worldlabs-skins.ts";
 import { createComposite, createFxaa, createDebug, createViewComposite } from "./composite.js";
 import { buildFallbackEnvironment } from "./env.js";
 import { RenderProbeScene } from "./probe.js";
@@ -213,7 +215,10 @@ export class RenderSystem {
     // afternoon. Daylight shots meter between -1 and -2.1, so this only ever
     // binds after dark.
     this.exposure.setLimits(-4.3, 20);
-    this.lut = createGradeLut("default");
+    // The skinned procedural map wears the World Labs look (worldlabs-skins.ts
+    // lightingPresetFor); classic and the splat map keep the shipped grade.
+    this.lighting = resolveLightingPreset(lightingPresetFor(cfg.map, cfg.skin));
+    this.lut = createGradeLut(this.lighting.grade);
     this.composite = createComposite(this.lut);
     this.viewComposite = createViewComposite();
     this.fxaa = q.taa ? null : createFxaa();
@@ -461,6 +466,8 @@ export class RenderSystem {
       // blur hides cascade stair-stepping on the long eave and fence shadows.
       sunSoftness: 0.03,
     };
+    // A look may carry its own exposure, fill and vignette (lighting-presets.ts).
+    Object.assign(this.settings, this.lighting.render ?? {});
     this._applySettings();
 
     this.probe = new RenderProbeScene(this.rng.fork());
