@@ -3,14 +3,16 @@ import { VEHICLES } from "../src/world/atomic-culdesac-layout.ts";
 import { MODELS_BY_ID } from "../src/world/model-manifest.ts";
 import {
   CLASSIC_PAINT,
+  SKIN_VEHICLE_PAINT,
   VEHICLE_MODELS,
   hueSat,
   recolorPaint,
+  skinPaintTint,
   vehicleModelFor,
   vehicleModelRequest,
   vehiclePaint,
 } from "../src/world/vehicle-models.ts";
-import type { SkinPalette } from "../src/world/worldlabs-skins.ts";
+import { srgbToLinear, type SkinPalette } from "../src/world/worldlabs-skins.ts";
 
 const skin = { achieved: { "ac-bus": [163, 120, 24] } } as unknown as SkinPalette;
 
@@ -29,20 +31,67 @@ test("vehicleModelFor finds specs and returns null for procedural-only vehicles"
   expect(vehicleModelFor("truck")).toBeNull();
 });
 
-test("vehiclePaint prefers the skin, then the classic hex, then grey", () => {
-  expect(vehiclePaint("ac-bus", skin)).toEqual([163, 120, 24]);
-  expect(vehiclePaint("ac-car", skin)).toEqual([...CLASSIC_PAINT["ac-car"]!]);
+test("vehiclePaint prefers the skin override, then the achieved colour, then the classic hex, then grey", () => {
+  expect(vehiclePaint("ac-bus", skin)).toEqual([...SKIN_VEHICLE_PAINT["ac-bus"]!]);
+  expect(vehiclePaint("ac-car", skin)).toEqual([...SKIN_VEHICLE_PAINT["ac-car"]!]);
+  const rustSkin = { achieved: { "ac-rust": [90, 40, 30] } } as unknown as SkinPalette;
+  expect(vehiclePaint("ac-rust", rustSkin)).toEqual([90, 40, 30]);
+  expect(vehiclePaint("ac-bus", null)).toEqual([...CLASSIC_PAINT["ac-bus"]!]);
   expect(vehiclePaint("ac-car", null)).toEqual([...CLASSIC_PAINT["ac-car"]!]);
   expect(vehiclePaint("nope", null)).toEqual([128, 128, 128]);
+});
+
+test("the skinned bus is a saturated school-bus yellow, brighter than the panorama's", () => {
+  const [r, g, b] = SKIN_VEHICLE_PAINT["ac-bus"]!;
+  expect(r).toBeGreaterThan(200);
+  expect(g).toBeGreaterThan(130);
+  expect(b).toBeLessThan(60);
+  expect(r + g + b).toBeGreaterThan(163 + 120 + 24);
+});
+
+test("skinPaintTint scales the calibrated tint by the linear colour ratio", () => {
+  const t = skinPaintTint("ac-bus", skin, [10, 5, 1])!;
+  const want = SKIN_VEHICLE_PAINT["ac-bus"]!;
+  const got = [163, 120, 24];
+  for (let i = 0; i < 3; i++) {
+    const ratio = srgbToLinear(want[i]! / 255) / srgbToLinear(got[i]! / 255);
+    expect(t[i]).toBeCloseTo([10, 5, 1][i]! * ratio, 6);
+  }
+  expect(t[0]).toBeGreaterThan(10);
+  // No override, no measurement, or no skin: leave the tint alone.
+  expect(skinPaintTint("ac-rust", skin, [1, 1, 1])).toBeNull();
+  expect(skinPaintTint("ac-car", skin, [1, 1, 1])).toBeNull();
+  expect(skinPaintTint("ac-bus", null, [1, 1, 1])).toBeNull();
+});
+
+test("the bus widens so its body, not its mirrors, meets the 2.62 m collider", () => {
+  const bus = vehicleModelFor("bus")!;
+  expect(bus.widthScale).toBeCloseTo(2.62 / 2.48, 2);
+  expect(vehicleModelFor("car-green")!.widthScale).toBeUndefined();
 });
 
 test("vehicleModelRequest lays the model on the footprint with the spec yaw", () => {
   const spec = vehicleModelFor("bus")!;
   const r = vehicleModelRequest(spec, { id: "bus", x: 3, z: -4, yaw: 0.5, w: 2, d: 10 }, skin);
-  expect(r).toMatchObject({ id: spec.model, x: 3, z: -4, y: spec.y, scale: spec.scale, far: 160 });
+  expect(r).toMatchObject({
+    id: spec.model,
+    x: 3,
+    z: -4,
+    y: spec.y,
+    scale: spec.scale,
+    widthScale: spec.widthScale!,
+    far: 160,
+  });
   expect(r.yaw).toBeCloseTo(0.5 + spec.yawOffset);
+  expect(
+    vehicleModelRequest(
+      vehicleModelFor("car-green")!,
+      { id: "c", x: 0, z: 0, yaw: 0, w: 2, d: 5 },
+      null,
+    ).widthScale,
+  ).toBe(1);
   expect(r.vehicle).toEqual({
-    paint: [163, 120, 24],
+    paint: [...SKIN_VEHICLE_PAINT["ac-bus"]!],
     stockPaint: spec.stockPaint,
     minSat: spec.minSat,
   });

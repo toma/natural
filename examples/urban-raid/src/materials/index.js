@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { TextureForge } from "./generator.js";
 import { LIBRARY, resolveName } from "./library.js";
-import { extendMaterial, DEFAULT_PARAMS } from "./shader.js";
+import { extendMaterial, DEFAULT_PARAMS, OW_TIME, qualityParams } from "./shader.js";
 import { bakeMasks, setMask } from "./masks.js";
 
 /**
@@ -160,10 +160,13 @@ export class MaterialSystem {
    * clearly finished; `TextureForge._heightRT()` recreates on demand, so a late
    * bake still produces exactly the same texture, it just re-allocates first.
    *
-   * Nothing here touches a material, a uniform or a texture that is sampled, so
-   * it cannot move a pixel - it only changes when a scratch buffer is freed.
+   * The scratch release touches nothing that is sampled, so it cannot move a
+   * pixel. The only per-frame uniform is OW_TIME, which drives the foliage
+   * sway and is read only by materials built with `wind` (the skinned hedges).
    */
   update(dt) {
+    // The foliage sway clock. Wrapped so the sines keep full float precision.
+    OW_TIME.value = (OW_TIME.value + (dt > 0.25 ? 0.25 : dt)) % 3600;
     if (this._scratchFreed || !this._forge) return;
     this._idle += dt > 0.25 ? 0.25 : dt; // ignore load-hitch dt spikes
     if (this._idle < 5) return;
@@ -185,7 +188,7 @@ export class MaterialSystem {
     if (cached) return cached;
 
     const set = this.getTextureSet(key, opts);
-    const p = { ...DEFAULT_PARAMS, ...def.mat, ...opts };
+    const p = { ...DEFAULT_PARAMS, ...def.mat, ...qualityParams(opts, this._quality) };
     delete p.three;
     delete p.bake;
     p.groundY = opts.groundY ?? this._groundY;

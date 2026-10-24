@@ -118,3 +118,20 @@ test("the worldlabs grade keeps a sunlit pale yellow wall under display clip", (
   expect(out[0]).toBeLessThan(0.97);
   expect(out[0]).toBeGreaterThan(out[2]);
 });
+
+test("the worldlabs look grounds objects with stronger AO and contact shadows", () => {
+  const r = resolveLightingPreset("worldlabs").render!;
+  // Renderer defaults: aoIntensity 1.1, contactLength 0.4, contactStrength 1.0.
+  expect(r.aoIntensity).toBeGreaterThan(1.1);
+  expect(r.aoRadius).toBeGreaterThan(1.35);
+  expect(r.contactLength).toBeGreaterThan(0.4);
+  expect(r.contactLength).toBeLessThanOrEqual(1);
+  expect(r.contactStrength).toBeGreaterThan(1);
+  expect(r.sunSoftness).toBeGreaterThan(0.03);
+  expect(r.sunSoftness).toBeLessThan(0.06);
+  for (const [name, p] of Object.entries(LIGHTING_PRESETS)) {
+    if (name === "worldlabs") continue;
+    expect(p.render?.aoIntensity, `${name} keeps the default AO`).toBeUndefined();
+    expect(p.render?.contactLength, `${name} keeps the default contact`).toBeUndefined();
+  }
+});

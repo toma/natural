@@ -20,6 +20,11 @@ import * as THREE from "three";
  */
 
 const PARS_VERTEX = /* glsl */ `
+#ifdef OW_WIND
+  uniform float owTime;
+  uniform float owWind;
+  uniform float owGroundY;
+#endif
 varying vec3 vOwWPos;
 varying vec3 vOwWNrm;
 #ifdef OW_OBJECT_SPACE
@@ -29,6 +34,28 @@ varying vec3 vOwWNrm;
 #endif
 #ifdef OW_PARALLAX
   varying vec3 vOwViewDirP;
+#endif
+`;
+
+/**
+ * Foliage sway, injected after <begin_vertex> so every later stage (normals,
+ * shadows of the main pass, the world-position varying) sees the moved vertex.
+ * The sway grows with height above the ground so a hedge's foot and a lawn
+ * stay planted, and three incommensurate sines keep it from reading as a loop.
+ * Amplitude is centimetres: the G-buffer and shadow passes do not sway, and a
+ * few centimetres of mismatch is invisible where a decimetre would halo.
+ */
+const WIND_VERTEX = /* glsl */ `
+#ifdef OW_WIND
+{
+  vec3 owWv = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;
+  float owH = clamp( ( owWv.y - owGroundY - 0.3 ) / 1.6, 0.0, 1.0 );
+  float owPh = dot( owWv.xz, vec2( 0.37, 0.21 ) );
+  float owS = sin( owTime * 1.3 + owPh ) * 0.6
+            + sin( owTime * 2.9 + owPh * 2.3 ) * 0.25
+            + sin( owTime * 6.1 + dot( owWv, vec3( 3.1, 2.3, 2.7 ) ) ) * 0.15;
+  transformed.xz += vec2( 0.8, 0.45 ) * ( owS * owWind * owH );
+}
 #endif
 `;
 
@@ -100,6 +127,8 @@ uniform float owNormalAmp;
 uniform float owGroundY;
 uniform float owAoAmt;
 uniform float owMacroRelief;
+uniform vec4  owStreetP;     // x cracks, y tyre polish, z oil, w dust drifts
+uniform vec4  owLeafP;       // x clump relief, y dry clumps, zw unused
 
 // Explicit-gradient sampling keeps the mip selection correct through the
 // parallax march; OW_NOGRAD falls back to implicit derivatives.
@@ -137,6 +166,37 @@ float owHash11( float x ){
   p *= p + p;
   return fract( p );
 }
+
+#if defined( OW_STREET ) || defined( OW_LEAF )
+vec2 owHash22( vec2 p ){
+  vec3 p3 = fract( vec3( p.xyx ) * vec3( 0.1031, 0.1030, 0.0973 ) );
+  p3 += dot( p3, p3.yzx + 33.33 );
+  return fract( ( p3.xx + p3.yz ) * p3.zy );
+}
+/**
+ * Voronoi border distance (Quilez): x = distance to the nearest cell border in
+ * cell units, y = a 0..1 id of the owning cell. The border distance is exact,
+ * so a crack drawn at a fixed width in metres stays that width everywhere
+ * instead of thickening near cell corners the way F2-F1 does.
+ */
+vec2 owVoronoi( vec2 x ){
+  vec2 n = floor( x ), f = fract( x ), mg = vec2( 0.0 ), mr = vec2( 0.0 );
+  float md = 8.0;
+  for ( int j = -1; j <= 1; j++ ) for ( int i = -1; i <= 1; i++ ) {
+    vec2 g = vec2( float( i ), float( j ) );
+    vec2 r = g + owHash22( n + g ) - f;
+    float d = dot( r, r );
+    if ( d < md ) { md = d; mr = r; mg = g; }
+  }
+  md = 8.0;
+  for ( int j = -2; j <= 2; j++ ) for ( int i = -2; i <= 2; i++ ) {
+    vec2 g = mg + vec2( float( i ), float( j ) );
+    vec2 r = g + owHash22( n + g ) - f;
+    if ( dot( mr - r, mr - r ) > 1e-5 ) md = min( md, dot( 0.5 * ( mr + r ), normalize( r - mr ) ) );
+  }
+  return vec2( md, owHash11( dot( n + mg, vec2( 7.13, 113.37 ) ) ) );
+}
+#endif
 
 /**
  * Runoff staining below a source.
@@ -619,6 +679,84 @@ const MAIN_FRAGMENT = /* glsl */ `
 
   // ------------------------------------------------------------ tint ----
   alb.rgb *= owTintCol;
+
+  #ifdef OW_STREET
+  {
+    // Sun-baked desert asphalt. Runs after the tint, so the dust is an
+    // absolute colour rather than the road's dark tint multiplied into it.
+    float upS = smoothstep( 0.62, 0.9, owNw.y );
+    vec2 sp = vOwWPos.xz;
+    // Two warps: a broad one bends the network, a fine one makes each crack
+    // wander, so it never reads as a grid of flagstones.
+    vec4 wn = texture2D( owMacroTex, sp * 0.85 + 0.43 );
+    vec2 wp = sp + ( vec2( mac1.r, mac2.g ) - 0.5 ) * 1.6 + ( wn.rg - 0.5 ) * 0.45;
+    // Cracks: a ~3 m block network, only where the macro field says the road
+    // is old, broken into segments along their length, at a fixed 0.6-1.6 cm
+    // width with an analytic AA edge.
+    vec2 vc = owVoronoi( wp * 0.34 );
+    float eM = vc.x / 0.34;
+    float aa = max( fwidth( eM ), 1e-4 ) * 1.5;
+    float zone = smoothstep( 0.5, 0.66, mac1.a * 0.55 + mac2.b * 0.55 )
+               * smoothstep( 0.3, 0.55, wn.b );
+    float cw = 0.006 + 0.01 * wn.a;
+    float crack = ( 1.0 - smoothstep( cw, cw + aa, eM ) ) * zone;
+    // Crack-seal: a third of the cracks carry a glossy tar band poured over them.
+    float sealed = step( 0.66, vc.y );
+    float seal = ( 1.0 - smoothstep( 0.022, 0.04 + aa, eM ) ) * sealed * zone;
+    #ifndef OW_STREET_LITE
+      // Fine alligator cracking in a few fatigued patches.
+      vec2 vf = owVoronoi( wp * 2.6 + 13.1 );
+      float fE = vf.x / 2.6;
+      float fine = ( 1.0 - smoothstep( 0.003, 0.003 + max( fwidth( fE ), 1e-4 ) * 1.5, fE ) )
+                 * smoothstep( 0.6, 0.75, mac2.a );
+      crack = max( crack, fine * 0.8 );
+    #endif
+    crack *= owStreetP.x * upS * ( 1.0 - seal * 0.9 );
+    seal *= owStreetP.x * upS;
+    alb.rgb *= 1.0 - seal * 0.55;
+    orm.g = mix( orm.g, 0.34, seal * 0.85 );
+    alb.rgb *= 1.0 - crack * 0.78;
+    orm.r *= 1.0 - crack * 0.65;
+    orm.g = mix( orm.g, 1.0, crack * 0.5 );
+    // Tyre wear: long streaks along the street, polished darker and smoother.
+    float lane = texture2D( owMacroTex, vec2( sp.x * 0.016, sp.y * 0.4 ) + 0.13 ).g * 0.7
+               + texture2D( owMacroTex, vec2( sp.x * 0.05, sp.y * 1.3 ) + 0.57 ).r * 0.4;
+    float polish = smoothstep( 0.52, 0.74, lane ) * owStreetP.y * upS;
+    alb.rgb *= 1.0 - polish * 0.14;
+    orm.g = clamp( orm.g - polish * 0.22, 0.0, 1.0 );
+    // Oil drips: sparse dark blots, glossy, mostly in the tyre lanes.
+    float oilN = texture2D( owMacroTex, sp * 0.9 + 0.71 ).a * 0.8 + lane * 0.3;
+    float oil = smoothstep( 0.8, 0.87, oilN ) * owStreetP.z * upS;
+    alb.rgb *= 1.0 - oil * 0.5;
+    orm.g = mix( orm.g, 0.2, oil * 0.7 );
+    // Dust: fine desert dust drifted into the low-traffic areas. It fills the
+    // texture, so it also flattens the normal and kills the gloss.
+    float dN = texture2D( owMacroTex, sp * 0.065 + 0.29 ).b * 0.65 + mac1.b * 0.45;
+    float dust = smoothstep( 0.48, 0.8, dN ) * ( 1.0 - polish ) * owStreetP.w * upS;
+    alb.rgb = mix( alb.rgb, owDustCol * ( 0.85 + 0.3 * mac2.r ), dust * 0.6 );
+    orm.g = clamp( orm.g + dust * 0.3, 0.0, 1.0 );
+    nShade = normalize( mix( nShade, owP2V * owNw, dust * 0.5 ) );
+  }
+  #endif
+
+  #ifdef OW_LEAF
+  {
+    // Leaf clumps on a foliage mass: 10-12 cm cells, each tilted its own way
+    // and shaded by its own value, with dark gaps between them. This is what
+    // stops a hedge built from spheres reading as smooth green balls.
+    vec2 luv = mix( vec2( vOwWPos.x + vOwWPos.z * 0.71, vOwWPos.y ), vOwWPos.xz,
+                    step( 0.6, abs( owNw.y ) ) );
+    vec2 lc = owVoronoi( luv * 8.5 );
+    float bulge = sqrt( clamp( lc.x * 2.4, 0.0, 1.0 ) );
+    alb.rgb *= mix( 0.42, 1.08, bulge ) * ( 0.82 + 0.34 * lc.y );
+    alb.rgb *= mix( vec3( 1.0 ), vec3( 1.16, 1.06, 0.8 ), step( 0.78, lc.y ) * owLeafP.y );
+    orm.r *= mix( 0.5, 1.0, bulge );
+    orm.g = clamp( orm.g - 0.22 * bulge * owLeafP.x, 0.0, 1.0 );
+    vec3 cn = vec3( owHash11( lc.y * 17.3 ), owHash11( lc.y * 31.1 ), owHash11( lc.y * 47.9 ) ) - 0.5;
+    nShade = normalize( nShade + mat3( viewMatrix ) * cn * ( 1.1 * owLeafP.x ) );
+  }
+  #endif
+
   // owRoughP.w is a per-surface floor: tile, glass and painted metal must stay
   // glossy enough to actually catch a highlight.
   orm.g = clamp( orm.g * owRoughP.x + owRoughP.y, max( owRoughP.w, 0.015 ), 1.0 );
@@ -772,10 +910,41 @@ export const DEFAULT_PARAMS = {
   /** roughness [ scale, offset, minimum ] */
   roughness: [1, 0, 0.06],
   aoStrength: 1,
+  /**
+   * Street wear on up-facing faces: [ cracks + crack-seal, tyre polish, oil,
+   * dust drifts ]. All zero disables the layer. See OW_STREET in the shader.
+   */
+  street: [0, 0, 0, 0],
+  /** Foliage clumps: [ clump relief, dry clumps, unused, unused ]. 0 disables. */
+  leaf: [0, 0, 0, 0],
+  /** Foliage sway amplitude in metres at full height; 0 disables. */
+  wind: 0,
+  /** Drop the street layer's fine alligator cracks (medium quality). */
+  streetLite: false,
   alphaMask: false,
   vertexMasks: false,
   noGrad: false,
 };
+
+/**
+ * Shared clock for the foliage sway (OW_WIND). One uniform object is handed to
+ * every swaying material, so MaterialSystem.update advances them all at once.
+ */
+export const OW_TIME = { value: 0 };
+
+/**
+ * Scale the realism layers to a quality level (MaterialSystem's texture scale:
+ * 0.5 low, 0.75 medium, 1 high and up). Low drops the street, leaf and wind
+ * layers entirely; medium keeps them but skips the fine alligator cracks and
+ * the sway. Returns a new object when anything changes.
+ */
+export function qualityParams(p, quality) {
+  const street = p.street ?? DEFAULT_PARAMS.street;
+  const has = street.some((v) => v > 0) || (p.leaf?.[0] ?? 0) > 0 || (p.wind ?? 0) > 0;
+  if (!has || quality >= 1) return p;
+  if (quality < 0.75) return { ...p, street: [0, 0, 0, 0], leaf: [0, 0, 0, 0], wind: 0 };
+  return { ...p, streetLite: true, wind: 0 };
+}
 
 /** THREE.Color already converts hex (sRGB) into the linear working space. */
 function col(v) {
@@ -840,6 +1009,10 @@ export function extendMaterial(material, p, shared) {
     owGroundY: { value: p.groundY },
     owAoAmt: { value: p.aoStrength },
     owMacroRelief: { value: p.macroRelief ?? 0 },
+    owStreetP: { value: new THREE.Vector4(...(p.street ?? DEFAULT_PARAMS.street)) },
+    owLeafP: { value: new THREE.Vector4(...(p.leaf ?? DEFAULT_PARAMS.leaf)) },
+    owWind: { value: p.wind ?? 0 },
+    owTime: OW_TIME,
   };
 
   const defines = {};
@@ -855,6 +1028,12 @@ export function extendMaterial(material, p, shared) {
   if (p.vertexMasks) defines.OW_VCOL_MASKS = "";
   if (p.alphaMask) defines.OW_ALPHA_MASK = "";
   if (p.noGrad) defines.OW_NOGRAD = "";
+  if ((p.street ?? DEFAULT_PARAMS.street).some((v) => v > 0)) {
+    defines.OW_STREET = "";
+    if (p.streetLite) defines.OW_STREET_LITE = "";
+  }
+  if ((p.leaf?.[0] ?? 0) > 0) defines.OW_LEAF = "";
+  if ((p.wind ?? 0) > 0) defines.OW_WIND = "";
 
   Object.assign(material.defines ?? (material.defines = {}), defines);
   material.userData.owUniforms = u;
@@ -868,6 +1047,7 @@ export function extendMaterial(material, p, shared) {
 
     shader.vertexShader = shader.vertexShader
       .replace("#include <common>", "#include <common>\n" + PARS_VERTEX)
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\n" + WIND_VERTEX)
       .replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\n" + MAIN_VERTEX);
 
     // The pars block must land *after* three has declared map / normalMap /

@@ -236,6 +236,14 @@ export interface RenderHints {
   vignette?: number;
   /** Sun shadow penumbra softness. */
   sunSoftness?: number;
+  /** Ground-truth AO world radius in metres. */
+  aoRadius?: number;
+  /** Ground-truth AO strength. */
+  aoIntensity?: number;
+  /** Screen-space contact shadow ray length in metres. */
+  contactLength?: number;
+  /** Screen-space contact shadow strength. */
+  contactStrength?: number;
 }
 
 export interface LightingPreset {
@@ -269,7 +277,8 @@ export const LIGHTING_PRESETS: Record<string, LightingPreset> = {
       turbidity: 7.5,
       horizonMurk: 0.62,
       cloudCoverage: 0,
-      fogDensity: 0.45,
+      // Enough aerial perspective that the far houses and the range step back.
+      fogDensity: 0.6,
       cirrusCoverage: 0.06,
       skyVeil: [5.9, 6.0, 7.0, 0.9],
       horizonGain: 1.0,
@@ -285,7 +294,15 @@ export const LIGHTING_PRESETS: Record<string, LightingPreset> = {
       groundFill: 0.07,
       bounceFill: 0.04,
       vignette: 0.16,
-      sunSoftness: 0.06,
+      // A crisper penumbra than 0.06 (which read soft-focus at 10 m), with
+      // AO and contact shadows strong enough that props, kerbs and wheels sit
+      // on the ground: the high fill here lifts every shadow, so occlusion is
+      // what separates an object from what it rests on.
+      sunSoftness: 0.045,
+      aoRadius: 1.6,
+      aoIntensity: 1.35,
+      contactLength: 0.6,
+      contactStrength: 1.25,
     },
   },
   // Flat overcast: soft, cool, low contrast under a grey sky.

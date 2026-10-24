@@ -14,7 +14,7 @@
  */
 
 import type { PropBox } from "./atomic-culdesac-layout.ts";
-import type { Rgb, SkinPalette } from "./worldlabs-skins.ts";
+import { srgbToLinear, type Rgb, type SkinPalette } from "./worldlabs-skins.ts";
 
 export interface VehicleModelSpec {
   /** Layout vehicle id (VEHICLES in atomic-culdesac-layout.ts). */
@@ -41,6 +41,11 @@ export interface VehicleModelSpec {
    * bus raises it so its cream roof stays cream.
    */
   minSat: number;
+  /**
+   * Extra scale across the model (its local X) so the body, not the mirrors,
+   * matches the collider width. 1 when the model already fits.
+   */
+  widthScale?: number;
 }
 
 /**
@@ -59,6 +64,9 @@ export const VEHICLE_MODELS: readonly VehicleModelSpec[] = [
     paintKey: "ac-bus",
     stockPaint: [244, 212, 116],
     minSat: 0.3,
+    // The body is 2.48 m across (the 3.02 m extent is the mirrors) against
+    // the 2.62 m collider, so it widens 5.6% to put the flanks on the box.
+    widthScale: 1.056,
   },
   {
     vehicle: "car-green",
@@ -92,6 +100,19 @@ export const CLASSIC_PAINT: Readonly<Record<string, Rgb>> = {
   "ac-red": [0xa7, 0x3e, 0x35],
 };
 
+/**
+ * Paint the skin gives a vehicle instead of its calibrated achieved colour.
+ *
+ * The panorama's bus and car sit in shade and haze, so the calibrated colours
+ * came out a dull ochre and a grey-green. The street the skin reproduces is
+ * sunlit, so the bus wears school-bus chrome yellow and the sedan a period
+ * turquoise; both stay inside what car paint reaches under this sun.
+ */
+export const SKIN_VEHICLE_PAINT: Readonly<Record<string, Rgb>> = {
+  "ac-bus": [246, 184, 18],
+  "ac-car": [52, 118, 128],
+};
+
 export function vehicleModelFor(vehicle: string): VehicleModelSpec | null {
   return VEHICLE_MODELS.find((s) => s.vehicle === vehicle) ?? null;
 }
@@ -101,8 +122,25 @@ export function vehicleModelFor(vehicle: string): VehicleModelSpec | null {
  * the procedural vehicle at, else the classic hex, else a neutral grey.
  */
 export function vehiclePaint(key: string, skin: SkinPalette | null): Rgb {
-  const c = skin?.achieved[key] ?? CLASSIC_PAINT[key] ?? [128, 128, 128];
+  const c = (skin ? SKIN_VEHICLE_PAINT[key] : undefined) ??
+    skin?.achieved[key] ??
+    CLASSIC_PAINT[key] ?? [128, 128, 128];
   return [c[0], c[1], c[2]];
+}
+
+/**
+ * The procedural tint that lands a skinned vehicle key on SKIN_VEHICLE_PAINT.
+ * The renderer is linear in the tint, so the calibrated tint scales per channel
+ * by the linear ratio of the wanted colour to the colour it achieved. Null when
+ * the key has no override or the skin never measured it.
+ */
+export function skinPaintTint(key: string, skin: SkinPalette | null, tint: Rgb): Rgb | null {
+  const want = skin ? SKIN_VEHICLE_PAINT[key] : undefined;
+  const got = skin?.achieved[key];
+  if (!want || !got) return null;
+  const ratio = (i: 0 | 1 | 2) =>
+    srgbToLinear(want[i] / 255) / Math.max(srgbToLinear(got[i] / 255), 1e-4);
+  return [tint[0] * ratio(0), tint[1] * ratio(1), tint[2] * ratio(2)];
 }
 
 export interface VehicleModelRequest {
@@ -112,6 +150,7 @@ export interface VehicleModelRequest {
   y: number;
   yaw: number;
   scale: number;
+  widthScale: number;
   far: number;
   vehicle: { paint: Rgb; stockPaint: Rgb; minSat: number };
 }
@@ -129,6 +168,7 @@ export function vehicleModelRequest(
     y: spec.y,
     yaw: box.yaw + spec.yawOffset,
     scale: spec.scale,
+    widthScale: spec.widthScale ?? 1,
     far: 160,
     vehicle: {
       paint: vehiclePaint(spec.paintKey, skin),

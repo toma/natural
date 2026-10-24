@@ -7,7 +7,7 @@ import { windowUnit, doorUnit } from "./kit.js";
 import { loadPbrSet } from "../materials/textures.js";
 import { beveledBoxGeometry } from "./box-bevel.js";
 import { skinClean, skinFinish, skinTint } from "./worldlabs-skins.ts";
-import { vehicleModelFor, vehicleModelRequest } from "./vehicle-models.ts";
+import { skinPaintTint, vehicleModelFor, vehicleModelRequest } from "./vehicle-models.ts";
 import { emptyMesh, vcount, computeNormals, weldNormals } from "../ai/geo.js";
 import {
   HOUSES,
@@ -47,7 +47,10 @@ function materials(A, rng) {
   // read exactly as they do with the classic palette.
   const skin = A.skin ?? null;
   const surface = (key, color, kind, roughness = 0.8, metalness = 0) => {
-    const skinned = skinTint(skin, key);
+    const calibrated = skinTint(skin, key);
+    // Skinned vehicle paint is pushed from the shaded panorama colour to a
+    // sunlit one (SKIN_VEHICLE_PAINT); everything else keeps its calibration.
+    const skinned = calibrated ? (skinPaintTint(key, skin, calibrated) ?? calibrated) : null;
     const tint = skinned ? new THREE.Color(...skinned) : new THREE.Color(color).getHex();
     let name, surf, opts;
     switch (kind) {
@@ -73,6 +76,12 @@ function materials(A, rng) {
                 tint,
                 scale: 1.7,
                 normalStrength: 0.35,
+                // Sun and dust on a lived-in street: a 10-15 m bleach band,
+                // patchy roughness so the low sun glints off some boards and
+                // not others, and a taller dust splash at the foot of the wall.
+                macro: [0.12, 0.08, 0.16, 0.12],
+                macroBig: [1.3, 0.06, 0.07, 0],
+                weather: [0.1, 0.06, 0.5, 0.36],
               }
             : {
                 tint,
@@ -94,6 +103,17 @@ function materials(A, rng) {
         name = "dirt";
         surf = "foliage";
         opts = { tint, scale: 2.3, detile: 0.8, weather: [0.18, 0, 0, 0.2] };
+        if (skin) {
+          // Desert lawns: drifts of dry dust through the green, and a stronger
+          // macro so the lawn has worn and lush patches. The hedge and tree
+          // masses (ac-hedge) get leaf clumps and a few centimetres of sway.
+          opts.street = [0, 0, 0, key === "ac-hedge" ? 0.25 : 0.75];
+          opts.macro = [0.055, 0.6, 0.24, 0.6];
+          if (key === "ac-hedge") {
+            opts.leaf = [1, 0.6, 0, 0];
+            opts.wind = 0.035;
+          }
+        }
         break;
       case "roof":
         name = "asphalt";
@@ -109,6 +129,14 @@ function materials(A, rng) {
         name = "asphalt";
         surf = "concrete";
         opts = { tint, scale: 3.0, detile: 0.8, wear: [0, 0.5, 0.45, 0] };
+        if (skin) {
+          // Sun-baked desert asphalt: cracks with crack-seal, polished tyre
+          // lanes, oil drips and dust drifts (OW_STREET), plus a 12 m band of
+          // fresh and faded paving. The tar patches are newer: glossier, no
+          // crack network.
+          opts.street = key === "ac-tar" ? [0, 0.6, 0.4, 0.4] : [1, 1, 1, 1];
+          opts.macroBig = [1.4, 0.1, 0.03, 0];
+        }
         break;
       case "sand":
         name = "sand";
@@ -146,7 +174,11 @@ function materials(A, rng) {
         opts = { tint, scale: 2.4 };
     }
     // Fresh concrete and kerbs under the skin: lighter dust and grime.
-    if (name === "concrete" && skinClean(skin, key)) opts.weather = [0.12, 0.08, 0.2, 0.25];
+    if (name === "concrete" && skinClean(skin, key)) {
+      opts.weather = [0.12, 0.08, 0.2, 0.25];
+      // Kerbs and walks collect the street's dust in drifts, never polish.
+      if (key === "ac-concrete") opts.street = [0, 0, 0, 0.6];
+    }
     const finish = skinFinish(skin, key);
     // Skinned vehicle paint is factory enamel under a lacquer: the painted
     // metal bake's chips, rust bloom and sun bleaching read as camouflage

@@ -354,6 +354,16 @@ visual fixture.
   (any channel at 253 or more) on the yellow pose after any grade change. Measure frame time with
   paired runs against a worktree of the previous commit on the same machine; one-off numbers from
   different sessions disagree by several ms.
+- Shader pass 2 learnings (skinned map only): the street layer (`street`: cracks, polish, oil,
+  dust) needs a double domain warp on the Voronoi input, or the crack network reads as a regular
+  flagstone grid; seal only a third of the cracks and keep oil thresholds high. Leaf clumps
+  (`leaf`) and wind sway (`wind`) only shift the colour pass: the GBuffer prepass uses its own
+  material, so keep sway at a few centimetres or AO and SSR halo around canopies, and do not
+  discard leaf silhouettes for the same reason. `qualityParams` drops these layers to a lite street
+  on medium and removes them on low. Skin paint overrides (`SKIN_VEHICLE_PAINT`) are applied as a
+  per-channel linear ratio over the achieved colour because palette tints clamp at `MAX_TINT`.
+  Classic captures differ between runs of the same commit by about as much as across commits (sun
+  drift, transient decals), so compare against a second baseline run before calling a diff real.
 - Vehicle model learnings (urban-raid): a model-backed vehicle runs its procedural builder on
   `colliderOnly(A)` (an `Object.create(A)` with `add` and `addBox` stubbed), so colliders, prop
   OBBs and nav blockers stay byte-identical while only the visuals are swapped. The model path is

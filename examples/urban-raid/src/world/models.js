@@ -54,7 +54,7 @@ function loadScene(url) {
 /**
  * Load each request and add it to `root`, baking the level-to-world transform
  * into the instance like the rest of the world. Requests are
- * { id, x, z, yaw?, y?, scale?, far? } in level coordinates. Resolves after all
+ * { id, x, z, yaw?, y?, scale?, widthScale?, far? } in level coordinates. Resolves after all
  * have loaded; LODs are pushed into `outLods` as they appear.
  */
 export async function placeModels(root, xform, requests, outLods) {
@@ -77,7 +77,7 @@ export async function placeModels(root, xform, requests, outLods) {
       const local = new THREE.Matrix4().compose(
         new THREE.Vector3(r.x, r.y ?? 0, r.z),
         new THREE.Quaternion().setFromEuler(new THREE.Euler(0, r.yaw ?? 0, 0)),
-        new THREE.Vector3(sc, sc, sc),
+        new THREE.Vector3(sc * (r.widthScale ?? 1), sc, sc),
       );
       const world = new THREE.Matrix4().multiplyMatrices(xform, local);
       const lod = new THREE.LOD();
