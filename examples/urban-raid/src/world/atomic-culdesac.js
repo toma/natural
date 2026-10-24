@@ -6,6 +6,7 @@ import { furnishRoom } from "./interiors.js";
 import { windowUnit, doorUnit } from "./kit.js";
 import { loadPbrSet } from "../materials/textures.js";
 import { beveledBoxGeometry } from "./box-bevel.js";
+import { buildGarage, buildInterior, interiorMaterials } from "./house-interior-build.js";
 import { skinClean, skinFinish, skinTint } from "./worldlabs-skins.ts";
 import { skinPaintTint, vehicleModelFor, vehicleModelRequest } from "./vehicle-models.ts";
 import { emptyMesh, vcount, computeNormals, weldNormals } from "../ai/geo.js";
@@ -735,78 +736,6 @@ function stairs(
   }
 }
 
-function furnish(K, house) {
-  K.box("ac-tiles", 2.4, 0.18, -2.7, 6.3, 0.03, 4.15, false);
-  wall(K, "ac-wallpaper", 0, -4.78, 11.5, 2.8, [
-    { x: 0.8, y: 0.16, w: 1.6, h: 2.35 },
-    { x: -3, y: 1.3, w: 2.2, h: 1.25 },
-  ]);
-  // Kitchen cabinets, sink, oven and chrome stools.
-  for (let x = 2.15; x < 5.2; x += 0.85) {
-    K.round("ac-rust", x, 0.61, -4.3, 0.8, 0.85, 0.65, 0.025, true);
-    K.round("ac-rust", x, 0.69, -3.95, 0.7, 0.6, 0.055, 0.018, false);
-    K.box("ac-dark", x, 0.23, -4, 0.77, 0.09, 0.08, false);
-    K.box("ac-cream", x, 1.08, -4.3, 0.87, 0.08, 0.78, false);
-    K.round("ac-rust", x, 2.25, -4.45, 0.8, 0.8, 0.4, 0.018, false);
-    K.box("ac-chrome", x + 0.24, 0.85, -3.94, 0.16, 0.026, 0.04, false);
-    K.box("ac-chrome", x + 0.24, 2.11, -4.21, 0.025, 0.18, 0.04, false);
-  }
-  K.box("ac-dark", 3, 1.125, -4.3, 0.55, 0.025, 0.44, false);
-  K.line("ac-chrome", [3, 1.1, -4.55], [3, 1.42, -4.55], 0.025);
-  K.line("ac-chrome", [3, 1.42, -4.55], [3, 1.42, -4.3], 0.025);
-  K.round("ac-enamel", 5.2, 1.22, -3.1, 0.88, 2.08, 0.9, 0.12, true);
-  K.round("ac-enamel", 5.2, 1.04, -2.62, 0.8, 1.52, 0.12, 0.055, false);
-  K.round("ac-enamel", 5.2, 2.04, -2.62, 0.8, 0.4, 0.12, 0.05, false);
-  K.box("ac-chrome", 4.92, 1.45, -2.53, 0.055, 0.39, 0.065, false);
-  K.box("ac-chrome", 4.92, 2.02, -2.53, 0.055, 0.15, 0.065, false);
-  K.round("ac-enamel", 2.15, 0.63, -4.25, 0.78, 0.87, 0.8, 0.04, true);
-  K.round("ac-dark", 2.15, 0.64, -3.81, 0.56, 0.44, 0.025, 0.025, false);
-  K.line("ac-chrome", [1.86, 0.92, -3.76], [2.43, 0.92, -3.76], 0.024);
-  for (const x of [1.91, 2.08, 2.25, 2.42]) K.sphere("ac-dark", x, 1.06, -3.8, 0.038, 0.038, 0.025);
-  for (let x = 1.94; x < 2.54; x += 0.35)
-    for (let z = -4.45; z < -3.9; z += 0.35) K.cylinder("ac-dark", x, 1.085, z, 0.115, 0.014);
-  K.round("ac-orange", 2.3, 0.98, -1.8, 1.8, 0.1, 0.95, 0.045, true);
-  for (const x of [1.65, 2.95])
-    for (const z of [-2.1, -1.5]) K.cylinder("ac-chrome", x, 0.58, z, 0.035, 0.8);
-  for (const x of [1.6, 2.9]) {
-    K.box("ac-yellow", x, 0.63, -0.75, 0.53, 0.13, 0.53, true);
-    K.box("ac-yellow", x, 1, -0.53, 0.53, 0.65, 0.09, false);
-    for (const dx of [-0.2, 0.2])
-      for (const dz of [-0.2, 0.2]) K.cylinder("ac-chrome", x + dx, 0.39, -0.75 + dz, 0.027, 0.4);
-  }
-  // Living room couch, rug, coffee table and period television.
-  K.box("ac-orange", 1.4, 0.2, 2.45, 4.4, 0.035, 3, false);
-  K.round("ac-sofa", 3.8, 0.55, 2.1, 1.15, 0.7, 2.8, 0.13, true);
-  K.round("ac-sofa", 4.3, 1.02, 2.1, 0.25, 0.85, 2.9, 0.1, false);
-  for (const z of [0.65, 3.55]) K.round("ac-sofa", 3.8, 0.87, z, 1.15, 0.55, 0.2, 0.07, false);
-  for (let z = 1; z < 3.5; z += 0.85) K.box("ac-cream", 3.7, 0.88, z, 0.9, 0.16, 0.77, false);
-  K.box("ac-wood", 1.6, 0.65, 2.1, 1.45, 0.1, 1.75, true);
-  for (const x of [1.05, 2.15])
-    for (const z of [1.4, 2.8]) K.cylinder("ac-wood", x, 0.39, z, 0.045, 0.5);
-  K.box("ac-wood", -0.4, 0.88, 4.3, 1.3, 1.05, 0.55, true);
-  K.box("ac-dark", -0.5, 0.99, 3.99, 0.91, 0.65, 0.045, false);
-  K.sphere("ac-glass", -0.5, 0.99, 3.96, 0.42, 0.28, 0.06);
-  for (const x of [-0.7, -0.3]) K.line("ac-chrome", [-0.5, 1.4, 4.2], [x, 1.95, 4.2], 0.01);
-  K.art("ac-art", 0, 1.92, -0.57, 1.5, 1.25);
-  K.box("ac-plaster", 1.1, FLOOR_HEIGHT - 0.075, 0, 9.6, 0.015, 9.75, false);
-  // Upper room, bed, writing desk, curtains, lamp.
-  const y = FLOOR_HEIGHT;
-  K.box("ac-wood", 2.6, y + 0.4, -2.1, 2.6, 0.4, 3.6, true);
-  K.box("ac-cream", 2.6, y + 0.72, -2.1, 2.5, 0.3, 3.5, true);
-  K.box("ac-blue", 2.6, y + 0.91, -1.45, 2.52, 0.12, 2.1, false);
-  for (const x of [1.95, 3.22]) K.sphere("ac-white", x, y + 0.95, -3.2, 0.55, 0.14, 0.34);
-  K.box("ac-wood", -0.4, y + 0.96, 3.85, 2.6, 0.13, 0.85, true);
-  for (const x of [-1.5, 0.7])
-    for (const z of [3.55, 4.1]) K.box("ac-wood", x, y + 0.55, z, 0.08, 0.8, 0.08, false);
-  for (const x of [-1.9, 1.9]) K.box("ac-blue", x, y + 1.65, 4.66, 0.5, 2.6, 0.13, false);
-  for (const z of [2, -2.5]) {
-    K.cylinder("ac-dark", 1, 2.88, z, 0.012, 0.45);
-    K.geo("ac-yellow", A_lamp(), 1, 2.64, z);
-    K.sphere("ac-bulb", 1, 2.57, z, 0.1, 0.07, 0.1);
-  }
-}
-const A_lamp = () => new THREE.ConeGeometry(0.29, 0.16, 16, 1, true);
-
 /**
  * Glaze the street facade with kit window and door units: recessed frames,
  * mullions, real glass, stone sills, shutters, and an ajar front door. The
@@ -884,7 +813,7 @@ function house(A, spec, rng) {
     -6,
     0,
     10,
-    [{ x: -0.2, y: 0.16, w: 1.7, h: 2.3 }, win(2.6, y + 1.1, 1.6, 1.5)],
+    [{ x: 2.2, y: 0.16, w: 1.2, h: 2.25 }, win(2.6, y + 1.1, 1.6, 1.5)],
     Math.PI / 2,
   );
   splitWall(6, 0, 10, [win(-2, 1.1, 2, 1.5), win(2, y + 1.1, 2, 1.5)], Math.PI / 2);
@@ -1000,13 +929,9 @@ function house(A, spec, rng) {
   K.box("ac-stone", 2.0, 0.34, 5.23, 8.2, 0.36, 0.1, false);
   K.box("ac-stone", -5.05, 0.34, 5.23, 1.9, 0.36, 0.1, false);
   K.box("ac-stone", 6.23, 0.34, 0, 0.1, 0.36, 10.4, false);
-  // Floor leaves a real stair opening along the left wall.
-  K.box("ac-wood", 1.1, y + 0.04, 0, 9.6, 0.2, 9.75, true);
-  K.box("ac-wood", -4.75, y + 0.04, 3.1, 2.1, 0.2, 3.6, true);
-  K.box("ac-wood", -4.75, y + 0.04, -4.2, 2.1, 0.2, 1.35, true);
-  stairs(K, -4.72, -3.3, 1.65);
-  wall(K, "ac-cream", 1.1, -0.7, 9.4, 2.83, [{ x: -1.9, y: 0.16, w: 1.6, h: 2.4 }], 0);
-  wall(K, "ac-cream", 0, -0.2, 11.6, 2.83, [{ x: -2.8, y: y + 0.16, w: 1.8, h: 2.4 }], 0, y + 0.16);
+  // The furnished interior: partitions, stair, finishes, furniture and lights
+  // (house-interior-build.js, plan in house-interiors.ts).
+  const roomLights = buildInterior(A, K, spec, { wall, stairs, balustrade });
   // Roofs and chimney distinguish the two houses at a glance: the green house
   // has a gable with its ridge along the street, the yellow a perpendicular
   // gable. Both carry eave overhangs, fascia boards, and a ridge cap.
@@ -1172,8 +1097,10 @@ function house(A, spec, rng) {
     K.box("ac-white", -9.2, 4.32, 5.1, 7.4, 0.18, 0.1, false, 0, 0, 0.34); // fascia
     for (const z of [-2.8, 1, 4.6]) K.box("ac-white", -12.2, 1.72, z, 0.16, 3.3, 0.16, true); // posts
   }
-  K.box("ac-wood", -10.9, 0.9, -1.6, 1.4, 1.5, 0.8, true);
-  K.box("ac-wood", -7.4, 0.61, -1.9, 1.2, 0.9, 1.1, true);
+  // Crates in the garage bay: cover between the side door and the rear door.
+  K.box("ac-wood", -9.6, 0.91, 0.2, 1.4, 1.5, 0.8, true);
+  K.box("ac-wood", -7.3, 0.61, 2.6, 1.2, 0.9, 1.1, true);
+  if (spec.id === "green") roomLights.push(...buildGarage(A, K, A.render?.qLevel ?? 3));
   // Rear deck and external staircase form the second route upstairs.
   K.box("ac-wood", -0.9, y + 0.02, -6.4, 9.8, 0.24, 2.5, true);
   for (const x of [-5.6, 3.8])
@@ -1184,15 +1111,14 @@ function house(A, spec, rng) {
   for (let x = -5.5; x < 2; x += 0.3)
     K.box("ac-white", x, y + 0.58, -7.63, 0.055, 0.88, 0.055, false);
   stairs(K, 3.05, -12.2, 1.55, 16, 0.29, y / 16, 0);
-  furnish(K, spec);
-  for (const z of [2, -2.5]) {
-    const p = housePoint(spec, 1, z);
-    A.interiorLights.push({ x: p.x, y: 2.6, z: p.z });
+  for (const l of roomLights) {
+    const p = housePoint(spec, l.x, l.z);
+    A.interiorLights.push({ x: p.x, y: l.y, z: p.z });
   }
-  const p = housePoint(spec, 0, 0);
-  A.interiorLights.push({ x: p.x, y: 5.7, z: p.z });
   kitFront(A, rng, spec);
-  return { spec };
+  // The published footprint is the outer wall skin (walls are centred on the
+  // nominal edge), which is what the renderer's indoor-light gate keys off.
+  return { spec: { ...spec, w: spec.w + 0.24, d: spec.d + 0.24, enterable: true }, roofY: 6.36 };
 }
 
 /** Convert a {p,n,uv,i} mesh record from the character loft toolkit into a BufferGeometry. */
@@ -1853,9 +1779,30 @@ function dressYards(A, rng) {
  * bed on the right.
  */
 function furnishHouse(A, rng, h) {
+  // The house interiors are now built by house-interior-build.js. The legacy
+  // room dresser still runs against a sink so its random draws are consumed
+  // and the yard, verge and road dressing that follows is laid out exactly as
+  // before; nothing it makes reaches the scene.
+  const cached = new Set(A._geoCache?.values?.() ?? []);
+  const drop = (g) => {
+    if (g && !cached.has(g)) g.dispose?.();
+  };
+  const sink = {
+    add: (_k, g) => drop(g),
+    addOnce: (_k, g) => drop(g),
+    box() {},
+    put() {},
+    cache: (k, f) => {
+      const g = A.cache(k, f);
+      cached.add(g);
+      return g;
+    },
+    interiorLights: [],
+    skirts: A.skirts,
+  };
   const c0 = housePoint(h, -5, -4);
   const c1 = housePoint(h, 0.5, 4);
-  furnishRoom(A, rng, {
+  furnishRoom(sink, rng, {
     kind: "living",
     x0: Math.min(c0.x, c1.x),
     x1: Math.max(c0.x, c1.x),
@@ -1929,6 +1876,19 @@ function enhancePbr(A) {
  * road-edge chips and tar patches, and gentle dunes on the sand ring. All of
  * it is static merged geometry; live wind sway on the blades is not modeled.
  */
+/** True on a house or garage slab (house-local footprint plus the garage bay). */
+function underRoof(x, z) {
+  for (const h of HOUSES) {
+    const c = Math.cos(h.yaw),
+      s = Math.sin(h.yaw);
+    const lx = c * (x - h.x) - s * (z - h.z);
+    const lz = s * (x - h.x) + c * (z - h.z);
+    if (Math.abs(lx) < h.w / 2 + 0.2 && Math.abs(lz) < h.d / 2 + 0.2) return true;
+    if (Math.abs(lx + 9) < 3.2 && Math.abs(lz - 1) < 4.2) return true;
+  }
+  return false;
+}
+
 function groundCover(A, rng) {
   const K = kit(A);
   const vergeZ = () => (rng.range(0, 1) < 0.5 ? 1 : -1) * rng.range(8.2, 13.5);
@@ -1937,11 +1897,16 @@ function groundCover(A, rng) {
       z = vergeZ(),
       blades = 4 + Math.floor(rng.range(0, 3)),
       key = rng.range(0, 1) < 0.5 ? "ac-grass" : "ac-hedge";
+    // The verge band crosses the house and garage slabs. The draws still run
+    // so the rest of the dressing stream is unchanged, but nothing is placed
+    // through a floor.
+    const indoors = underRoof(x, z);
     for (let b = 0; b < blades; b++) {
       const a = rng.range(0, Math.PI * 2),
         off = rng.range(0, 0.06),
         h = rng.range(0.13, 0.27),
         lean = rng.range(0.12, 0.33);
+      if (indoors) continue;
       K.box(
         key,
         x + Math.cos(a) * off,
@@ -1962,19 +1927,11 @@ function groundCover(A, rng) {
       z = vergeZ(),
       t = rng.range(0, 1),
       key = t < 0.4 ? "ac-orange" : t < 0.7 ? "ac-rust" : "ac-wood";
-    K.box(
-      key,
-      x,
-      0.126,
-      z,
-      rng.range(0.07, 0.15),
-      0.008,
-      rng.range(0.05, 0.12),
-      false,
-      0,
-      rng.range(0, Math.PI),
-      0,
-    );
+    const sx = rng.range(0.07, 0.15),
+      sz = rng.range(0.05, 0.12),
+      ry = rng.range(0, Math.PI);
+    if (underRoof(x, z)) continue;
+    K.box(key, x, 0.126, z, sx, 0.008, sz, false, 0, ry, 0);
   }
   for (let i = 0; i < 60; i++) {
     const x = rng.range(-22, 22),
@@ -2167,6 +2124,7 @@ function roadWear(A, rng) {
 
 export function buildAtomicCuldesac(A, rng) {
   materials(A, rng);
+  interiorMaterials(A, texture);
   registerProps(A, rng);
   const K = kit(A);
   // Sand extends to the atmospheric horizon; only the fenced map is playable.
