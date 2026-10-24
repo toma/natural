@@ -198,7 +198,7 @@ export class WorldSystem {
       // from a black hole, so it has to actually carry the room.
       // Intensity is re-driven every update() off the solar altitude; this is
       // the daylight value so a frame captured before the first update is right.
-      const l = new THREE.PointLight(0xffc07a, 5, 13, 2);
+      const l = new THREE.PointLight(0xffd3a0, 7, 13, 2);
       l.position.set(b.x, b.y, b.z);
       l.castShadow = false;
       A.light(l, { range: 13, priority: 2 });
@@ -350,7 +350,7 @@ export class WorldSystem {
       // interior read as pure tungsten (B-R -93) and sit level with the sunlit
       // street instead of 1.5-2.5 stops under it. Gate the bulb on solar
       // altitude: a weak practical by day, the room's only light after dark.
-      for (let i = 0; i < this.bulbs.length; i++) this.bulbs[i].intensity = 5 + 17 * mix;
+      for (let i = 0; i < this.bulbs.length; i++) this.bulbs[i].intensity = 7 + 15 * mix;
     }
   }
 

@@ -688,7 +688,7 @@ export function calendar(g, n) {
  * Flat interior paint over skim plaster: the base colour with a faint trowel
  * mottle, so a large wall reads as a painted surface under raking light.
  */
-export function flatPaint(hex) {
+export function flatPaint(hex, mottle = 1) {
   return (g, n) => {
     fill(g, n, hex);
     const r = seeded(211);
@@ -697,7 +697,7 @@ export function flatPaint(hex) {
         y = r() * n,
         rad = n * (0.05 + r() * 0.12);
       const grd = g.createRadialGradient(x, y, 0, x, y, rad);
-      const a = 0.025 + r() * 0.03;
+      const a = (0.025 + r() * 0.03) * mottle;
       grd.addColorStop(0, r() < 0.5 ? `rgba(255,255,255,${a})` : `rgba(0,0,0,${a})`);
       grd.addColorStop(1, "rgba(0,0,0,0)");
       g.fillStyle = grd;
@@ -710,5 +710,20 @@ export function flatPaint(hex) {
         }
     }
     noise(g, n, 6, 212);
+  };
+}
+
+/** Upholstery or drapery weave: a fine warp and weft over the base colour. */
+export function weave(hex) {
+  return (g, n) => {
+    fill(g, n, hex);
+    const step = n / 64;
+    for (let i = 0; i < 64; i++) {
+      g.fillStyle = i % 2 ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)";
+      g.fillRect(i * step, 0, step * 0.5, n);
+      g.fillStyle = i % 2 ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.04)";
+      g.fillRect(0, i * step, n, step * 0.5);
+    }
+    noise(g, n, 10, 221);
   };
 }

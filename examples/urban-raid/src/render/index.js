@@ -437,7 +437,10 @@ export class RenderSystem {
       // Indirect floor inside a coarse interior volume. Skylight does not reach
       // the middle of a closed room; without this the doorway reads as a hole
       // cut in a card because the room is brighter than the street outside it.
-      interiorIndirect: 0.035,
+      // Raised from 0.035 with the furnished houses: their rooms are glazed on
+      // three sides, so the daylight through the windows is a real share of
+      // the fill and the warm bulbs alone left them brown.
+      interiorIndirect: 0.07,
       // Global trim on room and street practicals (see PRACTICAL_RANGE).
       //
       // Twenty interior bulbs and twenty-two sodium lamps are the ONLY light in

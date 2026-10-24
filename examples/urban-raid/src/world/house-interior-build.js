@@ -64,23 +64,6 @@ export function interiorMaterials(A, texture) {
       A.materials.get(name, { tint: new THREE.Color(hex).getHex(), ...extra }),
       surf,
     );
-  for (const [k, hex] of [
-    ["teal", "#3d7670"],
-    ["olive", "#7a7b40"],
-    ["mustard", "#c49533"],
-    ["green", "#4d6c4b"],
-    ["orange", "#ae5a35"],
-    ["blue", "#4a6990"],
-    ["red", "#9c3a31"],
-    ["linen", "#e5ded0"],
-    ["shirt", "#8fa9c4"],
-    ["navy", "#2e3b52"],
-    ["skirt", "#d9b2ab"],
-    ["blanket-red", "#8b3a30"],
-    ["blanket-blue", "#3d5b80"],
-    ["drape-gold", "#b39550"],
-  ])
-    lib(`ac-in-${k}`, "fabric", hex, "fabric", { scale: 0.28, three: { side: THREE.DoubleSide } });
   lib("ac-in-walnut", "wood", "#5c3c25", "wood", { scale: 1.1, normalStrength: 1.0 });
   lib("ac-in-maple", "wood", "#b5824f", "wood", { scale: 1.1, normalStrength: 1.0 });
   lib("ac-in-honey", "wood", "#a8743f", "wood", { scale: 1.1, normalStrength: 1.0 });
@@ -152,6 +135,13 @@ export function interiorMaterials(A, texture) {
       params.bumpScale = opts.bumpScale ?? 1.5;
     }
     if (opts.alphaTest) params.alphaTest = opts.alphaTest;
+    // Fake bounce: a ceiling fixture lights its own ceiling only at grazing
+    // angles, so without GI the ceiling reads as a brown lid.
+    if (opts.bounce) {
+      params.emissive = new THREE.Color(opts.bounce[0]);
+      params.emissiveMap = params.map;
+      params.emissiveIntensity = opts.bounce[1];
+    }
     const mat = opts.clearcoat
       ? new THREE.MeshPhysicalMaterial({
           ...params,
@@ -161,12 +151,37 @@ export function interiorMaterials(A, texture) {
       : new THREE.MeshStandardMaterial(params);
     return A.registerMaterial(key, mat, opts.surf ?? "plaster");
   };
-  canvas("ac-in-sage", P.flatPaint("#b9bf9a"), 256, {
+  canvas("ac-in-sage", P.flatPaint("#cdd3b4"), 256, {
     rough: 0.92,
     bump: P.flatPaint("#808080"),
     bumpScale: 0.6,
   });
-  canvas("ac-in-ceiling", P.flatPaint("#e6e0d0"), 256, { rough: 0.95 });
+  canvas("ac-in-trim", P.flatPaint("#e2d9c6"), 128, { rough: 0.6 });
+  canvas("ac-in-ceiling", P.flatPaint("#f1ede4", 0.25), 256, {
+    rough: 0.95,
+    bounce: ["#fff1dc", 0.22],
+  });
+  for (const [k, hex] of [
+    ["teal", "#3d7670"],
+    ["olive", "#7a7b40"],
+    ["mustard", "#c49533"],
+    ["green", "#4d6c4b"],
+    ["orange", "#ae5a35"],
+    ["blue", "#4a6990"],
+    ["red", "#9c3a31"],
+    ["linen", "#e5ded0"],
+    ["shirt", "#8fa9c4"],
+    ["navy", "#2e3b52"],
+    ["skirt", "#d9b2ab"],
+    ["blanket-red", "#8b3a30"],
+    ["blanket-blue", "#3d5b80"],
+    ["drape-gold", "#b39550"],
+  ])
+    canvas(`ac-in-${k}`, P.weave(hex), 256, {
+      rough: 0.95,
+      side: THREE.DoubleSide,
+      surf: "fabric",
+    });
   const fabric = { rough: 1, surf: "fabric" };
   const sheet = { rough: 1, side: THREE.DoubleSide, surf: "fabric" };
   canvas("ac-in-floral", P.floralPaper, big, { rough: 0.9 });
@@ -187,13 +202,12 @@ export function interiorMaterials(A, texture) {
     clearcoat: 0.4,
     surf: "wood",
   });
-  const tile = { rough: 0.4, bump: P.checkerBump, bumpScale: 1, clearcoat: 0.25, surf: "concrete" };
+  const tile = { rough: 0.45, bump: P.checkerBump, bumpScale: 1, surf: "concrete" };
   canvas("ac-in-check-blue", P.checker("#ece7da", "#3d5f8e"), big, tile);
   canvas("ac-in-check-yellow", P.checker("#ece7da", "#d9b23f"), big, tile);
   canvas("ac-in-oak", P.oakFloor, big, {
-    rough: 0.5,
+    rough: 0.62,
     bump: P.oakBump,
-    clearcoat: 0.2,
     surf: "wood",
   });
   canvas("ac-in-plaid", P.plaidCarpet, 512, fabric);
@@ -1449,8 +1463,8 @@ export function buildInterior(A, K, spec, shell) {
     for (const [a, b] of spans) {
       const m = (a + b) / 2,
         off = face.at + face.side * depth;
-      if (face.axis === "x") K.box("ac-white", m, y, off, b - a, h, depth * 2, false);
-      else K.box("ac-white", off, y, m, depth * 2, h, b - a, false);
+      if (face.axis === "x") K.box("ac-in-trim", m, y, off, b - a, h, depth * 2, false);
+      else K.box("ac-in-trim", off, y, m, depth * 2, h, b - a, false);
     }
   };
   const line = (face, a, b, lo, hi, holes, key, wainscot) => {

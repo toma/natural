@@ -390,6 +390,12 @@ export function windowUnit(A, pm, o, rng, opts = {}) {
       fray: 0.012,
       rng,
     });
+    // "drawn" consumes the same random draws but hangs nothing: the room
+    // behind dresses its own window (see house-interior-build.js).
+    if (opts.curtain === "drawn") {
+      c.dispose();
+      return o;
+    }
     A.addOnce(
       opts.curtainKey ?? "fabric_cream",
       c,

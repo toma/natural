@@ -752,7 +752,7 @@ function kitFront(A, rng, spec) {
     state: "glazed",
     back: false,
     frameKey: "wood_dark",
-    curtain: true,
+    curtain: "drawn",
   });
   windowUnit(A, pm, { x: 0, y: y + 0.85 + 1.85 / 2, w: 3.2, h: 1.7 }, rng, {
     t: 0.34,
@@ -761,7 +761,7 @@ function kitFront(A, rng, spec) {
     frameKey: "wood_dark",
     shutters: true,
     shutterKey,
-    curtain: true,
+    curtain: "drawn",
   });
   doorUnit(A, pm, { x: 3.1, y: 0.16 + 2.35 / 2, w: 1.5, h: 2.3 }, rng, {
     t: 0.24,
