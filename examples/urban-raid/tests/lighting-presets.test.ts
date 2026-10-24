@@ -119,19 +119,43 @@ test("the worldlabs grade keeps a sunlit pale yellow wall under display clip", (
   expect(out[0]).toBeGreaterThan(out[2]);
 });
 
-test("the worldlabs look grounds objects with stronger AO and contact shadows", () => {
+test("the worldlabs look keeps occlusion subtle and the sun penumbra soft", () => {
   const r = resolveLightingPreset("worldlabs").render!;
-  // Renderer defaults: aoIntensity 1.1, contactLength 0.4, contactStrength 1.0.
-  expect(r.aoIntensity).toBeGreaterThan(1.1);
-  expect(r.aoRadius).toBeGreaterThan(1.35);
-  expect(r.contactLength).toBeGreaterThan(0.4);
-  expect(r.contactLength).toBeLessThanOrEqual(1);
-  expect(r.contactStrength).toBeGreaterThan(1);
-  expect(r.sunSoftness).toBeGreaterThan(0.03);
-  expect(r.sunSoftness).toBeLessThan(0.06);
+  // Renderer defaults: aoRadius 1.35, aoIntensity 1.1, contactLength 0.4,
+  // contactStrength 1.0, sunSoftness 0.03. Shadows on this map read harsh
+  // when AO and contact shadows ran above these, so they sit at or below them.
+  expect(r.aoIntensity).toBeLessThanOrEqual(1.1);
+  expect(r.aoIntensity).toBeGreaterThan(0.6);
+  expect(r.aoRadius).toBeLessThanOrEqual(1.35);
+  expect(r.contactLength).toBeLessThanOrEqual(0.4);
+  expect(r.contactStrength).toBeLessThan(1);
+  expect(r.contactStrength).toBeGreaterThan(0.3);
+  expect(r.sunSoftness).toBeGreaterThan(0.045);
+  expect(r.sunSoftness).toBeLessThanOrEqual(0.08);
+  // Sand bounce lifts the shade but stays a fraction of the sky fill.
+  expect(r.groundFill).toBeGreaterThan(0.07);
+  expect(r.groundFill!).toBeLessThan(r.skyFill!);
   for (const [name, p] of Object.entries(LIGHTING_PRESETS)) {
     if (name === "worldlabs") continue;
     expect(p.render?.aoIntensity, `${name} keeps the default AO`).toBeUndefined();
     expect(p.render?.contactLength, `${name} keeps the default contact`).toBeUndefined();
+  }
+});
+
+test("the worldlabs viewmodel rig is lit for the bright street it sits in", () => {
+  const r = resolveLightingPreset("worldlabs").render!;
+  // Rig defaults: viewKeyScale 0.55, viewKeyMax 2.6, viewHemiRatio 0.16.
+  const key = Math.min(4.6 * r.viewKeyScale!, r.viewKeyMax!);
+  expect(key / Math.min(4.6 * 0.55, 2.6)).toBeGreaterThan(4);
+  expect(r.viewHemiRatio).toBeGreaterThan(0.16);
+  expect(r.viewFillRatio).toBeGreaterThan(0.3);
+  expect(r.viewFillOcclusion).toBeGreaterThan(0.45);
+  expect(r.viewFillOcclusion).toBeLessThanOrEqual(1);
+  expect(r.viewWorldAo).toBe(false);
+  expect(r.viewIblDiffuse).toBeGreaterThan(0.03);
+  for (const [name, p] of Object.entries(LIGHTING_PRESETS)) {
+    if (name === "worldlabs") continue;
+    expect(p.render?.viewKeyScale, `${name} keeps the default rig`).toBeUndefined();
+    expect(p.render?.viewWorldAo, `${name} keeps world AO on the gun`).toBeUndefined();
   }
 });

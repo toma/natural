@@ -244,6 +244,24 @@ export interface RenderHints {
   contactLength?: number;
   /** Screen-space contact shadow strength. */
   contactStrength?: number;
+  /** Viewmodel key as a fraction of the shaped scene light. */
+  viewKeyScale?: number;
+  /** Ceiling on the viewmodel key intensity. */
+  viewKeyMax?: number;
+  /** Viewmodel cool fill, fraction of its key. */
+  viewFillRatio?: number;
+  /** Viewmodel warm rim, fraction of its key. */
+  viewRimRatio?: number;
+  /** Viewmodel hemisphere fill, fraction of its key. */
+  viewHemiRatio?: number;
+  /** Viewmodel warm ground bounce, fraction of its key. */
+  viewBounceRatio?: number;
+  /** Share of the world's sky and ground fill the viewmodel receives. */
+  viewFillOcclusion?: number;
+  /** False keeps the world's screen-space AO off the viewmodel. */
+  viewWorldAo?: boolean;
+  /** IBL diffuse for the viewmodel pass alone. */
+  viewIblDiffuse?: number;
 }
 
 export interface LightingPreset {
@@ -291,18 +309,36 @@ export const LIGHTING_PRESETS: Record<string, LightingPreset> = {
       exposureKey: 1.22,
       skyFill: 0.62,
       skyFillChroma: 0.55,
-      groundFill: 0.07,
-      bounceFill: 0.04,
+      // Sun-facing sand throws a lot back up: enough bounce that shade sits
+      // under two stops below the sunlit side and keeps its colour.
+      groundFill: 0.095,
+      bounceFill: 0.055,
       vignette: 0.16,
-      // A crisper penumbra than 0.06 (which read soft-focus at 10 m), with
-      // AO and contact shadows strong enough that props, kerbs and wheels sit
-      // on the ground: the high fill here lifts every shadow, so occlusion is
-      // what separates an object from what it rests on.
-      sunSoftness: 0.045,
-      aoRadius: 1.6,
-      aoIntensity: 1.35,
-      contactLength: 0.6,
-      contactStrength: 1.25,
+      // Dusty desert air spreads the sun well past its 0.5 degree disc, so the
+      // penumbra widens with the blocker gap (PCSS) and medium/low widen their
+      // fixed disc too. AO and contact shadows ground props and wheels without
+      // printing a black outline under every object.
+      sunSoftness: 0.06,
+      aoRadius: 1.3,
+      aoIntensity: 1.0,
+      contactLength: 0.4,
+      contactStrength: 0.7,
+      // The viewmodel. This street meters about three stops brighter than the
+      // classic one (pale skins and high fill: exposure 0.31 against 2.5), and
+      // the rig is sized against the classic exposure, so at the default key the
+      // weapon rendered as a black silhouette. The key runs three stops up here,
+      // with fill, sky and sand bounce raised so the shadow side of the gun and
+      // gloves keeps its detail, and the world's AO buffer (the street behind
+      // the gun) stays off it.
+      viewKeyScale: 3.4,
+      viewKeyMax: 16,
+      viewFillRatio: 0.42,
+      viewRimRatio: 0.45,
+      viewHemiRatio: 0.36,
+      viewBounceRatio: 0.45,
+      viewFillOcclusion: 0.7,
+      viewWorldAo: false,
+      viewIblDiffuse: 0.2,
     },
   },
   // Flat overcast: soft, cool, low contrast under a grey sky.

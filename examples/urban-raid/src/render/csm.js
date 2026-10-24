@@ -538,7 +538,9 @@ float owCsmCascade( int c, vec3 wPos, vec3 wN, float NdL, float rot ) {
   float invTex = owCsmMapSize.y;
   float extent = texelWorld * owCsmMapSize.x;   // cascade world extent
   float maxR = owCsmParams.z * invTex;
-  float filterR = 1.4 * invTex;
+  // Without PCSS (medium, low) the disc still widens with the look's softness:
+  // 1.4 texels at the default 0.03, up to 2.6x that for a soft dusty sun.
+  float filterR = min( 1.4 * invTex * clamp( owCsmParams.y / 0.03, 1.0, 2.6 ), maxR );
 
   #ifdef OW_PCSS
     float searchR = min( maxR, 10.0 * invTex );

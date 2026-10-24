@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 import { hdrTarget, blit } from "./pass.js";
 import { CascadedShadowMaps } from "./csm.js";
+import { viewAoFeature, viewIndirectOverride } from "./view-shading.ts";
 import { MaterialPatcher } from "./materialpatch.js";
 import { GBuffer } from "./prepass.js";
 import { Gtao } from "./gtao.js";
@@ -104,7 +105,8 @@ const REF_DAYLIGHT = 4.6;
  *                             exposureKey, autoExposure, skyFill, groundFill,
  *                             bounceFill, viewKeyScale/Max/Gamma,
  *                             viewFillRatio, viewRimRatio, viewHemiRatio,
- *                             viewFillOcclusion, dofMaxCoc, dofNearRatio,
+ *                             viewFillOcclusion, viewBounceRatio,
+ *                             viewWorldAo, viewIblDiffuse, dofMaxCoc, dofNearRatio,
  *                             dofFocusMin/Max, dofFarStart, dofFarRange,
  *                             dofNearScale
  *
@@ -464,6 +466,12 @@ export class RenderSystem {
       // key it is ~1.5 stops down, which is about what a sand street returns.
       viewBounceRatio: 0.34,
       viewKeyGamma: 0.65,
+      // Whether the viewmodel samples the world's screen-space AO buffer. That
+      // buffer describes the street behind the gun, so on the weapon it darkens
+      // metal by whatever creases happen to sit behind it on screen.
+      viewWorldAo: true,
+      // IBL diffuse for the viewmodel pass alone; null keeps the world's value.
+      viewIblDiffuse: null,
       shadowStrength: 1.0,
       // A touch softer than a razor penumbra: real sun through suburban air at
       // this elevation does not cast a knife edge, and the extra half-texel of
@@ -1486,8 +1494,14 @@ export class RenderSystem {
           // The interior gate is a WORLD-space volume test and the viewmodel's
           // world position is the camera's, so standing in a shop would drop the
           // weapon's whole indirect term at once. The gun has its own rig; skip it.
-          const roomN = this.patcher.uniforms.owIndirect.value.z;
-          this.patcher.uniforms.owIndirect.value.z = 0;
+          const ind = this.patcher.uniforms.owIndirect.value;
+          const roomN = ind.z;
+          const iblSave = ind.x;
+          ind.z = 0;
+          ind.x = viewIndirectOverride(this.settings, iblSave).x;
+          // The world's AO buffer is the street behind the gun, not the gun.
+          const prevAo = feat.x;
+          feat.x = viewAoFeature(this.settings, prevAo);
 
           // Still walked every frame - that is where new weapon/hand materials get
           // the shadow/AO/fill injection. It just no longer feeds the gbuffer.
@@ -1506,7 +1520,9 @@ export class RenderSystem {
             feat.y = prevFeat;
             uSky.copy(this._fillSkySave);
             uGnd.copy(this._fillGroundSave);
-            this.patcher.uniforms.owIndirect.value.z = roomN;
+            ind.z = roomN;
+            ind.x = iblSave;
+            feat.x = prevAo;
           }
         }
       } finally {

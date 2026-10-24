@@ -364,6 +364,17 @@ visual fixture.
   per-channel linear ratio over the achieved colour because palette tints clamp at `MAX_TINT`.
   Classic captures differ between runs of the same commit by about as much as across commits (sun
   drift, transient decals), so compare against a second baseline run before calling a diff real.
+- Shadow pass learnings (skinned map only): the skinned street meters about three stops brighter
+  than the classic one (exposure 0.31 against 2.5), and the viewmodel rig is sized against the
+  classic exposure, so a "harsh shadow" on the gun was really a black silhouette. Raising the rig
+  by a fraction does nothing visible; it needs roughly a 6x key (`viewKeyScale`/`viewKeyMax` in
+  the worldlabs render hints) with fill, hemisphere and bounce ratios raised alongside. The
+  viewmodel pass must not sample the world GTAO buffer (`viewWorldAo: false`): that buffer is the
+  street behind the gun. Without PCSS (medium, low) the CSM disc is a fixed 1.4 texels, so it now
+  scales with `sunSoftness` (capped at 2.6x); classic at 0.03 is unchanged. Keep AO and contact
+  shadows at or under the renderer defaults on this map: above them every object gets a black
+  outline. Check a viewmodel change by reading `debugExposure()` and lights through `EVAL`, and
+  sweep rig values live with `PRE` (Object.assign on `settings`) instead of editing sources.
 - Vehicle model learnings (urban-raid): a model-backed vehicle runs its procedural builder on
   `colliderOnly(A)` (an `Object.create(A)` with `add` and `addBox` stubbed), so colliders, prop
   OBBs and nav blockers stay byte-identical while only the visuals are swapped. The model path is
